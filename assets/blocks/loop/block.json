@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "omniloop/loop-gutenberg",
+	"title": "OmniLoop Filter Loop",
+	"category": "omniloop",
+	"icon": "filter",
+	"description": "Faceted post/product loop with instant REST filtering.",
+	"textdomain": "omniloop",
+	"attributes": {
+		"postType": {
+			"type": "string",
+			"default": "post"
+		},
+		"perPage": {
+			"type": "number",
+			"default": 12
+		},
+		"columns": {
+			"type": "number",
+			"default": 3
+		},
+		"imageRatio": {
+			"type": "string",
+			"default": "4-3"
+		},
+		"showFilters": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": ["wide", "full"]
+	},
+	"editorScript": "omniloop-loop-editor",
+	"viewScript": "omniloop-engine",
+	"style": "omniloop-style"
+}

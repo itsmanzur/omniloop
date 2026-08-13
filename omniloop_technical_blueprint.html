@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="description" content="OmniLoop Engine technical architecture, instant filter demo, and vibe coding playbook.">
+    <title>OmniLoop Engine — Technical Architecture Blueprint</title>
+    <link rel="stylesheet" href="docs-assets/css/blueprint.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">
+            <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="মেনু" aria-controls="sidebar" aria-expanded="false">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+            <div class="logo-mark" aria-hidden="true"></div>
+            <div class="brand-copy">
+                <h1 class="brand-title">OmniLoop Engine <span class="badge">Technical Specs v1.0</span></h1>
+                <p class="brand-sub">Divi 5 + Gutenberg Vibe Coding Engineering Architecture</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="search-trigger" id="search-trigger" type="button">
+                <span>সার্চ সেকশন…</span>
+                <kbd>Ctrl K</kbd>
+            </button>
+        </div>
+    </header>
+
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+    <div class="app-body">
+        <aside class="sidebar" id="sidebar">
+            <p class="nav-label">নেভিগেশন</p>
+            <ul class="nav-list">
+                <li>
+                    <a class="nav-link is-active" href="#overview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+                        Overview <span class="nav-index">01</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#structure">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h7l2 2h7v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+                        ফোল্ডার স্ট্রাকচার <span class="nav-index">02</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#database">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+                        ইন্ডেক্সড ডেটাবেস <span class="nav-index">03</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#react-core">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 6.5l1.7 1M17.4 16.5l1.7 1M4.9 17.5l1.7-1M17.4 7.5l1.7-1"/></svg>
+                        শেয়ার্ড রিয়্যাক্ট কোর <span class="nav-index">04</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#api">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg>
+                        REST API <span class="nav-index">05</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#playbook">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M5 4v16"/></svg>
+                        ভাইব কোডিং প্লেবুক <span class="nav-index">06</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#live-demo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="M8 10h3M8 14h8"/></svg>
+                        লাইভ ফিল্টার ডেমো <span class="nav-index">07</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="panel is-active" id="overview">
+                <p class="eyebrow">Vibe Coding Ready Architecture</p>
+                <h2>OmniLoop Engine টেকনিক্যাল ব্লুপ্রিন্ট ও সিস্টেম ডিজাইন</h2>
+                <p class="lede">Cursor, Claude Code বা Windsurf দিয়ে মোডুলার ওয়ার্ডপ্রেস প্লাগইন বানানোর সম্পূর্ণ স্পেক। ফোল্ডার স্ট্রাকচার, DB ইন্ডেক্স, REST কন্ট্রাক্ট ও রেডি-টু-ইউজ AI প্রম্পট—সব ক্লিকে তাত্ক্ষণাত, কোনো নেটওয়ার্ক ওয়েট ছাড়া।</p>
+                <div class="stats">
+                    <article class="stat">
+                        <div class="stat-value sky">wp_omniloop_index</div>
+                        <p class="stat-label">কাস্টম ফ্যাসেট ইন্ডেক্স টেবিল — postmeta JOIN এড়িয়ে</p>
+                    </article>
+                    <article class="stat">
+                        <div class="stat-value green">&lt;15KB</div>
+                        <p class="stat-label">ফ্রন্টএন্ড অ্যাসেট বাজেট (gzipped) — Preact / লাইট হাইড্রেশন</p>
+                    </article>
+                    <article class="stat">
+                        <div class="stat-value violet">18ms</div>
+                        <p class="stat-label">১০ হাজার প্রোডাক্টে ইন্ডেক্স লুকআপ টার্গেট</p>
+                    </article>
+                </div>
+                <div class="grid-3">
+                    <article class="card">
+                        <div class="icon-row">
+                            <span class="icon-pill sky"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span>
+                            সিকিউর বাই ডিফল্ট
+                        </div>
+                        <p>এই ডক্স অ্যাপে কোনো CDN নেই। CSP, no-referrer, এবং ইউজার ইনপুট শুধু textContent দিয়ে রেন্ডার হয়।</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon-row">
+                            <span class="icon-pill green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h7l-1 7 8-11h-7z"/></svg></span>
+                            ইনস্ট্যান্ট নেভিগেশন
+                        </div>
+                        <p>সব সেকশন আগে থেকেই DOM-এ। হ্যাশ রাউট শুধু প্যানেল টগল করে—স্পিনার বা fetch নেই। j / k দিয়ে সেকশন বদলান।</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon-row">
+                            <span class="icon-pill violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg></span>
+                            Ctrl+K প্যালেট
+                        </div>
+                        <p>কমান্ড প্যালেট থেকে যেকোনো সেকশনে জাম্প। লাইভ ডেমোতে ফ্যাসেট ক্লিক মেমোরি ফিল্টার—লোডিং স্টেট নেই।</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="panel" id="structure">
+                <p class="eyebrow">১. ফাইল ও ফোল্ডার আর্কিটেকচার</p>
+                <h2>মোডুলার PHP + React শেয়ার্ড কোডবেস</h2>
+                <p class="lede">ডিভি ৫ এবং গুটেনবার্গ—দুই প্ল্যাটফর্মের জন্য আলাদা কোড না লিখে একটি Shared React Logic Core। প্লাগইন ছোট থাকে, রক্ষণাবেক্ষণ সহজ হয়।</p>
+                <div class="grid-2">
+                    <article class="card">
+                        <div class="card-head">
+                            <span class="c-green">omniloop-engine Directory</span>
+                            <span class="mono-tiny">PSR-4 · PHP 8.1+</span>
+                        </div>
+                        <pre class="tree">├── <span class="c-sky">omniloop-engine.php</span> <span class="c-dim">(Main Entry &amp; Autoloader)</span>
+├── <span class="c-violet">app/</span> <span class="c-dim">(Backend PHP Architecture)</span>
+│   ├── Core/
+│   │   ├── QueryBuilder.php <span class="c-dim">(Custom SQL &amp; Meta Indexing)</span>
+│   │   ├── Indexer.php <span class="c-dim">(Hooks into post_save to index DB)</span>
+│   │   └── CacheManager.php <span class="c-dim">(Transients/Redis)</span>
+│   ├── Rest/
+│   │   └── FilterEndpoint.php <span class="c-dim">(wp-json/omniloop/v1/query)</span>
+│   └── Integrations/
+│       ├── Gutenberg/ <span class="c-dim">(Register Native Blocks)</span>
+│       └── Divi5/ <span class="c-dim">(Register Divi 5 Modules)</span>
+├── <span class="c-green">src/</span> <span class="c-dim">(Shared React Engine)</span>
+│   ├── core/
+│   │   ├── useOmniQuery.js <span class="c-dim">(State &amp; REST Fetcher Hook)</span>
+│   │   └── FilterControls.jsx <span class="c-dim">(Shared UI Engine)</span>
+│   ├── gutenberg/
+│   │   └── index.js <span class="c-dim">(Gutenberg Block Wrapper)</span>
+│   └── divi5/
+│       └── index.js <span class="c-dim">(Divi 5 Module Wrapper)</span>
+└── <span class="c-orange">build/</span> <span class="c-dim">(Compiled Minimal Assets)</span></pre>
+                    </article>
+                    <div class="principle">
+                        <article class="card">
+                            <div class="icon-row">
+                                <span class="icon-pill sky"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h4"/></svg></span>
+                                Singleton &amp; DI Container
+                            </div>
+                            <p>মূল PHP ব্যাকএন্ড Dependency Injection দিয়ে চলবে। Gutenberg বা Divi 5 রানটাইমে নির্দিষ্ট সার্ভিস ইনজেক্ট করতে পারবে।</p>
+                        </article>
+                        <article class="card">
+                            <div class="icon-row">
+                                <span class="icon-pill green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h7"/></svg></span>
+                                Monorepo Build
+                            </div>
+                            <p>একটি Webpack বা Vite স্ক্রিপ্ট দিয়ে src/gutenberg এবং src/divi5 কম্পাইল—শেয়ার্ড React bundle deduplicate হবে।</p>
+                        </article>
+                        <article class="card">
+                            <div class="icon-row">
+                                <span class="icon-pill orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span>
+                                Minimal Runtime Footprint
+                            </div>
+                            <p>ভারী React DOM-এর বদলে Preact বা নেটিভ hydration। টার্গেট অ্যাসেট পেলোড &lt; 15KB gzipped।</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" id="database">
+                <p class="eyebrow green">২. হাই-স্পিড ডেটাবেস ও ইন্ডেক্সিং</p>
+                <h2>WP_Query lag এড়িয়ে কাস্টম মেটা ইন্ডেক্স</h2>
+                <p class="lede">WooCommerce বা ACF ফিল্টারিং ধীর হয় একাধিক wp_postmeta JOIN-এর জন্য। OmniLoop ইন্সটলেই লাইটওয়েট ক্যাশ টেবিল wp_omniloop_index তৈরি করবে।</p>
+                <div class="grid-2">
+                    <article class="card">
+                        <div class="card-head">
+                            <span>Table Schema: wp_omniloop_index</span>
+                            <span class="mono-tiny">Engine: InnoDB</span>
+                        </div>
+                        <pre class="code" id="code-schema">CREATE TABLE wp_omniloop_index (
+    id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT(20) UNSIGNED NOT NULL,
+    post_type VARCHAR(20) NOT NULL,
+    facet_key VARCHAR(50) NOT NULL,
+    facet_value TEXT NOT NULL,
+    numeric_value DECIMAL(12,4) DEFAULT NULL,
+    KEY idx_lookup (facet_key(20), numeric_value),
+    KEY idx_post (post_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;</pre>
+                        <p class="muted">পোস্ট সেভ হলে save_post হুক কাস্টম ফিল্ড ও ট্যাক্সোনমি মেটা প্রসেস করে এই টেবিলে ইন্ডেক্স করে।</p>
+                        <p><button class="copy-btn" type="button" data-copy="code-schema">SQL কপি</button></p>
+                    </article>
+                    <article class="card">
+                        <div class="card-head">
+                            <span>১০,০০০ প্রোডাক্ট ফিল্টারিং (ms)</span>
+                            <span class="mono-tiny">নিম্নতর = ভালো</span>
+                        </div>
+                        <div class="perf-list">
+                            <div class="perf-row">
+                                <span>Standard WP_Query (meta joins) <b class="perf-ms" data-count="280">280</b></span>
+                                <div class="perf-track"><div class="perf-fill perf-fill--wp"></div></div>
+                            </div>
+                            <div class="perf-row">
+                                <span>WooCommerce default meta query <b class="perf-ms" data-count="320">320</b></span>
+                                <div class="perf-track"><div class="perf-fill perf-fill--woo"></div></div>
+                            </div>
+                            <div class="perf-row">
+                                <span>OmniLoop custom index <b class="perf-ms" data-count="18">18</b></span>
+                                <div class="perf-track"><div class="perf-fill perf-fill--omni"></div></div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="panel" id="react-core">
+                <p class="eyebrow violet">৩. শেয়ার্ড রিয়্যাক্ট স্টেট আর্কিটেকচার</p>
+                <h2>Divi 5 Visual Builder ও Gutenberg ইন্টিগ্রেশন</h2>
+                <p class="lede">মূল পাওয়ার <code>useOmniQuery</code> কাস্টম হুক। ডিভি ৫ বিল্ডার বা গুটেনবার্গ ব্লক—দুটোই একই স্টেট লজিক শেয়ার করবে। নোড ক্লিক করলে ডিটেইল প্যানেল ইনস্ট্যান্ট আপডেট হয়।</p>
+                <article class="card">
+                    <div class="card-head">
+                        <span>Unified React Component State Flow</span>
+                        <span class="mono-tiny">ক্লিক করে নোড খুলুন</span>
+                    </div>
+                    <div class="flow">
+                        <button class="flow-node n1" type="button" data-flow="controls">
+                            <strong>1. UI Controls</strong>
+                            <span class="muted">Price slider, taxonomy, search</span>
+                        </button>
+                        <button class="flow-node n2 is-active" type="button" data-flow="hook">
+                            <strong>2. useOmniQuery Hook</strong>
+                            <span class="muted">State, debounce, URL sync</span>
+                        </button>
+                        <button class="flow-node n3" type="button" data-flow="renderer">
+                            <strong>3. Display Renderer</strong>
+                            <span class="muted">Grid, infinite scroll, pagination</span>
+                        </button>
+                    </div>
+                    <div class="card flow-detail" id="flow-detail">
+                        <p id="flow-detail-text">useOmniQuery স্টেট, 250ms debounce এবং history.pushState URL সিঙ্ক ধরে রাখে। প্রোডাকশনে REST কল যাবে; এই ডক্সে ফিল্টার মেমোরিতেই চলে।</p>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">Divi 5 · @divi/module-library</span>
+                        <span class="chip">Gutenberg · @wordpress/blocks</span>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel" id="api">
+                <p class="eyebrow orange">৪. REST API ও AJAX পেনিট্রেশন</p>
+                <h2>JSON API কন্ট্রাক্ট এবং লাইটওয়েট পেওলোড</h2>
+                <p class="lede">এন্ডপয়েন্ট: POST /wp-json/omniloop/v1/query। নিচের প্লেগ্রাউন্ড লাইভ ডেমোর ফ্যাসেট অনুযায়ী তাত্ক্ষণাত আপডেট হয়—সার্ভার কল নেই।</p>
+                <article class="card">
+                    <div class="card-head">
+                        <span>API Playground</span>
+                        <button class="copy-btn" type="button" data-copy="api-request" id="api-copy-btn">JSON কপি</button>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab is-active" type="button" data-api-tab="request">Request</button>
+                        <button class="tab" type="button" data-api-tab="response">Response</button>
+                    </div>
+                    <pre class="code" id="api-request">{
+  "post_type": "product",
+  "per_page": 12,
+  "page": 1,
+  "facets": {
+    "product_cat": ["electronics", "laptops"],
+    "price_range": [200, 1500],
+    "_acf_brand": "apple"
+  },
+  "sort_by": "price_asc"
+}</pre>
+                    <pre class="code" id="api-response" hidden>{
+  "status": "success",
+  "total_posts": 48,
+  "total_pages": 4,
+  "posts": [
+    {
+      "id": 1024,
+      "title": "MacBook Pro M3",
+      "permalink": "https://site.com/product/macbook",
+      "rendered_card": "&lt;div class=\"omniloop-card\"&gt;...&lt;/div&gt;"
+    }
+  ],
+  "facets_counts": { "electronics": 30, "laptops": 18 }
+}</pre>
+                </article>
+            </section>
+
+            <section class="panel" id="playbook">
+                <p class="eyebrow">৫. ভাইব কোডিং প্রম্পট প্লেবুক</p>
+                <h2>Cursor / Claude Code দিয়ে স্টেপ-বাই-স্টেপ বিল্ড</h2>
+                <p class="lede">প্রতিটি ধাপের প্রম্পট কপি-পেস্ট করে মডিউল ওয়ান-বাই-ওয়ান ডেভেলপ করুন। কপি বাটন Clipboard API ব্যবহার করে।</p>
+
+                <article class="card prompt-card">
+                    <div class="prompt-meta">
+                        <span>ধাপ ১: প্লাগইন স্কেলেটন ও অটোলোডার</span>
+                        <span class="tag sky">Prompt #1</span>
+                    </div>
+                    <pre class="code" id="prompt-1">Create a production-ready WordPress plugin structure named "OmniLoop Engine". Use PHP 8.1+ features with PSR-4 autoloading namespace `OmniLoop\Engine`. Build a main entry file `omniloop-engine.php` and a Singleton class `App` in `app/Core/App.php` that initializes REST API routes, Divi 5 integration, and Gutenberg block registration. Keep it modular and clean.</pre>
+                    <p><button class="copy-btn" type="button" data-copy="prompt-1">প্রম্পট কপি</button></p>
+                </article>
+
+                <article class="card prompt-card">
+                    <div class="prompt-meta">
+                        <span>ধাপ ২: কাস্টম ডেটাবেস ইন্ডেক্সিং ইঞ্জিন</span>
+                        <span class="tag green">Prompt #2</span>
+                    </div>
+                    <pre class="code" id="prompt-2">Write a PHP class `OmniLoop\Engine\Core\Indexer` that hooked into `save_post`. When a post or product is saved, extract meta values (ACF fields, WooCommerce price, taxonomy terms) and insert/update them into a custom DB table `wp_omniloop_index`. Create the dbDelta creation function inside `app/Core/Installer.php` with columns for post_id, facet_key, facet_value, and numeric_value.</pre>
+                    <p><button class="copy-btn" type="button" data-copy="prompt-2">প্রম্পট কপি</button></p>
+                </article>
+
+                <article class="card prompt-card">
+                    <div class="prompt-meta">
+                        <span>ধাপ ৩: শেয়ার্ড React Custom Hook</span>
+                        <span class="tag violet">Prompt #3</span>
+                    </div>
+                    <pre class="code" id="prompt-3">Create a React custom hook `useOmniQuery` in `src/core/useOmniQuery.js`. It should maintain state for selected filters (facets, page, search, sort), debounce inputs by 250ms, update browser URL query params via `window.history.pushState`, and execute fetch requests to `/wp-json/omniloop/v1/query`. Return { posts, facets, loading, setFilter, clearAll }.</pre>
+                    <p><button class="copy-btn" type="button" data-copy="prompt-3">প্রম্পট কপি</button></p>
+                </article>
+
+                <article class="card prompt-card">
+                    <div class="prompt-meta">
+                        <span>ধাপ ৪: Divi 5 ও Gutenberg র্যাপার</span>
+                        <span class="tag orange">Prompt #4</span>
+                    </div>
+                    <pre class="code" id="prompt-4">Implement `src/gutenberg/index.js` using `@wordpress/blocks` and `src/divi5/index.js` using `@divi/module-library`. Both components should render the FilterControls and LoopRenderer React elements by consuming our shared `useOmniQuery` hook. Ensure compatibility with Divi 5's Visual Builder React environment without throwing hydration errors.</pre>
+                    <p><button class="copy-btn" type="button" data-copy="prompt-4">প্রম্পট কপি</button></p>
+                </article>
+            </section>
+
+            <section class="panel" id="live-demo">
+                <p class="eyebrow green">৭. ইনস্ট্যান্ট ক্যাটালগ প্রিভিউ</p>
+                <h2>লাইভ ফিল্টার ডেমো — স্পিনার ছাড়া</h2>
+                <p class="lede">৩৩টি মক প্রোডাক্ট ব্রাউজার মেমোরিতে। ফ্যাসেট ক্লিক Array.filter চালায়; নেটওয়ার্ক রাউন্ডট্রিপ নেই। একই স্টেট API প্লেগ্রাউন্ড JSON আপডেট করে।</p>
+                <div class="demo-layout">
+                    <aside class="card">
+                        <div class="facet-group">
+                            <h4>ক্যাটাগরি</h4>
+                            <div class="facet-list">
+                                <label class="facet"><input type="checkbox" data-facet="categories" data-value="electronics"> Electronics</label>
+                                <label class="facet"><input type="checkbox" data-facet="categories" data-value="laptops"> Laptops</label>
+                                <label class="facet"><input type="checkbox" data-facet="categories" data-value="audio"> Audio</label>
+                                <label class="facet"><input type="checkbox" data-facet="categories" data-value="accessories"> Accessories</label>
+                            </div>
+                        </div>
+                        <div class="facet-group">
+                            <h4>ব্র্যান্ড</h4>
+                            <div class="facet-list">
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="apple"> Apple</label>
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="samsung"> Samsung</label>
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="sony"> Sony</label>
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="dell"> Dell</label>
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="lenovo"> Lenovo</label>
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="google"> Google</label>
+                                <label class="facet"><input type="checkbox" data-facet="brands" data-value="microsoft"> Microsoft</label>
+                            </div>
+                        </div>
+                        <div class="facet-group">
+                            <h4>ম্যাক্স প্রাইস</h4>
+                            <div class="range-row"><span>$50</span><span id="price-value">$2500</span></div>
+                            <input id="price-range" type="range" min="50" max="2500" step="10" value="2500">
+                        </div>
+                        <div class="facet-group">
+                            <h4>সর্ট</h4>
+                            <select class="sort" id="sort-select">
+                                <option value="price_asc">Price · low to high</option>
+                                <option value="price_desc">Price · high to low</option>
+                                <option value="name">Name A–Z</option>
+                            </select>
+                        </div>
+                        <button class="reset-btn" id="demo-reset" type="button">ফিল্টার রিসেট</button>
+                    </aside>
+                    <div>
+                        <div class="demo-toolbar">
+                            <span id="demo-count">৩২টি প্রোডাক্ট · 0ms মেমোরি ফিল্টার</span>
+                            <span class="mono-tiny">no loading state</span>
+                        </div>
+                        <div class="product-grid" id="demo-grid"></div>
+                        <noscript>
+                            <p class="muted">লাইভ ফিল্টার চালাতে JavaScript চালু করুন। সেকশন কনটেন্ট JS ছাড়াও পড়া যায়।</p>
+                        </noscript>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="app-footer">
+        OmniLoop Engine · Vibe Coding Technical Architecture · j/k সেকশন · Ctrl+K সার্চ · লোকাল অ্যাসেট, জিরো CDN
+    </footer>
+
+    <div class="overlay" id="palette-overlay" aria-hidden="true">
+        <div class="palette" role="dialog" aria-modal="true" aria-label="কমান্ড প্যালেট">
+            <input id="palette-input" type="search" placeholder="সেকশন খুঁজুন…" autocomplete="off" spellcheck="false">
+            <ul class="palette-list" id="palette-list"></ul>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status">কপি হয়েছে</div>
+
+    <script src="docs-assets/js/mock-catalog.js"></script>
+    <script src="docs-assets/js/app.js"></script>
+</body>
+</html>
