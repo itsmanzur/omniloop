@@ -8,10 +8,12 @@
 namespace OmniLoop\Engine\Rest;
 
 use OmniLoop\Engine\Core\CacheManager;
+use OmniLoop\Engine\Core\FilterPresets;
 use OmniLoop\Engine\Core\Indexer;
 use OmniLoop\Engine\Core\Installer;
 use OmniLoop\Engine\Core\LoopRenderer;
 use OmniLoop\Engine\Core\QueryBuilder;
+use OmniLoop\Engine\Core\WooFacets;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,6 +56,18 @@ final class FilterEndpoint {
 				},
 			]
 		);
+
+		register_rest_route(
+			'omniloop/v1',
+			'/index-status',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ self::class, 'index_status' ],
+				'permission_callback' => static function () {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
 	}
 
 	/**
@@ -91,7 +105,21 @@ final class FilterEndpoint {
 			delete_option( 'omniloop_reindex_cursor' );
 		}
 
-		return rest_ensure_response( Indexer::process_batch( $offset ) );
+		return rest_ensure_response(
+			array_merge(
+				Indexer::process_batch( $offset ),
+				[ 'status' => Indexer::status() ]
+			)
+		);
+	}
+
+	/**
+	 * @return \WP_REST_Response
+	 */
+	public static function index_status( \WP_REST_Request $request ) {
+		unset( $request );
+
+		return rest_ensure_response( Indexer::status() );
 	}
 
 	/**
@@ -127,6 +155,9 @@ final class FilterEndpoint {
 		$search = sanitize_text_field( (string) $request->get_param( 'search' ) );
 		$search = substr( $search, 0, 120 );
 
+		$facet_logic = QueryBuilder::sanitize_facet_logic( (string) $request->get_param( 'facet_logic' ) );
+		$sort_meta   = Indexer::sanitize_facet_key( (string) $request->get_param( 'sort_meta_key' ) );
+
 		$facets = $request->get_param( 'facets' );
 		if ( is_string( $facets ) ) {
 			$decoded = json_decode( $facets, true );
@@ -137,12 +168,14 @@ final class FilterEndpoint {
 		}
 
 		return [
-			'post_type' => $post_type,
-			'per_page'  => $per_page,
-			'page'      => $page,
-			'sort_by'   => $sort,
-			'search'    => $search,
-			'facets'    => self::sanitize_facets( $facets ),
+			'post_type'     => $post_type,
+			'per_page'      => $per_page,
+			'page'          => $page,
+			'sort_by'       => $sort,
+			'search'        => $search,
+			'facets'        => self::sanitize_facets( $facets ),
+			'facet_logic'   => $facet_logic,
+			'sort_meta_key' => $sort_meta,
 		];
 	}
 
@@ -211,10 +244,7 @@ final class FilterEndpoint {
 			return false;
 		}
 
-		$settings = get_option( 'omniloop_settings', [] );
-		$allowed  = isset( $settings['post_types'] ) && is_array( $settings['post_types'] )
-			? array_map( 'sanitize_key', $settings['post_types'] )
-			: Installer::default_post_types();
+		$allowed = Installer::allowed_post_types();
 
 		return in_array( $post_type, $allowed, true );
 	}
@@ -232,6 +262,57 @@ final class FilterEndpoint {
 			}
 		}
 
+		if ( post_type_exists( 'product' ) ) {
+			$object         = get_post_type_object( 'product' );
+			$out['product'] = $object && isset( $object->labels->singular_name )
+				? (string) $object->labels->singular_name
+				: __( 'Product', 'omniloop' );
+		}
+
+		if ( isset( $out['product'] ) ) {
+			$product = [ 'product' => $out['product'] ];
+			unset( $out['product'] );
+			$out = $product + $out;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Saved filter presets for the Visual Builder dropdown.
+	 *
+	 * @return array<string,string> id => label
+	 */
+	public static function selectable_presets(): array {
+		return FilterPresets::selectable();
+	}
+
+	/**
+	 * Facet keys editors can show or hide, keyed by slug.
+	 *
+	 * @return array<string,string> key => label
+	 */
+	public static function selectable_facets(): array {
+		$builder = new QueryBuilder();
+		$out     = [];
+
+		if ( post_type_exists( 'product' ) ) {
+			$out['price'] = __( 'Price', 'omniloop' );
+		}
+
+		$types = array_keys( self::selectable_post_types() );
+		if ( ! $types ) {
+			$types = [ 'post' ];
+		}
+
+		foreach ( $types as $type ) {
+			foreach ( $builder->facet_keys_for_type( $type ) as $key ) {
+				if ( ! isset( $out[ $key ] ) ) {
+					$out[ $key ] = WooFacets::label( $key );
+				}
+			}
+		}
+
 		return $out;
 	}
 
@@ -243,7 +324,7 @@ final class FilterEndpoint {
 	private static function build_payload( array $parsed, array $result ): array {
 		$posts = [];
 		foreach ( $result['post_ids'] as $post_id ) {
-			$built = LoopRenderer::post_payload( (int) $post_id );
+			$built = LoopRenderer::post_payload( (int) $post_id, false );
 			if ( $built ) {
 				$posts[] = $built;
 			}
@@ -256,6 +337,17 @@ final class FilterEndpoint {
 			$total_pages = 0;
 		}
 
+		$facet_labels = [];
+		$facet_ui     = [];
+		foreach ( $result['facets'] as $key => $map ) {
+			$key                  = (string) $key;
+			$facet_labels[ $key ] = WooFacets::label( $key );
+			$ui                   = WooFacets::facet_ui( $key, is_array( $map ) ? array_keys( $map ) : [] );
+			if ( $ui ) {
+				$facet_ui[ $key ] = $ui;
+			}
+		}
+
 		return [
 			'status'        => 'success',
 			'total_posts'   => $total,
@@ -263,8 +355,11 @@ final class FilterEndpoint {
 			'page'          => (int) $parsed['page'],
 			'posts'         => $posts,
 			'facets_counts' => $result['facets'],
+			'facet_labels'  => $facet_labels,
+			'facet_ui'      => $facet_ui,
 			'price_min'     => $result['price_min'],
 			'price_max'     => $result['price_max'],
+			'currency'      => WooFacets::currency_symbol(),
 		];
 	}
 
@@ -301,6 +396,16 @@ final class FilterEndpoint {
 			'search'    => [
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+			],
+			'facet_logic' => [
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+				'default'           => 'smart',
+			],
+			'sort_meta_key' => [
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
 				'default'           => '',
 			],
 		];

@@ -1,0 +1,535 @@
+/**
+ * OmniLoop admin settings — product dashboard shell.
+ */
+
+.omniloop-admin {
+	--ol-admin-ink: #0f172a;
+	--ol-admin-muted: #64748b;
+	--ol-admin-line: #e2e8f0;
+	--ol-admin-soft: #f8fafc;
+	--ol-admin-card: #ffffff;
+	--ol-admin-accent: #0f766e;
+	--ol-admin-accent-soft: #ccfbf1;
+	--ol-admin-warn: #b45309;
+	--ol-admin-warn-soft: #ffedd5;
+	--ol-admin-ok: #047857;
+	--ol-admin-ok-soft: #d1fae5;
+	--ol-admin-radius: 14px;
+	--ol-admin-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px rgba(15, 23, 42, 0.05);
+	max-width: 1080px;
+	margin: 1.25rem 1.25rem 2.5rem 0;
+	color: var(--ol-admin-ink);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.omniloop-admin *,
+.omniloop-admin *::before,
+.omniloop-admin *::after {
+	box-sizing: border-box;
+}
+
+.omniloop-admin-hero {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1.25rem;
+	padding: 1.35rem 1.5rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: var(--ol-admin-radius);
+	background:
+		radial-gradient(1200px 280px at 0% 0%, rgba(15, 118, 110, 0.1), transparent 55%),
+		linear-gradient(180deg, #ffffff 0%, var(--ol-admin-soft) 100%);
+	box-shadow: var(--ol-admin-shadow);
+}
+
+.omniloop-admin-hero__brand {
+	display: flex;
+	gap: 1rem;
+	align-items: flex-start;
+	min-width: min(100%, 28rem);
+}
+
+.omniloop-admin-hero__mark {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 12px;
+	background: var(--ol-admin-ink);
+	color: #fff;
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+}
+
+.omniloop-admin-hero__mark svg {
+	display: block;
+}
+
+.omniloop-admin-hero__eyebrow {
+	margin: 0 0 0.2rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ol-admin-accent);
+}
+
+.omniloop-admin-hero h1 {
+	margin: 0 0 0.35rem;
+	padding: 0;
+	font-size: 1.55rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-hero__lead {
+	margin: 0;
+	max-width: 36rem;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-hero__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.omniloop-admin-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	min-height: 2.35rem;
+	margin: 0;
+	padding: 0.45rem 0.95rem;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+.omniloop-admin-btn:focus-visible {
+	outline: 2px solid var(--ol-admin-accent);
+	outline-offset: 2px;
+}
+
+.omniloop-admin-btn--primary {
+	background: var(--ol-admin-ink);
+	border-color: var(--ol-admin-ink);
+	color: #fff;
+	box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+}
+
+.omniloop-admin-btn--primary:hover {
+	background: #1e293b;
+	border-color: #1e293b;
+	color: #fff;
+}
+
+.omniloop-admin-btn--primary:disabled {
+	opacity: 0.65;
+	cursor: wait;
+	box-shadow: none;
+}
+
+.omniloop-admin-btn--ghost {
+	background: #fff;
+	border-color: var(--ol-admin-line);
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-btn--ghost:hover {
+	border-color: #cbd5e1;
+	background: var(--ol-admin-soft);
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-stats {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.85rem;
+	margin: 1rem 0 0;
+}
+
+.omniloop-admin-stat {
+	padding: 1rem 1.1rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 12px;
+	background: var(--ol-admin-card);
+	box-shadow: var(--ol-admin-shadow);
+}
+
+.omniloop-admin-stat__label {
+	margin: 0 0 0.35rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-stat__value {
+	margin: 0;
+	font-size: 1.55rem;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	line-height: 1.1;
+	color: var(--ol-admin-ink);
+	font-variant-numeric: tabular-nums;
+}
+
+.omniloop-admin-stat__meta {
+	margin: 0.35rem 0 0;
+	font-size: 0.8rem;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-stat__pill {
+	display: inline-flex;
+	align-items: center;
+	margin-top: 0.4rem;
+	padding: 0.15rem 0.5rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+
+.omniloop-admin-stat__pill--ok {
+	background: var(--ol-admin-ok-soft);
+	color: var(--ol-admin-ok);
+}
+
+.omniloop-admin-stat__pill--warn {
+	background: var(--ol-admin-warn-soft);
+	color: var(--ol-admin-warn);
+}
+
+.omniloop-admin-stat__pill--muted {
+	background: #e2e8f0;
+	color: #475569;
+}
+
+.omniloop-admin-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+	gap: 1rem;
+	margin-top: 1rem;
+	align-items: start;
+}
+
+.omniloop-admin-card {
+	border: 1px solid var(--ol-admin-line);
+	border-radius: var(--ol-admin-radius);
+	background: var(--ol-admin-card);
+	box-shadow: var(--ol-admin-shadow);
+	overflow: hidden;
+}
+
+.omniloop-admin-card__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1.05rem 1.2rem;
+	border-bottom: 1px solid var(--ol-admin-line);
+	background: linear-gradient(180deg, #fff, var(--ol-admin-soft));
+}
+
+.omniloop-admin-card__head h2 {
+	margin: 0 0 0.25rem;
+	padding: 0;
+	font-size: 1.05rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-card__head p {
+	margin: 0;
+	color: var(--ol-admin-muted);
+	font-size: 0.84rem;
+}
+
+.omniloop-admin-card__body {
+	padding: 1rem 1.2rem 1.2rem;
+}
+
+.omniloop-admin-checks {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.55rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.omniloop-admin-check {
+	position: relative;
+	margin: 0;
+}
+
+.omniloop-admin-check input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.omniloop-admin-check__ui {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	min-height: 3.1rem;
+	padding: 0.55rem 0.75rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 11px;
+	background: #fff;
+	cursor: pointer;
+	transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+.omniloop-admin-check:hover .omniloop-admin-check__ui {
+	border-color: #cbd5e1;
+	background: var(--ol-admin-soft);
+}
+
+.omniloop-admin-check input:focus-visible + .omniloop-admin-check__ui {
+	outline: 2px solid var(--ol-admin-accent);
+	outline-offset: 2px;
+}
+
+.omniloop-admin-check input:checked + .omniloop-admin-check__ui {
+	border-color: rgba(15, 118, 110, 0.45);
+	background: var(--ol-admin-accent-soft);
+	box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.12);
+}
+
+.omniloop-admin-check__tick {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 1.15rem;
+	height: 1.15rem;
+	border: 1.5px solid #94a3b8;
+	border-radius: 5px;
+	background: #fff;
+	color: transparent;
+}
+
+.omniloop-admin-check input:checked + .omniloop-admin-check__ui .omniloop-admin-check__tick {
+	border-color: var(--ol-admin-accent);
+	background: var(--ol-admin-accent);
+	color: #fff;
+}
+
+.omniloop-admin-check__tick svg {
+	display: block;
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.omniloop-admin-check__text {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+}
+
+.omniloop-admin-check__label {
+	font-weight: 600;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-check__slug {
+	font-size: 0.75rem;
+	color: var(--ol-admin-muted);
+	font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Consolas, monospace;
+}
+
+.omniloop-admin-empty {
+	margin: 0;
+	padding: 0.95rem 1rem;
+	border: 1px dashed #cbd5e1;
+	border-radius: 11px;
+	background: var(--ol-admin-soft);
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-tip {
+	display: flex;
+	gap: 0.85rem;
+	align-items: flex-start;
+	margin-top: 1rem;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: var(--ol-admin-radius);
+	background: #fff;
+	box-shadow: var(--ol-admin-shadow);
+}
+
+.omniloop-admin-tip__icon {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 9px;
+	background: var(--ol-admin-accent-soft);
+	color: var(--ol-admin-accent);
+}
+
+.omniloop-admin-tip strong {
+	display: block;
+	margin-bottom: 0.15rem;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-tip p {
+	margin: 0;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.85rem;
+	margin-top: 1rem;
+	padding: 0.95rem 1.15rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: var(--ol-admin-radius);
+	background: #fff;
+	box-shadow: var(--ol-admin-shadow);
+}
+
+.omniloop-admin-foot__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.omniloop-admin-presets {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+.omniloop-admin-preset {
+	padding: 0.95rem 1rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 12px;
+	background: var(--ol-admin-soft);
+}
+
+.omniloop-admin-preset__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.65rem 0.85rem;
+}
+
+.omniloop-admin-preset__grid label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin: 0;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-preset__grid input,
+.omniloop-admin-preset__grid select,
+.omniloop-admin-preset__grid textarea {
+	width: 100%;
+	margin: 0;
+	padding: 0.45rem 0.55rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 8px;
+	background: #fff;
+	font-size: 0.875rem;
+	font-weight: 400;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-admin-preset__grid textarea {
+	font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Consolas, monospace;
+	font-size: 0.8rem;
+	resize: vertical;
+	min-height: 5rem;
+}
+
+.omniloop-admin-preset__wide {
+	grid-column: 1 / -1;
+}
+
+.omniloop-admin-progress {
+	display: none;
+	width: min(100%, 18rem);
+	height: 0.4rem;
+	overflow: hidden;
+	border-radius: 999px;
+	background: #e2e8f0;
+}
+
+.omniloop-admin-progress.is-on {
+	display: block;
+}
+
+.omniloop-admin-progress__bar {
+	height: 100%;
+	width: 0%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, var(--ol-admin-accent), #14b8a6);
+	transition: width 180ms ease;
+}
+
+.omniloop-admin-status {
+	min-height: 1.25rem;
+	font-size: 0.84rem;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-status.is-ok {
+	color: var(--ol-admin-ok);
+	font-weight: 600;
+}
+
+.omniloop-admin-status.is-error {
+	color: #b91c1c;
+	font-weight: 600;
+}
+
+@media (max-width: 960px) {
+	.omniloop-admin-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.omniloop-admin-stats {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 640px) {
+	.omniloop-admin {
+		margin-right: 0.5rem;
+	}
+
+	.omniloop-admin-checks {
+		grid-template-columns: 1fr;
+	}
+
+	.omniloop-admin-hero {
+		padding: 1.1rem;
+	}
+}

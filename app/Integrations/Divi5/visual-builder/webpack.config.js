@@ -6,7 +6,8 @@ module.exports = {
 		loop: './loop/index.jsx',
 	},
 	externals: {
-		react: 'React',
+		react: ['vendor', 'React'],
+		'react-dom': ['vendor', 'ReactDOM'],
 	},
 	module: {
 		rules: [

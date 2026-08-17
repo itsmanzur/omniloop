@@ -1,14 +1,16 @@
 <?php
 /**
- * Plugin Name: OmniLoop Engine
- * Plugin URI: https://example.com/omniloop
- * Description: High-speed faceted loop for Divi 5 and Gutenberg. Custom index table, REST query API, shared frontend engine.
- * Version: 1.0.0
+ * Plugin Name: OmniLoop for Divi
+ * Plugin URI: https://github.com/itsmanzur/omniloop
+ * Description: Faceted product and post loop for the Divi 5 Visual Builder. Custom index, live filters, WooCommerce-ready.
+ * Version: 1.3.0
  * Author: OmniLoop
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: omniloop
  * Domain Path: /languages
  * Requires at least: 6.4
- * Requires PHP: 8.1
+ * Requires PHP: 7.4
  *
  * @package OmniLoop
  */
@@ -17,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'OMNILOOP_VERSION', '1.0.0' );
+define( 'OMNILOOP_VERSION', '1.3.0' );
 define( 'OMNILOOP_DB_VERSION', '1.0.0' );
 define( 'OMNILOOP_FILE', __FILE__ );
 define( 'OMNILOOP_PATH', plugin_dir_path( __FILE__ ) );

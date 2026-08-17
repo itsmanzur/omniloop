@@ -36,10 +36,16 @@ final class Installer {
 		if ( ! wp_next_scheduled( 'omniloop_reindex_batch' ) ) {
 			wp_schedule_single_event( time() + 15, 'omniloop_reindex_batch' );
 		}
+
+		SeoUrls::register_rules();
+		flush_rewrite_rules( false );
+		update_option( 'omniloop_rewrite_version', SeoUrls::REWRITE_VERSION, false );
 	}
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
+		flush_rewrite_rules( false );
+		delete_option( 'omniloop_rewrite_version' );
 	}
 
 	public static function maybe_upgrade(): void {
@@ -60,6 +66,49 @@ final class Installer {
 		}
 
 		return $types;
+	}
+
+	/**
+	 * WooCommerce registers `product` after some plugins boot. Add it to
+	 * saved settings so the Divi dropdown and indexer can see it.
+	 */
+	public static function maybe_enable_product(): void {
+		if ( ! post_type_exists( 'product' ) ) {
+			return;
+		}
+
+		$settings = get_option( 'omniloop_settings', [] );
+		if ( ! is_array( $settings ) ) {
+			$settings = [];
+		}
+
+		$types = isset( $settings['post_types'] ) && is_array( $settings['post_types'] )
+			? array_map( 'sanitize_key', $settings['post_types'] )
+			: self::default_post_types();
+
+		if ( in_array( 'product', $types, true ) ) {
+			return;
+		}
+
+		$types[]                 = 'product';
+		$settings['post_types']  = array_values( array_unique( array_filter( $types ) ) );
+		update_option( 'omniloop_settings', $settings, false );
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public static function allowed_post_types(): array {
+		$settings = get_option( 'omniloop_settings', [] );
+		$types    = isset( $settings['post_types'] ) && is_array( $settings['post_types'] )
+			? array_map( 'sanitize_key', $settings['post_types'] )
+			: self::default_post_types();
+
+		if ( post_type_exists( 'product' ) ) {
+			$types[] = 'product';
+		}
+
+		return array_values( array_unique( array_filter( $types ) ) );
 	}
 
 	public static function create_table(): void {

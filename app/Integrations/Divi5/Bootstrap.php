@@ -50,9 +50,11 @@ final class Bootstrap {
 
 		$bridge = wp_json_encode(
 			[
-				'restUrl'   => rest_url( 'omniloop/v1/query' ),
-				'nonce'     => wp_create_nonce( 'wp_rest' ),
-				'postTypes' => FilterEndpoint::selectable_post_types(),
+				'restUrl'      => rest_url( 'omniloop/v1/query' ),
+				'nonce'        => wp_create_nonce( 'wp_rest' ),
+				'postTypes'    => FilterEndpoint::selectable_post_types(),
+				'facetOptions' => FilterEndpoint::selectable_facets(),
+				'filterPresets' => FilterEndpoint::selectable_presets(),
 			],
 			JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP
 		);
@@ -71,13 +73,14 @@ final class Bootstrap {
 				'version' => OMNILOOP_VERSION,
 				'script'  => [
 					'src'                => OMNILOOP_URL . 'app/Integrations/Divi5/visual-builder/build/loop.js',
-					'deps'               => [ 'omniloop-vb-bridge', 'react', 'jquery', 'divi-module-library', 'wp-hooks', 'divi-rest' ],
+					'deps'               => [ 'omniloop-vb-bridge', 'jquery', 'divi-module-library', 'wp-hooks', 'divi-rest' ],
 					'enqueue_top_window' => false,
 					'enqueue_app_window' => true,
 					'data_app_window'    => [
 						'restUrl'   => rest_url( 'omniloop/v1/query' ),
 						'nonce'     => wp_create_nonce( 'wp_rest' ),
-						'postTypes' => FilterEndpoint::selectable_post_types(),
+						'postTypes'    => FilterEndpoint::selectable_post_types(),
+						'facetOptions' => FilterEndpoint::selectable_facets(),
 					],
 				],
 			]

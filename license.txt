@@ -1,0 +1,35 @@
+OmniLoop for Divi
+Copyright (C) 2026 OmniLoop
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the License along with this program.
+If not, see <https://www.gnu.org/licenses/gpl-2.0.html>.
+
+
+=== Third-party / bundled files ===
+
+Runtime plugin code and assets are original to OmniLoop unless listed below.
+
+1) No third-party PHP libraries are bundled.
+2) No third-party CSS/JS libraries are enqueued at runtime (no CDNs).
+3) Frontend scripts and styles under assets/ are original OmniLoop code.
+4) Divi 5 Visual Builder module script:
+   - Path: app/Integrations/Divi5/visual-builder/build/loop.js
+   - Source: app/Integrations/Divi5/visual-builder/loop/
+   - Built with webpack/babel as development tooling only.
+   - webpack, babel, and node_modules are not required at runtime and
+     must not be shipped in the Marketplace ZIP.
+5) No stock photos or third-party illustrations are bundled in the plugin
+   package. Sale/empty-state icons are original inline SVG.
+
+Divi itself is provided by Elegant Themes and is not redistributed with
+this extension.

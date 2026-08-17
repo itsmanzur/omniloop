@@ -1,15 +1,15 @@
 <?php
 /**
- * Plugin singleton — wires REST, indexer, Gutenberg, Divi 5, admin, shortcode.
+ * Plugin singleton — wires REST, indexer, Divi 5, and admin.
  *
  * @package OmniLoop
  */
 
 namespace OmniLoop\Engine\Core;
 
+use OmniLoop\Engine\Admin\DocsPage;
 use OmniLoop\Engine\Admin\SettingsPage;
 use OmniLoop\Engine\Integrations\Divi5\Bootstrap as DiviBootstrap;
-use OmniLoop\Engine\Integrations\Gutenberg\LoopBlock;
 use OmniLoop\Engine\Rest\FilterEndpoint;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,13 +33,19 @@ final class App {
 	public function boot(): void {
 		Installer::maybe_upgrade();
 
+		if ( (string) get_option( 'omniloop_asset_version', '' ) !== OMNILOOP_VERSION ) {
+			CacheManager::bump();
+			update_option( 'omniloop_asset_version', OMNILOOP_VERSION, false );
+		}
+
 		Indexer::init();
+		SeoUrls::init();
 		FilterEndpoint::init();
-		LoopBlock::init();
 		DiviBootstrap::init();
 		SettingsPage::init();
+		DocsPage::init();
 
-		add_shortcode( 'omniloop', [ LoopRenderer::class, 'shortcode' ] );
+		add_action( 'init', [ Installer::class, 'maybe_enable_product' ], 20 );
 		add_action( 'init', [ $this, 'register_assets' ], 5 );
 		add_action( 'omniloop_reindex_batch', [ Indexer::class, 'process_batch' ] );
 	}

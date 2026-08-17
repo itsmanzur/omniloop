@@ -22,7 +22,7 @@
 				"advanced": {
 					"postType": {
 						"desktop": {
-							"value": "post"
+							"value": "product"
 						}
 					},
 					"perPage": {
@@ -35,7 +35,57 @@
 							"value": "on"
 						}
 					},
-					"columns": {
+					"showAddToCart": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"showQuickView": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"showPagination": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"paginationStyle": {
+						"desktop": {
+							"value": "pages"
+						}
+					},
+					"filterSync": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"syncGroup": {
+						"desktop": {
+							"value": "default"
+						}
+					},
+					"filterPreset": {
+						"desktop": {
+							"value": ""
+						}
+					},
+					"facetLogic": {
+						"desktop": {
+							"value": "smart"
+						}
+					},
+					"sortMetaKey": {
+						"desktop": {
+							"value": ""
+						}
+					},
+					"visibleFacets": {
+						"desktop": {
+							"value": []
+						}
+					},
+					"cardColumns": {
 						"desktop": {
 							"value": "3"
 						}
@@ -43,6 +93,96 @@
 					"imageRatio": {
 						"desktop": {
 							"value": "4-3"
+						}
+					},
+					"filterStyle": {
+						"desktop": {
+							"value": "sidebar"
+						}
+					},
+					"cardStyle": {
+						"desktop": {
+							"value": "classic"
+						}
+					},
+					"carouselAutoplay": {
+						"desktop": {
+							"value": "off"
+						}
+					},
+					"carouselSpeed": {
+						"desktop": {
+							"value": "4000"
+						}
+					},
+					"carouselPauseHover": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"carouselLoop": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"carouselArrows": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"carouselDots": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"gridGap": {
+						"desktop": {
+							"value": "md"
+						}
+					},
+					"layoutGap": {
+						"desktop": {
+							"value": "md"
+						}
+					},
+					"badgePosition": {
+						"desktop": {
+							"value": "top-left"
+						}
+					},
+					"titleLines": {
+						"desktop": {
+							"value": "2"
+						}
+					},
+					"imageHover": {
+						"desktop": {
+							"value": "subtle"
+						}
+					},
+					"emptyStyle": {
+						"desktop": {
+							"value": "box"
+						}
+					},
+					"emptyTitle": {
+						"desktop": {
+							"value": "No results found"
+						}
+					},
+					"emptyMessage": {
+						"desktop": {
+							"value": "Try clearing filters or searching for something else."
+						}
+					},
+					"emptyResetLabel": {
+						"desktop": {
+							"value": "Reset filters"
+						}
+					},
+					"emptyShowReset": {
+						"desktop": {
+							"value": "on"
 						}
 					}
 				}
@@ -61,15 +201,17 @@
 							"attrName": "module.advanced.postType",
 							"label": "Post Type",
 							"description": "Which public post type the faceted loop should query.",
+							"category": "configuration",
 							"features": {
 								"dynamicContent": false,
 								"hover": false,
 								"sticky": false,
-								"responsive": false
+								"responsive": false,
+								"preset": "content"
 							},
 							"defaultAttr": {
 								"desktop": {
-									"value": "post"
+									"value": "product"
 								}
 							},
 							"component": {
@@ -100,11 +242,13 @@
 							"attrName": "module.advanced.perPage",
 							"label": "Per Page",
 							"description": "How many items to show in the loop.",
+							"category": "configuration",
 							"features": {
 								"dynamicContent": false,
 								"hover": false,
 								"sticky": false,
-								"responsive": false
+								"responsive": false,
+								"preset": "content"
 							},
 							"defaultAttr": {
 								"desktop": {
@@ -137,11 +281,13 @@
 							"attrName": "module.advanced.showFilters",
 							"label": "Show Filters",
 							"description": "Show the search and facet sidebar next to the loop.",
+							"category": "configuration",
 							"features": {
 								"dynamicContent": false,
 								"hover": false,
 								"sticky": false,
-								"responsive": false
+								"responsive": false,
+								"preset": "content"
 							},
 							"defaultAttr": {
 								"desktop": {
@@ -154,20 +300,358 @@
 							}
 						}
 					},
-					"columns": {
+					"showAddToCart": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 35,
+							"render": true,
+							"attrName": "module.advanced.showAddToCart",
+							"label": "Add to Cart",
+							"description": "Show an Add to cart button on product cards (WooCommerce). Variable products link to the product page.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
+									}
+								}
+							}
+						}
+					},
+					"showQuickView": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 37,
+							"render": true,
+							"attrName": "module.advanced.showQuickView",
+							"label": "Quick View",
+							"description": "Show a Quick view button that opens a product/post preview modal.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
+									}
+								}
+							}
+						}
+					},
+					"showPagination": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 38,
+							"render": true,
+							"attrName": "module.advanced.showPagination",
+							"label": "Show Pagination",
+							"description": "Show paging controls under the loop. Turn off to display only the first page of results.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
+									}
+								}
+							}
+						}
+					},
+					"paginationStyle": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39,
+							"render": true,
+							"attrName": "module.advanced.paginationStyle",
+							"label": "Pagination Style",
+							"description": "Choose numbered pages, a Load More button, or infinite scroll while scrolling.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "pages"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"pages": { "label": "Page numbers" },
+										"load_more": { "label": "Load More" },
+										"infinite": { "label": "Infinite scroll" }
+									}
+								}
+							}
+						}
+					},
+					"filterSync": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.5,
+							"render": true,
+							"attrName": "module.advanced.filterSync",
+							"label": "Sync Filters",
+							"description": "When multiple OmniLoop modules share a Sync Group, changing filters in one updates the others.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
+									}
+								}
+							}
+						}
+					},
+					"syncGroup": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.6,
+							"render": true,
+							"attrName": "module.advanced.syncGroup",
+							"label": "Sync Group",
+							"description": "Modules with the same group ID and post type share live filter state on this page.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "default"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/text"
+							}
+						}
+					},
+					"filterPreset": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.7,
+							"render": true,
+							"attrName": "module.advanced.filterPreset",
+							"label": "Saved Filter Preset",
+							"description": "Apply a preset when the URL has no active filters. Share with ?ol_preset=your-preset-id",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": ""
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"": { "label": "None" }
+									}
+								}
+							}
+						}
+					},
+					"facetLogic": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.facetLogic",
+							"label": "Within-facet match",
+							"description": "Smart = categories OR, attributes AND. Force OR or AND for every facet.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "smart"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"smart": { "label": "Smart (cat OR, attr AND)" },
+										"or": { "label": "Always OR" },
+										"and": { "label": "Always AND" }
+									}
+								}
+							}
+						}
+					},
+					"sortMetaKey": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.sortMetaKey",
+							"label": "Custom sort meta key",
+							"description": "Optional post meta key for Custom meta sort (e.g. _weight). Reindex after changing.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": ""
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/text"
+							}
+						}
+					},
+					"visibleFacets": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.visibleFacets",
+							"label": "Visible Filters",
+							"description": "Choose which filters appear. Leave empty to show all. Check only Color (not Size) to hide Size.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": []
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/checkboxes",
+								"props": {
+									"options": [
+										{ "value": "price", "label": "Price" },
+										{ "value": "product_cat", "label": "Categories" },
+										{ "value": "pa_color", "label": "Color" },
+										{ "value": "pa_size", "label": "Size" },
+										{ "value": "product_tag", "label": "Tags" },
+										{ "value": "rating", "label": "Rating" },
+										{ "value": "_stock_status", "label": "Stock" },
+										{ "value": "on_sale", "label": "On sale" },
+										{ "value": "featured", "label": "Featured" }
+									]
+								}
+							}
+						}
+					},
+					"cardColumns": {
 						"groupType": "group-item",
 						"item": {
 							"groupSlug": "loopLayout",
 							"priority": 10,
 							"render": true,
-							"attrName": "module.advanced.columns",
+							"attrName": "module.advanced.cardColumns",
 							"label": "Columns",
-							"description": "Number of cards per row.",
+							"description": "Cards per row (or visible slides in Carousel). Hidden when Card Style is List.",
+							"category": "configuration",
 							"features": {
 								"dynamicContent": false,
 								"hover": false,
 								"sticky": false,
-								"responsive": false
+								"responsive": false,
+								"preset": "content"
 							},
 							"defaultAttr": {
 								"desktop": {
@@ -196,11 +680,13 @@
 							"attrName": "module.advanced.imageRatio",
 							"label": "Image Ratio",
 							"description": "Featured image crop for loop cards.",
+							"category": "configuration",
 							"features": {
 								"dynamicContent": false,
 								"hover": false,
 								"sticky": false,
-								"responsive": false
+								"responsive": false,
+								"preset": "content"
 							},
 							"defaultAttr": {
 								"desktop": {
@@ -216,6 +702,621 @@
 										"16-9": { "label": "Wide 16:9" },
 										"1-1": { "label": "Square 1:1" },
 										"3-4": { "label": "Portrait 3:4" }
+									}
+								}
+							}
+						}
+					},
+					"filterStyle": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopLayout",
+							"priority": 30,
+							"render": true,
+							"attrName": "module.advanced.filterStyle",
+							"label": "Filter Style",
+							"description": "Layout of the filter panel: sidebar, accordion, toolbar, mega bar, pills, or chip-only.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "sidebar"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"sidebar": { "label": "Sidebar" },
+										"accordion": { "label": "Accordion" },
+										"toolbar": { "label": "Toolbar" },
+										"megabar": { "label": "Mega Bar" },
+										"pills": { "label": "Pills" },
+										"chipsonly": { "label": "Chip Only" }
+									}
+								}
+							}
+						}
+					},
+					"cardStyle": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopLayout",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.cardStyle",
+							"label": "Card Style",
+							"description": "How loop items are displayed: classic, overlay, list, compact, carousel, or masonry. Carousel options appear when Carousel is selected.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "classic"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"classic": { "label": "Classic" },
+										"overlay": { "label": "Overlay" },
+										"list": { "label": "List" },
+										"compact": { "label": "Compact" },
+										"carousel": { "label": "Carousel" },
+										"masonry": { "label": "Masonry" }
+									}
+								}
+							}
+						}
+					},
+					"carouselAutoplay": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "carouselOptions",
+							"priority": 10,
+							"render": true,
+							"attrName": "module.advanced.carouselAutoplay",
+							"label": "Autoplay",
+							"description": "Used when Card Style is Carousel. Automatically advance slides.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "off"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "On" },
+										"off": { "label": "Off" }
+									}
+								}
+							}
+						}
+					},
+					"carouselSpeed": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "carouselOptions",
+							"priority": 20,
+							"render": true,
+							"attrName": "module.advanced.carouselSpeed",
+							"label": "Autoplay Speed",
+							"description": "Delay between slides. Shown when Autoplay is on.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "4000"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"2000": { "label": "2 seconds" },
+										"3000": { "label": "3 seconds" },
+										"4000": { "label": "4 seconds" },
+										"5000": { "label": "5 seconds" },
+										"6000": { "label": "6 seconds" },
+										"8000": { "label": "8 seconds" }
+									}
+								}
+							}
+						}
+					},
+					"carouselPauseHover": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "carouselOptions",
+							"priority": 30,
+							"render": true,
+							"attrName": "module.advanced.carouselPauseHover",
+							"label": "Pause on Hover",
+							"description": "Pause autoplay while the pointer is over the carousel. Shown when Autoplay is on.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "On" },
+										"off": { "label": "Off" }
+									}
+								}
+							}
+						}
+					},
+					"carouselLoop": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "carouselOptions",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.carouselLoop",
+							"label": "Loop",
+							"description": "Jump back to the start after the last slide.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "On" },
+										"off": { "label": "Off" }
+									}
+								}
+							}
+						}
+					},
+					"carouselArrows": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "carouselOptions",
+							"priority": 50,
+							"render": true,
+							"attrName": "module.advanced.carouselArrows",
+							"label": "Show Arrows",
+							"description": "Previous / Next arrow buttons.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "On" },
+										"off": { "label": "Off" }
+									}
+								}
+							}
+						}
+					},
+					"carouselDots": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "carouselOptions",
+							"priority": 60,
+							"render": true,
+							"attrName": "module.advanced.carouselDots",
+							"label": "Show Dots",
+							"description": "Dot navigation under the carousel.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "On" },
+										"off": { "label": "Off" }
+									}
+								}
+							}
+						}
+					},
+					"gridGap": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designDetails",
+							"priority": 10,
+							"render": true,
+							"attrName": "module.advanced.gridGap",
+							"label": "Card Gap",
+							"description": "Space between product cards in the grid.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "md"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"sm": { "label": "Compact" },
+										"md": { "label": "Default" },
+										"lg": { "label": "Comfortable" },
+										"xl": { "label": "Spacious" }
+									}
+								}
+							}
+						}
+					},
+					"layoutGap": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designDetails",
+							"priority": 20,
+							"render": true,
+							"attrName": "module.advanced.layoutGap",
+							"label": "Filters / Results Gap",
+							"description": "Space between the filter panel and the results grid.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "md"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"sm": { "label": "Tight" },
+										"md": { "label": "Default" },
+										"lg": { "label": "Wide" }
+									}
+								}
+							}
+						}
+					},
+					"badgePosition": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designDetails",
+							"priority": 30,
+							"render": true,
+							"attrName": "module.advanced.badgePosition",
+							"label": "Sale Badge Position",
+							"description": "Where the sale badge sits on the product image.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "top-left"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"top-left": { "label": "Top Left" },
+										"top-right": { "label": "Top Right" },
+										"bottom-left": { "label": "Bottom Left" },
+										"bottom-right": { "label": "Bottom Right" }
+									}
+								}
+							}
+						}
+					},
+					"titleLines": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designDetails",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.titleLines",
+							"label": "Title Lines",
+							"description": "How many lines of the product title to show before truncating.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "2"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"1": { "label": "1 line" },
+										"2": { "label": "2 lines" },
+										"3": { "label": "3 lines" }
+									}
+								}
+							}
+						}
+					},
+					"imageHover": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designDetails",
+							"priority": 50,
+							"render": true,
+							"attrName": "module.advanced.imageHover",
+							"label": "Image Hover Zoom",
+							"description": "Zoom strength when hovering a product card image.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "subtle"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"off": { "label": "Off" },
+										"subtle": { "label": "Subtle" },
+										"strong": { "label": "Strong" }
+									}
+								}
+							}
+						}
+					},
+					"emptyStyle": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "emptyState",
+							"priority": 10,
+							"render": true,
+							"attrName": "module.advanced.emptyStyle",
+							"label": "Empty Style",
+							"description": "Illustration shown when the loop has no matching results.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "box"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"minimal": { "label": "Minimal (text only)" },
+										"box": { "label": "Package icon" },
+										"search": { "label": "Search icon" },
+										"bag": { "label": "Bag icon" }
+									}
+								}
+							}
+						}
+					},
+					"emptyTitle": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "emptyState",
+							"priority": 20,
+							"render": true,
+							"attrName": "module.advanced.emptyTitle",
+							"label": "Empty Title",
+							"description": "Headline when no products or posts match the filters.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "No results found"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/text"
+							}
+						}
+					},
+					"emptyMessage": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "emptyState",
+							"priority": 30,
+							"render": true,
+							"attrName": "module.advanced.emptyMessage",
+							"label": "Empty Message",
+							"description": "Supporting text under the empty title. Leave blank to hide.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "Try clearing filters or searching for something else."
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/textarea"
+							}
+						}
+					},
+					"emptyResetLabel": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "emptyState",
+							"priority": 40,
+							"render": true,
+							"attrName": "module.advanced.emptyResetLabel",
+							"label": "Reset Button Label",
+							"description": "Label for the button that clears active filters from the empty state.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "Reset filters"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/text"
+							}
+						}
+					},
+					"emptyShowReset": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "emptyState",
+							"priority": 50,
+							"render": true,
+							"attrName": "module.advanced.emptyShowReset",
+							"label": "Show Reset Button",
+							"description": "Show a reset button on the empty state when filters are active.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
 									}
 								}
 							}
@@ -239,6 +1340,399 @@
 					"zIndex": {}
 				}
 			}
+		},
+		"card": {
+			"type": "object",
+			"selector": "{{selector}} .omniloop-card",
+			"settings": {
+				"decoration": {
+					"background": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCard",
+							"attrName": "card.decoration.background",
+							"priority": 10,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/background",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Card",
+									"attrName": "card.decoration.background"
+								}
+							}
+						}
+					},
+					"spacing": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCard",
+							"attrName": "card.decoration.spacing",
+							"priority": 20,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/spacing",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Card"
+								}
+							}
+						}
+					},
+					"border": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCard",
+							"attrName": "card.decoration.border",
+							"priority": 30,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/border",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Card"
+								}
+							}
+						}
+					},
+					"boxShadow": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCard",
+							"attrName": "card.decoration.boxShadow",
+							"priority": 40,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/box-shadow",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Card"
+								}
+							}
+						}
+					}
+				}
+			},
+			"styleProps": {
+				"selector": "{{selector}} .omniloop-card",
+				"background": {
+					"important": true
+				},
+				"border": {
+					"important": true
+				},
+				"boxShadow": {
+					"important": true
+				},
+				"spacing": {
+					"selector": "{{selector}} .omniloop-card__body",
+					"important": true
+				}
+			}
+		},
+		"cardTitle": {
+			"type": "object",
+			"selector": "{{selector}} .omniloop-card__title",
+			"settings": {
+				"decoration": {
+					"font": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardTitle",
+							"priority": 10,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/font",
+								"props": {
+									"grouped": false,
+									"fieldLabel": "Title",
+									"groupLabel": "Card Title Text",
+									"dynamicSubgroupHost": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"styleProps": {
+				"font": {
+					"important": true
+				}
+			}
+		},
+		"cardPrice": {
+			"type": "object",
+			"selector": "{{selector}} .omniloop-card__price",
+			"settings": {
+				"decoration": {
+					"font": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardPrice",
+							"priority": 10,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/font",
+								"props": {
+									"grouped": false,
+									"fieldLabel": "Price",
+									"groupLabel": "Card Price Text",
+									"dynamicSubgroupHost": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"styleProps": {
+				"font": {
+					"important": true
+				}
+			}
+		},
+		"cardPriceRegular": {
+			"type": "object",
+			"selector": "{{selector}} .omniloop-card__price-regular",
+			"settings": {
+				"decoration": {
+					"font": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardPriceRegular",
+							"priority": 10,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/font",
+								"props": {
+									"grouped": false,
+									"fieldLabel": "Regular Price",
+									"groupLabel": "Regular Price Text",
+									"dynamicSubgroupHost": true
+								}
+							}
+						}
+					}
+				}
+			},
+			"styleProps": {
+				"font": {
+					"important": true
+				}
+			}
+		},
+		"cardBadge": {
+			"type": "object",
+			"selector": "{{selector}} .omniloop-card__badge",
+			"settings": {
+				"decoration": {
+					"background": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardBadge",
+							"attrName": "cardBadge.decoration.background",
+							"priority": 10,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/background",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Sale Badge",
+									"attrName": "cardBadge.decoration.background"
+								}
+							}
+						}
+					},
+					"font": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardBadge",
+							"attrName": "cardBadge.decoration.font",
+							"priority": 20,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/font",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Sale Badge",
+									"dynamicSubgroupHost": true
+								}
+							}
+						}
+					},
+					"border": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardBadge",
+							"attrName": "cardBadge.decoration.border",
+							"priority": 30,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/border",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Sale Badge"
+								}
+							}
+						}
+					},
+					"spacing": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designCardBadge",
+							"attrName": "cardBadge.decoration.spacing",
+							"priority": 40,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/spacing",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Sale Badge"
+								}
+							}
+						}
+					}
+				}
+			},
+			"styleProps": {
+				"selector": "{{selector}} .omniloop-card__badge",
+				"background": {
+					"important": true
+				},
+				"border": {
+					"important": true
+				},
+				"spacing": {
+					"important": true
+				},
+				"font": {
+					"important": true
+				}
+			}
+		},
+		"filters": {
+			"type": "object",
+			"selector": "{{selector}} .omniloop-filters",
+			"settings": {
+				"decoration": {
+					"background": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designFilters",
+							"attrName": "filters.decoration.background",
+							"priority": 10,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/background",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Filters",
+									"attrName": "filters.decoration.background"
+								}
+							}
+						}
+					},
+					"font": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designFilters",
+							"attrName": "filters.decoration.font",
+							"priority": 15,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/font",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Filters",
+									"dynamicSubgroupHost": true
+								}
+							}
+						}
+					},
+					"spacing": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designFilters",
+							"attrName": "filters.decoration.spacing",
+							"priority": 20,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/spacing",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Filters"
+								}
+							}
+						}
+					},
+					"border": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designFilters",
+							"attrName": "filters.decoration.border",
+							"priority": 30,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/border",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Filters"
+								}
+							}
+						}
+					},
+					"boxShadow": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "designFilters",
+							"attrName": "filters.decoration.boxShadow",
+							"priority": 40,
+							"render": true,
+							"component": {
+								"type": "group",
+								"name": "divi/box-shadow",
+								"props": {
+									"grouped": true,
+									"fieldLabel": "Filters"
+								}
+							}
+						}
+					}
+				}
+			},
+			"styleProps": {
+				"selector": "{{selector}} .omniloop-filters",
+				"background": {
+					"important": true
+				},
+				"border": {
+					"important": true
+				},
+				"boxShadow": {
+					"important": true
+				},
+				"spacing": {
+					"important": true
+				},
+				"font": {
+					"selector": "{{selector}} .omniloop-filters, {{selector}} .omniloop-check, {{selector}} .omniloop-facet__title",
+					"important": true
+				}
+			}
 		}
 	},
 	"settings": {
@@ -259,16 +1753,128 @@
 					}
 				}
 			},
-			"loopLayout": {
-				"panel": "design",
-				"priority": 5,
-				"groupName": "layout",
+			"emptyState": {
+				"panel": "content",
+				"priority": 15,
+				"groupName": "emptyState",
 				"multiElements": true,
 				"component": {
 					"name": "divi/composite",
 					"props": {
-						"groupLabel": "Loop Layout",
-						"clipboardCategory": "style"
+						"groupLabel": "Empty State",
+						"preset": "content"
+					}
+				}
+			},
+			"loopLayout": {
+				"panel": "design",
+				"priority": 5,
+				"groupName": "loopLayout",
+				"multiElements": true,
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Loop Layout"
+					}
+				}
+			},
+			"carouselOptions": {
+				"panel": "design",
+				"priority": 7,
+				"groupName": "carouselOptions",
+				"multiElements": true,
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Carousel",
+						"preset": "content"
+					}
+				}
+			},
+			"designDetails": {
+				"panel": "design",
+				"priority": 8,
+				"groupName": "designDetails",
+				"multiElements": true,
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Spacing & Details"
+					}
+				}
+			},
+			"designFilters": {
+				"panel": "design",
+				"priority": 10,
+				"groupName": "designFilters",
+				"multiElements": true,
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Filters"
+					}
+				}
+			},
+			"designCard": {
+				"panel": "design",
+				"priority": 20,
+				"groupName": "designCard",
+				"multiElements": true,
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Card"
+					}
+				}
+			},
+			"designCardTitle": {
+				"panel": "design",
+				"priority": 30,
+				"groupName": "designCardTitle",
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Card Title Text",
+						"presetGroup": "divi/font",
+						"dynamicSubgroupHost": true
+					}
+				}
+			},
+			"designCardPrice": {
+				"panel": "design",
+				"priority": 40,
+				"groupName": "designCardPrice",
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Card Price Text",
+						"presetGroup": "divi/font",
+						"dynamicSubgroupHost": true
+					}
+				}
+			},
+			"designCardPriceRegular": {
+				"panel": "design",
+				"priority": 45,
+				"groupName": "designCardPriceRegular",
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Regular Price Text",
+						"presetGroup": "divi/font",
+						"dynamicSubgroupHost": true
+					}
+				}
+			},
+			"designCardBadge": {
+				"panel": "design",
+				"priority": 50,
+				"groupName": "designCardBadge",
+				"multiElements": true,
+				"component": {
+					"name": "divi/composite",
+					"props": {
+						"groupLabel": "Sale Badge"
 					}
 				}
 			}
