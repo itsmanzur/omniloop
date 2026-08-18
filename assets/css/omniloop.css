@@ -825,13 +825,22 @@
 	flex-shrink: 0;
 }
 
-.omniloop-card__badge {
+.omniloop-card__badges {
 	position: absolute;
 	top: 0.6rem;
 	left: 0.6rem;
 	right: auto;
 	bottom: auto;
 	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.28rem;
+	max-width: calc(100% - 1.2rem);
+	pointer-events: none;
+}
+
+.omniloop-card__badge {
 	padding: 0.22rem 0.55rem;
 	border-radius: 999px;
 	background-color: #dc2626;
@@ -843,21 +852,34 @@
 	line-height: 1.2;
 }
 
-.omniloop-app--badge-top-right .omniloop-card__badge {
-	left: auto;
-	right: 0.6rem;
+.omniloop-card__badge--promo {
+	background-color: #0f766e;
 }
 
-.omniloop-app--badge-bottom-left .omniloop-card__badge {
+.omniloop-card__badge--urgency {
+	background-color: #d97706;
+	text-transform: none;
+	letter-spacing: 0;
+	font-weight: 600;
+}
+
+.omniloop-app--badge-top-right .omniloop-card__badges {
+	left: auto;
+	right: 0.6rem;
+	align-items: flex-end;
+}
+
+.omniloop-app--badge-bottom-left .omniloop-card__badges {
 	top: auto;
 	bottom: 0.6rem;
 }
 
-.omniloop-app--badge-bottom-right .omniloop-card__badge {
+.omniloop-app--badge-bottom-right .omniloop-card__badges {
 	top: auto;
 	left: auto;
 	right: 0.6rem;
 	bottom: 0.6rem;
+	align-items: flex-end;
 }
 
 .omniloop-app--gap-sm {

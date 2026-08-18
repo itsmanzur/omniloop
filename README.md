@@ -34,6 +34,7 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 - Live search, sort, pagination (page numbers, Load More, or infinite scroll)
 - **Filter Sync** — multiple modules on one page share filter state via a Sync Group ID
 - **Saved filter presets** — reusable combinations from Settings; share with `?ol_preset=preset-id`
+- **Merchandising** — pin products, push out-of-stock last, promo badges, and “Only X left” urgency
 - Taxonomy facets with counts and “Show more”
 - WooCommerce: categories, tags, attributes (color / image / size swatches), price From–To, stock, on sale, featured, star rating
 - ACF facets (opt-in in Settings)
@@ -68,6 +69,7 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 
 - Post Type, Per Page, Show Filters, Visible Filters, Add to Cart, Quick View, Show Pagination, Pagination Style  
 - Sync Filters, Sync Group, Saved Filter Preset  
+- Merchandising, Extra Pin IDs, Stock Urgency, Promoted Badge  
 - Empty State (style, title, message, reset label)
 
 ### Design

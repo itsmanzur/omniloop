@@ -2,6 +2,13 @@
 
 All notable changes to OmniLoop for Divi are documented here.
 
+## 1.4.0 — 2026-08-18
+
+### Added
+- **Merchandising rules** in **OmniLoop → Settings**: pin product IDs to the top of matching results, push out-of-stock products last, and attach promo badges from facet JSON
+- **Stock urgency** — cards show “Only X left” when WooCommerce stock is at or below the threshold
+- Module toggles: Merchandising, Extra Pin IDs, Stock Urgency, Promoted Badge
+
 ## 1.3.0 — 2026-08-17
 
 ### Added

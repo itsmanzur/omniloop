@@ -70,6 +70,26 @@
 							"value": ""
 						}
 					},
+					"merchandising": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"extraPinIds": {
+						"desktop": {
+							"value": ""
+						}
+					},
+					"stockUrgency": {
+						"desktop": {
+							"value": "on"
+						}
+					},
+					"promotedBadge": {
+						"desktop": {
+							"value": "on"
+						}
+					},
 					"facetLogic": {
 						"desktop": {
 							"value": "smart"
@@ -527,6 +547,136 @@
 								"props": {
 									"options": {
 										"": { "label": "None" }
+									}
+								}
+							}
+						}
+					},
+					"merchandising": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.8,
+							"render": true,
+							"attrName": "module.advanced.merchandising",
+							"label": "Merchandising",
+							"description": "Apply global pin, out-of-stock-last, and badge rules from OmniLoop → Settings.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
+									}
+								}
+							}
+						}
+					},
+					"extraPinIds": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.85,
+							"render": true,
+							"attrName": "module.advanced.extraPinIds",
+							"label": "Extra Pin IDs",
+							"description": "Optional extra product IDs to pin in this loop, comma-separated. Combined with Settings pins.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": ""
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/text"
+							}
+						}
+					},
+					"stockUrgency": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.9,
+							"render": true,
+							"attrName": "module.advanced.stockUrgency",
+							"label": "Stock Urgency",
+							"description": "Show “Only X left” on cards when stock is at or below the Settings threshold.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
+									}
+								}
+							}
+						}
+					},
+					"promotedBadge": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 39.95,
+							"render": true,
+							"attrName": "module.advanced.promotedBadge",
+							"label": "Promoted Badge",
+							"description": "Show promo badges from merchandising rules in Settings.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "on"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/select",
+								"props": {
+									"options": {
+										"on": { "label": "Yes" },
+										"off": { "label": "No" }
 									}
 								}
 							}

@@ -136,6 +136,7 @@ final class Indexer {
 				'_regular_price' => true,
 				'_sale_price'    => true,
 				'_stock_status'  => true,
+				'_stock'         => true,
 				'_featured'      => true,
 				'_visibility'    => true,
 			];
@@ -386,7 +387,7 @@ final class Indexer {
 			}
 		}
 
-		$meta_keys = [ '_price', '_regular_price', '_sale_price', '_stock_status' ];
+		$meta_keys = [ '_price', '_regular_price', '_sale_price', '_stock_status', '_stock' ];
 		$extra     = get_option( 'omniloop_sort_meta_keys', [] );
 		if ( is_array( $extra ) ) {
 			foreach ( $extra as $extra_key ) {

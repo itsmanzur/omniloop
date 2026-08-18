@@ -38,6 +38,9 @@ final class QueryBuilder {
 		$sort_meta   = Indexer::sanitize_facet_key( (string) ( $args['sort_meta_key'] ?? '' ) );
 
 		$ids = $this->matching_ids( $post_type, $facets, $search, $sort, $facet_logic, $sort_meta );
+		if ( Merchandising::is_enabled( $args['merchandising'] ?? true ) ) {
+			$ids = Merchandising::reorder( $post_type, $ids, $args['extra_pin_ids'] ?? [] );
+		}
 
 		$total     = count( $ids );
 		$offset    = ( $page - 1 ) * $per_page;

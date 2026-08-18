@@ -54,7 +54,9 @@
 			sort_by: sortEl ? sortEl.value : "date",
 			facets: selectedFacets(root),
 			facet_logic: config.facetLogic || "smart",
-			sort_meta_key: config.sortMetaKey || ""
+			sort_meta_key: config.sortMetaKey || "",
+			merchandising: config.merchandising !== false,
+			extra_pin_ids: config.extraPinIds || ""
 		};
 	}
 
@@ -75,6 +77,33 @@
 		var pct = Number(item.salePercent) || 0;
 		badge.textContent = pct > 0 ? ("-" + pct + "%") : "Sale";
 		return badge;
+	}
+
+	function cardBadges(item, root) {
+		var cfg = readConfig(root) || {};
+		var wrap = document.createElement("span");
+		wrap.className = "omniloop-card__badges";
+		var count = 0;
+		if (cfg.promotedBadge !== false && item && item.promotedBadge) {
+			var promo = document.createElement("span");
+			promo.className = "omniloop-card__badge omniloop-card__badge--promo";
+			promo.textContent = String(item.promotedBadge);
+			wrap.appendChild(promo);
+			count += 1;
+		}
+		var sale = saleBadge(item);
+		if (sale) {
+			wrap.appendChild(sale);
+			count += 1;
+		}
+		if (cfg.stockUrgency !== false && item && item.stockUrgency) {
+			var urgency = document.createElement("span");
+			urgency.className = "omniloop-card__badge omniloop-card__badge--urgency";
+			urgency.textContent = String(item.stockUrgency);
+			wrap.appendChild(urgency);
+			count += 1;
+		}
+		return count ? wrap : null;
 	}
 
 	function editorCardStyle(root) {
@@ -128,11 +157,11 @@
 		return active ? Number(active.getAttribute("data-page") || 1) || 1 : 1;
 	}
 
-	function appendMedia(link, item) {
+	function appendMedia(link, item, root) {
 		if (item.thumbnail) {
 			var media = document.createElement("div");
 			media.className = "omniloop-card__media";
-			var badge = saleBadge(item);
+			var badge = cardBadges(item, root);
 			if (badge) media.appendChild(badge);
 			var img = document.createElement("img");
 			img.src = item.thumbnail;
@@ -146,7 +175,7 @@
 		}
 		var mediaEmpty = document.createElement("div");
 		mediaEmpty.className = "omniloop-card__media omniloop-card__media--empty";
-		var emptyBadge = saleBadge(item);
+		var emptyBadge = cardBadges(item, root);
 		if (emptyBadge) mediaEmpty.appendChild(emptyBadge);
 		var letter = document.createElement("span");
 		letter.className = "omniloop-card__fallback";
@@ -415,7 +444,7 @@
 		link.className = "omniloop-card__link";
 		link.href = typeof item.permalink === "string" ? item.permalink : "#";
 
-		appendMedia(link, item);
+		appendMedia(link, item, root);
 
 		var title = document.createElement("h3");
 		title.className = "omniloop-card__title";

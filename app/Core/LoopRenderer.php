@@ -26,6 +26,12 @@ final class LoopRenderer {
 	/** @var bool */
 	private static $show_quick_view = false;
 
+	/** @var bool */
+	private static $show_stock_urgency = true;
+
+	/** @var bool */
+	private static $show_promoted_badge = true;
+
 	public static function default_post_type(): string {
 		return FilterEndpoint::is_allowed_post_type( 'product' ) ? 'product' : 'post';
 	}
@@ -269,9 +275,15 @@ final class LoopRenderer {
 		if ( '' !== $sort_meta ) {
 			self::remember_sort_meta_key( $sort_meta );
 		}
+		$merch_on     = self::is_flag_on( $attributes['merchandising'] ?? 'on' );
+		$extra_pins   = (string) ( $attributes['extraPinIds'] ?? '' );
+		$show_urgency = $merch_on && self::is_flag_on( $attributes['stockUrgency'] ?? 'on' );
+		$show_promo   = $merch_on && self::is_flag_on( $attributes['promotedBadge'] ?? 'on' );
 		self::$card_style      = $card_style;
 		self::$show_add_to_cart = $show_atc;
 		self::$show_quick_view  = $show_qv;
+		self::$show_stock_urgency  = $show_urgency;
+		self::$show_promoted_badge = $show_promo;
 		$visible_facets         = self::parse_visible_facets( $attributes['visibleFacets'] ?? '' );
 
 		$state = SeoUrls::frontend_enabled()
@@ -301,6 +313,8 @@ final class LoopRenderer {
 			'facets'        => is_array( $state['facets'] ) ? $state['facets'] : [],
 			'facet_logic'   => $facet_logic,
 			'sort_meta_key' => $sort_meta,
+			'merchandising' => $merch_on,
+			'extra_pin_ids' => Merchandising::parse_ids( $extra_pins ),
 		];
 
 		$builder = new QueryBuilder();
@@ -340,6 +354,10 @@ final class LoopRenderer {
 				'filterSync'    => self::is_flag_on( $attributes['filterSync'] ?? 'on' ),
 				'syncGroup'     => self::sanitize_sync_group( $attributes['syncGroup'] ?? 'default' ),
 				'instanceId'    => $id,
+				'merchandising' => $merch_on,
+				'extraPinIds'   => implode( ',', Merchandising::parse_ids( $extra_pins ) ),
+				'stockUrgency'  => $show_urgency,
+				'promotedBadge' => $show_promo,
 				'filterPreset'  => $active_preset ? [
 					'id'       => $active_preset['id'],
 					'label'    => $active_preset['label'],
@@ -505,6 +523,7 @@ final class LoopRenderer {
 		$on_sale       = false;
 		$sale_percent  = 0;
 		$add_to_cart   = null;
+		$product       = null;
 		if ( function_exists( 'wc_get_product' ) ) {
 			$product = wc_get_product( $post_id );
 			if ( $product ) {
@@ -523,6 +542,7 @@ final class LoopRenderer {
 		$raw     = '' !== $post->post_excerpt ? $post->post_excerpt : $post->post_content;
 		$excerpt = wp_trim_words( wp_strip_all_tags( $raw ), 18 );
 
+		$merch   = Merchandising::decorate( $post_id, (string) $post->post_type, $product );
 		$payload = [
 			'id'            => $post_id,
 			'title'         => wp_specialchars_decode( $title, ENT_QUOTES ),
@@ -534,6 +554,8 @@ final class LoopRenderer {
 			'salePercent'   => $sale_percent,
 			'excerpt'       => $excerpt,
 			'addToCart'     => $add_to_cart,
+			'promotedBadge' => $merch['promotedBadge'],
+			'stockUrgency'  => $merch['stockUrgency'],
 		];
 		if ( $include_card ) {
 			$payload['rendered_card'] = self::card_html( $payload, self::$card_style );
@@ -812,7 +834,7 @@ final class LoopRenderer {
 	 * @param array{id:int,title:string,permalink:string,thumbnail:string,price:string,priceRegular?:string,onSale?:bool,salePercent?:int,excerpt:string,addToCart?:array|null} $item
 	 */
 	public static function card_html( array $item, string $card_style = 'classic' ): string {
-		$badge  = self::sale_badge_html( $item );
+		$badge  = self::badges_html( $item );
 		$letter = self::fallback_letter( $item['title'] );
 		if ( $item['thumbnail'] ) {
 			$img = sprintf(
@@ -856,21 +878,30 @@ final class LoopRenderer {
 		);
 	}
 
-	private static function sale_badge_html( array $item ): string {
-		if ( empty( $item['onSale'] ) ) {
+	private static function badges_html( array $item ): string {
+		$parts = [];
+		if ( self::$show_promoted_badge && ! empty( $item['promotedBadge'] ) ) {
+			$parts[] = '<span class="omniloop-card__badge omniloop-card__badge--promo">' . esc_html( (string) $item['promotedBadge'] ) . '</span>';
+		}
+		if ( ! empty( $item['onSale'] ) ) {
+			$percent = (int) ( $item['salePercent'] ?? 0 );
+			$label   = $percent > 0
+				? sprintf(
+					/* translators: %d: discount percent */
+					__( '-%d%%', 'omniloop' ),
+					$percent
+				)
+				: __( 'Sale', 'omniloop' );
+			$parts[] = '<span class="omniloop-card__badge">' . esc_html( $label ) . '</span>';
+		}
+		if ( self::$show_stock_urgency && ! empty( $item['stockUrgency'] ) ) {
+			$parts[] = '<span class="omniloop-card__badge omniloop-card__badge--urgency">' . esc_html( (string) $item['stockUrgency'] ) . '</span>';
+		}
+		if ( ! $parts ) {
 			return '';
 		}
 
-		$percent = (int) ( $item['salePercent'] ?? 0 );
-		$label   = $percent > 0
-			? sprintf(
-				/* translators: %d: discount percent */
-				__( '-%d%%', 'omniloop' ),
-				$percent
-			)
-			: __( 'Sale', 'omniloop' );
-
-		return '<span class="omniloop-card__badge">' . esc_html( $label ) . '</span>';
+		return '<span class="omniloop-card__badges">' . implode( '', $parts ) . '</span>';
 	}
 
 	private static function fallback_letter( string $title ): string {

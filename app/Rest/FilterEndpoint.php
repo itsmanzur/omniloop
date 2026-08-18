@@ -12,6 +12,7 @@ use OmniLoop\Engine\Core\FilterPresets;
 use OmniLoop\Engine\Core\Indexer;
 use OmniLoop\Engine\Core\Installer;
 use OmniLoop\Engine\Core\LoopRenderer;
+use OmniLoop\Engine\Core\Merchandising;
 use OmniLoop\Engine\Core\QueryBuilder;
 use OmniLoop\Engine\Core\WooFacets;
 
@@ -167,6 +168,11 @@ final class FilterEndpoint {
 			$facets = [];
 		}
 
+		$merch_raw = $request->get_param( 'merchandising' );
+		if ( null === $merch_raw || '' === $merch_raw ) {
+			$merch_raw = true;
+		}
+
 		return [
 			'post_type'     => $post_type,
 			'per_page'      => $per_page,
@@ -176,6 +182,8 @@ final class FilterEndpoint {
 			'facets'        => self::sanitize_facets( $facets ),
 			'facet_logic'   => $facet_logic,
 			'sort_meta_key' => $sort_meta,
+			'merchandising' => Merchandising::is_enabled( $merch_raw ),
+			'extra_pin_ids' => Merchandising::parse_ids( $request->get_param( 'extra_pin_ids' ) ),
 		];
 	}
 
@@ -407,6 +415,14 @@ final class FilterEndpoint {
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_key',
 				'default'           => '',
+			],
+			'merchandising' => [
+				'type'    => 'boolean',
+				'default' => true,
+			],
+			'extra_pin_ids' => [
+				'type'    => 'string',
+				'default' => '',
 			],
 		];
 	}

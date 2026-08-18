@@ -145,6 +145,10 @@ class LoopModule implements DependencyInterface {
 		$filter_sync  = $attrs['module']['advanced']['filterSync']['desktop']['value'] ?? 'on';
 		$sync_group   = $attrs['module']['advanced']['syncGroup']['desktop']['value'] ?? 'default';
 		$filter_preset = $attrs['module']['advanced']['filterPreset']['desktop']['value'] ?? '';
+		$merchandising = $attrs['module']['advanced']['merchandising']['desktop']['value'] ?? 'on';
+		$extra_pin_ids = $attrs['module']['advanced']['extraPinIds']['desktop']['value'] ?? '';
+		$stock_urgency = $attrs['module']['advanced']['stockUrgency']['desktop']['value'] ?? 'on';
+		$promoted_badge = $attrs['module']['advanced']['promotedBadge']['desktop']['value'] ?? 'on';
 		$facet_logic  = $attrs['module']['advanced']['facetLogic']['desktop']['value'] ?? 'smart';
 		$sort_meta    = $attrs['module']['advanced']['sortMetaKey']['desktop']['value'] ?? '';
 		$carousel_autoplay = $attrs['module']['advanced']['carouselAutoplay']['desktop']['value'] ?? 'off';
@@ -199,6 +203,10 @@ class LoopModule implements DependencyInterface {
 					'filterSync'      => $filter_sync,
 					'syncGroup'       => LoopRenderer::sanitize_sync_group( $sync_group ),
 					'filterPreset'    => sanitize_key( (string) $filter_preset ),
+					'merchandising'   => $merchandising,
+					'extraPinIds'     => is_string( $extra_pin_ids ) ? $extra_pin_ids : '',
+					'stockUrgency'    => $stock_urgency,
+					'promotedBadge'   => $promoted_badge,
 					'facetLogic'          => sanitize_key( (string) $facet_logic ),
 					'sortMetaKey'         => is_string( $sort_meta ) ? $sort_meta : '',
 					'carouselAutoplay'    => sanitize_key( (string) $carousel_autoplay ),

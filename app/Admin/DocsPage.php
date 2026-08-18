@@ -200,6 +200,7 @@ final class DocsPage {
 							<li><strong><?php esc_html_e( 'Quick View', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Lets shoppers peek at an item in a popup without leaving the list.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Show Pagination', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Shows page numbers under the loop. Turn off to display only the first page of results.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Within-facet match', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Advanced. Smart mode usually means “any category” but “all selected attributes”. Most shops can leave this on Smart.', 'omniloop' ); ?></li>
+							<li><strong><?php esc_html_e( 'Merchandising', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Uses rules from OmniLoop → Settings: pin products, push out-of-stock last, promo badges, and “Only X left”. Extra Pin IDs apply only to this module.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Empty state', 'omniloop' ); ?></strong> — <?php esc_html_e( 'The friendly message when no items match the current filters.', 'omniloop' ); ?></li>
 						</ul>
 					</section>

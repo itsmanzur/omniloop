@@ -247,6 +247,13 @@ const isFilterSyncOn = (params) => {
 	return fieldAttrValue(params, 'filterSync', 'on') === 'on';
 };
 
+const isMerchandisingOn = (params) => {
+	if (params?.isActivePreset) {
+		return true;
+	}
+	return fieldAttrValue(params, 'merchandising', 'on') === 'on';
+};
+
 const setFieldVisible = (item, visible) => {
 	if (item && typeof item === 'object') {
 		item.visible = visible;
@@ -290,6 +297,9 @@ const applyConditionalVisibility = (meta) => {
 		setFieldVisible(advanced.cardColumns?.item, isNotListStyle);
 		setFieldVisible(advanced.paginationStyle?.item, isPaginationStyleVisible);
 		setFieldVisible(advanced.syncGroup?.item, isFilterSyncOn);
+		setFieldVisible(advanced.extraPinIds?.item, isMerchandisingOn);
+		setFieldVisible(advanced.stockUrgency?.item, isMerchandisingOn);
+		setFieldVisible(advanced.promotedBadge?.item, isMerchandisingOn);
 	}
 
 	setGroupVisible(meta?.settings?.groups?.carouselOptions, isCarouselStyle);
@@ -345,18 +355,39 @@ const applyGroupFieldVisibility = (groups) => {
 			if (String(key).toLowerCase().includes('syncgroup')) {
 				field.visible = isFilterSyncOn;
 			}
+			if (
+				String(key).toLowerCase().includes('extrapinids') ||
+				String(key).toLowerCase().includes('stockurgency') ||
+				String(key).toLowerCase().includes('promotedbadge')
+			) {
+				field.visible = isMerchandisingOn;
+			}
 		});
 	}
 
 	return groups;
 };
 
-const CardMedia = ({ thumbnail, title, onSale, salePercent }) => {
+const CardMedia = ({ thumbnail, title, onSale, salePercent, promotedBadge, stockUrgency }) => {
 	const safeTitle = typeof title === 'string' ? title : '';
 	const pct = Number(salePercent) || 0;
-	const badge = onSale ? (
-		<span className="omniloop-card__badge">{pct > 0 ? `-${pct}%` : 'Sale'}</span>
-	) : null;
+	const badges = [];
+	if (promotedBadge) {
+		badges.push(
+			<span key="promo" className="omniloop-card__badge omniloop-card__badge--promo">{String(promotedBadge)}</span>
+		);
+	}
+	if (onSale) {
+		badges.push(
+			<span key="sale" className="omniloop-card__badge">{pct > 0 ? `-${pct}%` : 'Sale'}</span>
+		);
+	}
+	if (stockUrgency) {
+		badges.push(
+			<span key="urgency" className="omniloop-card__badge omniloop-card__badge--urgency">{String(stockUrgency)}</span>
+		);
+	}
+	const badge = badges.length ? <span className="omniloop-card__badges">{badges}</span> : null;
 	if (thumbnail) {
 		return (
 			<div className="omniloop-card__media">
@@ -838,7 +869,7 @@ const LiveGrid = ({ postType, posts, previewCount, queried, emptyProps, showAddT
 				return (
 					<div className="omniloop-card" key={item.id}>
 						<a className="omniloop-card__link" href={item.permalink || '#'} onMouseDown={stopBuilder} onClick={stopBuilder}>
-							<CardMedia thumbnail={item.thumbnail} title={item.title} onSale={item.onSale} salePercent={item.salePercent} />
+							<CardMedia thumbnail={item.thumbnail} title={item.title} onSale={item.onSale} salePercent={item.salePercent} promotedBadge={item.promotedBadge} stockUrgency={item.stockUrgency} />
 							<div className="omniloop-card__body">
 								<h3 className="omniloop-card__title">{item.title}</h3>
 								{item.excerpt ? (
@@ -1449,6 +1480,18 @@ const loopModule = {
 				},
 				filterPreset: {
 					desktop: { value: '' },
+				},
+				merchandising: {
+					desktop: { value: 'on' },
+				},
+				extraPinIds: {
+					desktop: { value: '' },
+				},
+				stockUrgency: {
+					desktop: { value: 'on' },
+				},
+				promotedBadge: {
+					desktop: { value: 'on' },
 				},
 				facetLogic: {
 					desktop: { value: 'smart' },

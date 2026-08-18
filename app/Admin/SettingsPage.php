@@ -8,8 +8,10 @@
 namespace OmniLoop\Engine\Admin;
 
 use OmniLoop\Engine\Core\AcfFacets;
+use OmniLoop\Engine\Core\CacheManager;
 use OmniLoop\Engine\Core\FilterPresets;
 use OmniLoop\Engine\Core\Installer;
+use OmniLoop\Engine\Core\Merchandising;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -58,6 +60,7 @@ final class SettingsPage {
 					'acf_fields' => [],
 					'auto_sync'  => 'on',
 					'filter_presets' => [],
+					'merchandising'  => [],
 				],
 			]
 		);
@@ -100,12 +103,16 @@ final class SettingsPage {
 			}
 		}
 
-		return [
+		$clean = [
 			'post_types'     => array_values( array_unique( $types ) ),
 			'acf_fields'     => array_values( array_unique( $acf_fields ) ),
 			'auto_sync'      => ( is_array( $raw ) && isset( $raw['auto_sync'] ) && 'off' === $raw['auto_sync'] ) ? 'off' : 'on',
 			'filter_presets' => FilterPresets::sanitize_list( is_array( $raw ) && isset( $raw['filter_presets'] ) ? $raw['filter_presets'] : [] ),
+			'merchandising'  => Merchandising::sanitize( is_array( $raw ) && isset( $raw['merchandising'] ) ? $raw['merchandising'] : [] ),
 		];
+		CacheManager::bump();
+
+		return $clean;
 	}
 
 	public static function divi_required_notice(): void {
@@ -201,6 +208,7 @@ final class SettingsPage {
 		$acf_active   = AcfFacets::is_active();
 		$auto_sync_on = ! isset( $settings['auto_sync'] ) || 'off' !== $settings['auto_sync'];
 		$presets      = FilterPresets::all();
+		$merch        = Merchandising::settings();
 		$sort_options = [ 'date', 'title', 'price_asc', 'price_desc', 'popularity', 'rating', 'meta' ];
 
 		$public = get_post_types( [ 'public' => true ], 'objects' );
@@ -484,6 +492,78 @@ final class SettingsPage {
 							<p class="omniloop-admin-status">
 								<?php esc_html_e( 'Example facets JSON: {"on_sale":["1"],"product_cat":["shoes"],"price_range":[10,120]}', 'omniloop' ); ?>
 							</p>
+						</div>
+					</section>
+
+					<section class="omniloop-admin-card">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Merchandising', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Pin products to the top of matching results, push out-of-stock items down, and show promo or low-stock badges.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<div class="omniloop-admin-preset__grid">
+								<label class="omniloop-admin-preset__wide">
+									<span><?php esc_html_e( 'Pinned product IDs', 'omniloop' ); ?></span>
+									<input type="text" name="omniloop_settings[merchandising][pin_ids]" value="<?php echo esc_attr( implode( ', ', $merch['pin_ids'] ) ); ?>" placeholder="12, 45, 90">
+								</label>
+								<label>
+									<span><?php esc_html_e( 'Out of stock last', 'omniloop' ); ?></span>
+									<select name="omniloop_settings[merchandising][oos_last]">
+										<option value="on" <?php selected( $merch['oos_last'] ); ?>><?php esc_html_e( 'Yes', 'omniloop' ); ?></option>
+										<option value="off" <?php selected( ! $merch['oos_last'] ); ?>><?php esc_html_e( 'No', 'omniloop' ); ?></option>
+									</select>
+								</label>
+								<label>
+									<span><?php esc_html_e( 'Low-stock threshold', 'omniloop' ); ?></span>
+									<input type="number" min="0" max="99" name="omniloop_settings[merchandising][urgency_threshold]" value="<?php echo esc_attr( (string) $merch['urgency_threshold'] ); ?>">
+								</label>
+							</div>
+							<p class="omniloop-admin-status"><?php esc_html_e( 'Pinned IDs stay at the top only when they still match the current filters. Set the threshold to 0 to hide “Only X left”.', 'omniloop' ); ?></p>
+							<div class="omniloop-admin-presets" style="margin-top:1rem">
+								<?php
+								$promo_rows = $merch['promotions'];
+								if ( empty( $promo_rows ) ) {
+									$promo_rows = [
+										[
+											'id'        => '',
+											'badge'     => '',
+											'post_type' => in_array( 'product', $selected, true ) ? 'product' : ( $selected[0] ?? 'post' ),
+											'facets'    => [],
+										],
+									];
+								}
+								foreach ( $promo_rows as $index => $promo ) :
+									$promo_facets = wp_json_encode( $promo['facets'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+									?>
+									<div class="omniloop-admin-preset">
+										<div class="omniloop-admin-preset__grid">
+											<label>
+												<span><?php esc_html_e( 'Promo badge', 'omniloop' ); ?></span>
+												<input type="text" name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][badge]" value="<?php echo esc_attr( $promo['badge'] ); ?>" placeholder="<?php esc_attr_e( 'Staff pick', 'omniloop' ); ?>">
+											</label>
+											<label>
+												<span><?php esc_html_e( 'Rule ID', 'omniloop' ); ?></span>
+												<input type="text" name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][id]" value="<?php echo esc_attr( $promo['id'] ); ?>" placeholder="<?php esc_attr_e( 'staff-pick', 'omniloop' ); ?>">
+											</label>
+											<label>
+												<span><?php esc_html_e( 'Post type', 'omniloop' ); ?></span>
+												<select name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][post_type]">
+													<?php foreach ( $types as $type ) : ?>
+														<option value="<?php echo esc_attr( $type->name ); ?>" <?php selected( $promo['post_type'], $type->name ); ?>><?php echo esc_html( $type->labels->singular_name ); ?></option>
+													<?php endforeach; ?>
+												</select>
+											</label>
+											<label class="omniloop-admin-preset__wide">
+												<span><?php esc_html_e( 'Match facets JSON', 'omniloop' ); ?></span>
+												<textarea name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][facets]" rows="3" placeholder='{"product_cat":["shoes"]}'><?php echo esc_textarea( is_string( $promo_facets ) ? $promo_facets : '{}' ); ?></textarea>
+											</label>
+										</div>
+									</div>
+								<?php endforeach; ?>
+							</div>
+							<p class="omniloop-admin-status"><?php esc_html_e( 'Products that have those facet values get the promo badge. Example: {"product_cat":["shoes"]}', 'omniloop' ); ?></p>
 						</div>
 					</section>
 
