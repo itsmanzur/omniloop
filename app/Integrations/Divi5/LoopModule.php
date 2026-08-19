@@ -181,10 +181,13 @@ class LoopModule implements DependencyInterface {
 			$empty_attrs['emptyMessage'] = is_string( $empty_message ) ? $empty_message : '';
 		}
 
+		$card_parts = LoopItemModule::parts_from_block( $block );
+
 		$inner = LoopRenderer::render(
 			array_merge(
 				[
 					'postType'      => sanitize_key( (string) $post_type ),
+					'cardParts'     => $card_parts,
 					'perPage'       => (int) $per_page,
 					'columns'       => (int) $columns,
 					'imageRatio'    => sanitize_key( (string) $image_ratio ),

@@ -2,6 +2,11 @@
 
 All notable changes to OmniLoop for Divi are documented here.
 
+## 2.0.0 — 2026-08-19
+
+### Added
+- **Loop Item Builder** — nest **OmniLoop Card Item** children inside the Filter module (Image, Title, Excerpt, Price, Rating, Add to Cart, Quick View). Reorder in the layers panel to change card layout. No children = preset Card Style.
+
 ## 1.4.0 — 2026-08-18
 
 ### Added

@@ -35,6 +35,7 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 - **Filter Sync** — multiple modules on one page share filter state via a Sync Group ID
 - **Saved filter presets** — reusable combinations from Settings; share with `?ol_preset=preset-id`
 - **Merchandising** — pin products, push out-of-stock last, promo badges, and “Only X left” urgency
+- **Loop Item Builder** — add Card Item children (image, title, price, rating, buttons) and reorder them to design the card
 - Taxonomy facets with counts and “Show more”
 - WooCommerce: categories, tags, attributes (color / image / size swatches), price From–To, stock, on sale, featured, star rating
 - ACF facets (opt-in in Settings)
@@ -70,6 +71,7 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 - Post Type, Per Page, Show Filters, Visible Filters, Add to Cart, Quick View, Show Pagination, Pagination Style  
 - Sync Filters, Sync Group, Saved Filter Preset  
 - Merchandising, Extra Pin IDs, Stock Urgency, Promoted Badge  
+- Nested **OmniLoop Card Item** children for custom card element order  
 - Empty State (style, title, message, reset label)
 
 ### Design

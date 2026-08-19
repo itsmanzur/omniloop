@@ -32,6 +32,9 @@ final class LoopRenderer {
 	/** @var bool */
 	private static $show_promoted_badge = true;
 
+	/** @var string[] */
+	private static $card_parts = [];
+
 	public static function default_post_type(): string {
 		return FilterEndpoint::is_allowed_post_type( 'product' ) ? 'product' : 'post';
 	}
@@ -202,6 +205,39 @@ final class LoopRenderer {
 		return [] === $visible || in_array( $key, $visible, true );
 	}
 
+	/**
+	 * @param mixed $value
+	 * @return string[]
+	 */
+	public static function sanitize_card_parts( $value ): array {
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			$value   = is_array( $decoded ) ? $decoded : preg_split( '/[\s,]+/', $value );
+		}
+		if ( ! is_array( $value ) ) {
+			return [];
+		}
+
+		$allowed = [ 'image', 'title', 'excerpt', 'price', 'rating', 'addToCart', 'quickView' ];
+		$out     = [];
+		foreach ( $value as $part ) {
+			$part = (string) $part;
+			$key  = sanitize_key( $part );
+			if ( 'addtocart' === $key ) {
+				$part = 'addToCart';
+			} elseif ( 'quickview' === $key ) {
+				$part = 'quickView';
+			} else {
+				$part = $key;
+			}
+			if ( in_array( $part, $allowed, true ) && ! in_array( $part, $out, true ) ) {
+				$out[] = $part;
+			}
+		}
+
+		return $out;
+	}
+
 	public static function is_flag_on( $value ): bool {
 		if ( is_bool( $value ) ) {
 			return $value;
@@ -284,6 +320,7 @@ final class LoopRenderer {
 		self::$show_quick_view  = $show_qv;
 		self::$show_stock_urgency  = $show_urgency;
 		self::$show_promoted_badge = $show_promo;
+		self::$card_parts          = self::sanitize_card_parts( $attributes['cardParts'] ?? [] );
 		$visible_facets         = self::parse_visible_facets( $attributes['visibleFacets'] ?? '' );
 
 		$state = SeoUrls::frontend_enabled()
@@ -342,6 +379,7 @@ final class LoopRenderer {
 				'perPage'       => $per_page,
 				'filterStyle'   => $filter_style,
 				'cardStyle'     => $card_style,
+				'cardParts'     => self::$card_parts,
 				'visibleFacets' => $visible_facets,
 				'showAddToCart' => $show_atc,
 				'showQuickView'  => $show_qv,
@@ -556,6 +594,8 @@ final class LoopRenderer {
 			'addToCart'     => $add_to_cart,
 			'promotedBadge' => $merch['promotedBadge'],
 			'stockUrgency'  => $merch['stockUrgency'],
+			'rating'        => self::product_rating( $product ),
+			'reviewCount'   => self::product_review_count( $product ),
 		];
 		if ( $include_card ) {
 			$payload['rendered_card'] = self::card_html( $payload, self::$card_style );
@@ -834,6 +874,10 @@ final class LoopRenderer {
 	 * @param array{id:int,title:string,permalink:string,thumbnail:string,price:string,priceRegular?:string,onSale?:bool,salePercent?:int,excerpt:string,addToCart?:array|null} $item
 	 */
 	public static function card_html( array $item, string $card_style = 'classic' ): string {
+		if ( self::$card_parts ) {
+			return self::card_html_from_parts( $item );
+		}
+
 		$badge  = self::badges_html( $item );
 		$letter = self::fallback_letter( $item['title'] );
 		if ( $item['thumbnail'] ) {
@@ -876,6 +920,145 @@ final class LoopRenderer {
 			$price,
 			$actions
 		);
+	}
+
+	private static function card_html_from_parts( array $item ): string {
+		$media   = '';
+		$body    = '';
+		$actions = [];
+
+		foreach ( self::$card_parts as $part ) {
+			if ( 'image' === $part ) {
+				$media = self::card_media_html( $item );
+				continue;
+			}
+			if ( 'addToCart' === $part || 'quickView' === $part ) {
+				$actions[] = $part;
+				continue;
+			}
+			$body .= self::card_part_html( $part, $item );
+		}
+
+		if ( '' === $media && in_array( 'image', self::$card_parts, true ) ) {
+			$media = self::card_media_html( $item );
+		}
+
+		$body_html = '' !== $body ? '<div class="omniloop-card__body">' . $body . '</div>' : '';
+		$act_html  = self::card_actions_from_parts( $item, $actions );
+
+		return sprintf(
+			'<article class="omniloop-card omniloop-card--custom" data-id="%d"><a class="omniloop-card__link" href="%s">%s%s</a>%s</article>',
+			(int) $item['id'],
+			esc_url( $item['permalink'] ),
+			$media,
+			$body_html,
+			$act_html
+		);
+	}
+
+	private static function card_media_html( array $item ): string {
+		$badge  = self::badges_html( $item );
+		$letter = self::fallback_letter( (string) ( $item['title'] ?? '' ) );
+		if ( ! empty( $item['thumbnail'] ) ) {
+			return sprintf(
+				'<div class="omniloop-card__media">%s<img src="%s" alt="%s" loading="lazy" width="600" height="450"></div>',
+				$badge,
+				esc_url( (string) $item['thumbnail'] ),
+				esc_attr( (string) $item['title'] )
+			);
+		}
+
+		return sprintf(
+			'<div class="omniloop-card__media omniloop-card__media--empty">%s<span class="omniloop-card__fallback">%s</span></div>',
+			$badge,
+			esc_html( $letter )
+		);
+	}
+
+	private static function card_part_html( string $part, array $item ): string {
+		if ( 'title' === $part ) {
+			return '<h3 class="omniloop-card__title">' . esc_html( (string) ( $item['title'] ?? '' ) ) . '</h3>';
+		}
+		if ( 'excerpt' === $part && ! empty( $item['excerpt'] ) ) {
+			return '<p class="omniloop-card__excerpt">' . esc_html( (string) $item['excerpt'] ) . '</p>';
+		}
+		if ( 'price' === $part && ! empty( $item['price'] ) ) {
+			$regular = ! empty( $item['priceRegular'] )
+				? '<s class="omniloop-card__price-regular">' . esc_html( (string) $item['priceRegular'] ) . '</s> '
+				: '';
+			return '<p class="omniloop-card__price">' . $regular . esc_html( (string) $item['price'] ) . '</p>';
+		}
+		if ( 'rating' === $part ) {
+			return self::rating_html( $item );
+		}
+
+		return '';
+	}
+
+	/**
+	 * @param string[] $actions
+	 */
+	private static function card_actions_from_parts( array $item, array $actions ): string {
+		if ( ! $actions ) {
+			return '';
+		}
+
+		$parts = [];
+		if ( in_array( 'quickView', $actions, true ) ) {
+			$qv = self::quick_view_button_html( $item );
+			if ( '' !== $qv ) {
+				$parts[] = $qv;
+			}
+		}
+		if ( in_array( 'addToCart', $actions, true ) && ! empty( $item['addToCart'] ) && is_array( $item['addToCart'] ) ) {
+			$atc = self::add_to_cart_button_html( $item['addToCart'] );
+			if ( '' !== $atc ) {
+				$parts[] = $atc;
+			}
+		}
+		if ( ! $parts ) {
+			return '';
+		}
+
+		return '<div class="omniloop-card__actions">' . implode( '', $parts ) . '</div>';
+	}
+
+	private static function rating_html( array $item ): string {
+		$rating = (float) ( $item['rating'] ?? 0 );
+		if ( $rating <= 0 ) {
+			return '';
+		}
+
+		$stars = (int) max( 1, min( 5, (int) round( $rating ) ) );
+		$label = sprintf(
+			/* translators: %s: average rating */
+			__( 'Rated %s out of 5', 'omniloop' ),
+			number_format_i18n( $rating, 1 )
+		);
+
+		return '<p class="omniloop-card__rating" aria-label="' . esc_attr( $label ) . '"><span aria-hidden="true">' . esc_html( str_repeat( '★', $stars ) . str_repeat( '☆', 5 - $stars ) ) . '</span></p>';
+	}
+
+	/**
+	 * @param object|null $product WooCommerce product.
+	 */
+	private static function product_rating( $product ): float {
+		if ( is_object( $product ) && method_exists( $product, 'get_average_rating' ) ) {
+			return (float) $product->get_average_rating();
+		}
+
+		return 0.0;
+	}
+
+	/**
+	 * @param object|null $product WooCommerce product.
+	 */
+	private static function product_review_count( $product ): int {
+		if ( is_object( $product ) && method_exists( $product, 'get_review_count' ) ) {
+			return (int) $product->get_review_count();
+		}
+
+		return 0;
 	}
 
 	private static function badges_html( array $item ): string {

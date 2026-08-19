@@ -7,6 +7,11 @@
 	"moduleIcon": "omniloop/module-loop",
 	"moduleClassName": "ol_loop",
 	"moduleOrderClassName": "ol_loop",
+	"childModuleName": "omniloop/loop-item",
+	"childModuleTitle": "OmniLoop Card Item",
+	"childrenName": [
+		"omniloop/loop-item"
+	],
 	"attributes": {
 		"module": {
 			"type": "object",
@@ -903,7 +908,7 @@
 							"render": true,
 							"attrName": "module.advanced.cardStyle",
 							"label": "Card Style",
-							"description": "How loop items are displayed: classic, overlay, list, compact, carousel, or masonry. Carousel options appear when Carousel is selected.",
+							"description": "Skin for loop cards. Add OmniLoop Card Item children (Image, Title, Price…) to build a custom element order. Empty children use this preset layout.",
 							"category": "configuration",
 							"features": {
 								"dynamicContent": false,

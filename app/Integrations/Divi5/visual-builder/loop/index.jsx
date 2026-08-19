@@ -1,5 +1,6 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
 import metadata from './module.json';
+import '../item/index.jsx';
 
 const fallbackTypeLabels = {
 	post: 'Posts',

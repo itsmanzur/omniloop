@@ -435,7 +435,31 @@
 		return fallback;
 	}
 
+	function cardPartsOf(root) {
+		var cfg = readConfig(root) || {};
+		return Array.isArray(cfg.cardParts) ? cfg.cardParts : [];
+	}
+
+	function appendRating(body, item) {
+		var rating = Number(item.rating) || 0;
+		if (rating <= 0) return;
+		var stars = Math.max(1, Math.min(5, Math.round(rating)));
+		var p = document.createElement("p");
+		p.className = "omniloop-card__rating";
+		p.setAttribute("aria-label", "Rated " + rating.toFixed(1) + " out of 5");
+		var mark = document.createElement("span");
+		mark.setAttribute("aria-hidden", "true");
+		mark.textContent = "★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars);
+		p.appendChild(mark);
+		body.appendChild(p);
+	}
+
 	function buildCard(item, root) {
+		var parts = cardPartsOf(root);
+		if (parts.length) {
+			return buildCustomCard(item, root, parts);
+		}
+
 		var article = document.createElement("article");
 		article.className = "omniloop-card";
 		article.setAttribute("data-id", String(item.id || ""));
@@ -468,6 +492,66 @@
 		return article;
 	}
 
+	function buildCustomCard(item, root, parts) {
+		var article = document.createElement("article");
+		article.className = "omniloop-card omniloop-card--custom";
+		article.setAttribute("data-id", String(item.id || ""));
+
+		var link = document.createElement("a");
+		link.className = "omniloop-card__link";
+		link.href = typeof item.permalink === "string" ? item.permalink : "#";
+
+		var body = document.createElement("div");
+		body.className = "omniloop-card__body";
+		var actionParts = [];
+		var hasBody = false;
+
+		parts.forEach(function (part) {
+			if (part === "image") {
+				appendMedia(link, item, root);
+				return;
+			}
+			if (part === "addToCart" || part === "quickView") {
+				actionParts.push(part);
+				return;
+			}
+			if (part === "title") {
+				var title = document.createElement("h3");
+				title.className = "omniloop-card__title";
+				title.textContent = item.title || "";
+				body.appendChild(title);
+				hasBody = true;
+				return;
+			}
+			if (part === "excerpt" && item.excerpt) {
+				var excerpt = document.createElement("p");
+				excerpt.className = "omniloop-card__excerpt";
+				excerpt.textContent = String(item.excerpt);
+				body.appendChild(excerpt);
+				hasBody = true;
+				return;
+			}
+			if (part === "price") {
+				var before = body.childNodes.length;
+				appendPrice(body, item);
+				if (body.childNodes.length > before) hasBody = true;
+				return;
+			}
+			if (part === "rating") {
+				var beforeR = body.childNodes.length;
+				appendRating(body, item);
+				if (body.childNodes.length > beforeR) hasBody = true;
+			}
+		});
+
+		if (hasBody) {
+			link.appendChild(body);
+		}
+		article.appendChild(link);
+		appendCardActions(article, item, root, actionParts);
+		return article;
+	}
+
 	function appendGrid(root, posts) {
 		var grid = qs(root, ".omniloop-grid");
 		if (!grid || !posts || !posts.length) {
@@ -479,9 +563,13 @@
 		syncCarousel(root);
 	}
 
-	function appendCardActions(article, item, root) {
+	function appendCardActions(article, item, root, onlyParts) {
 		var qvOn = showQuickView(root);
 		var atcOn = showAddToCart(root) && item && item.addToCart && typeof item.addToCart === "object";
+		if (Array.isArray(onlyParts) && onlyParts.length) {
+			qvOn = onlyParts.indexOf("quickView") !== -1;
+			atcOn = onlyParts.indexOf("addToCart") !== -1 && item && item.addToCart && typeof item.addToCart === "object";
+		}
 		if (!qvOn && !atcOn) return;
 
 		var wrap = document.createElement("div");

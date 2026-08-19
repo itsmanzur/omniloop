@@ -21,6 +21,7 @@ final class Bootstrap {
 			static function ( $dependency_tree ): void {
 				if ( is_object( $dependency_tree ) && method_exists( $dependency_tree, 'add_dependency' ) ) {
 					$dependency_tree->add_dependency( new LoopModule() );
+					$dependency_tree->add_dependency( new LoopItemModule() );
 				}
 			}
 		);
