@@ -1,7 +1,6 @@
 <?php
 /**
  * Plugin Name: OmniLoop for Divi
- * Plugin URI: https://github.com/itsmanzur/omniloop
  * Description: Faceted product and post loop for the Divi 5 Visual Builder. Custom index, live filters, WooCommerce-ready.
  * Version: 2.0.0
  * Author: OmniLoop

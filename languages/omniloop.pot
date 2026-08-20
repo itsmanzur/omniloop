@@ -1,0 +1,1121 @@
+﻿msgid ""
+msgstr ""
+"Project-Id-Version: OmniLoop for Divi 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-20 12:40+06:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: omniloop\n"
+
+#: app/Core/LoopRenderer.php:1321
+msgid "%1$s (%2$d)"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:288
+msgid "%d facet rows"
+msgstr ""
+
+#: app/Core/WooFacets.php:213
+msgid "%d stars"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1074
+msgid "-%d%%"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:303
+msgid "%s ago"
+msgstr ""
+
+#: app/Core/WooFacets.php:208
+msgid "1 star"
+msgstr ""
+
+#: app/Admin/DocsPage.php:99
+msgid "5 minutes"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:390
+msgid "A background rebuild is still running. Filters keep working; auto-sync updates individual posts meanwhile."
+msgstr ""
+
+#: app/Admin/DocsPage.php:268
+msgid "A Pinterest-like staggered collage. Lovely for image-heavy catalogs."
+msgstr ""
+
+#: app/Admin/DocsPage.php:264
+msgid "A sliding row with arrows and dots. Pick Card Style â†’ Carousel and the Design â†’ Carousel group appears (Autoplay, Speed, Pause on Hover, Loop, arrows, dots)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:304
+msgid "A soft zoom when someone hovers a card."
+msgstr ""
+
+#: app/Admin/DocsPage.php:225
+msgid "A wide multi-column filter panel above the grid. Strong for large catalogs."
+msgstr ""
+
+#: app/Admin/DocsPage.php:347
+msgid "â† Previous"
+msgstr ""
+
+#: app/Admin/DocsPage.php:217 app/Admin/DocsPage.php:218
+msgid "Accordion"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:573
+msgid "ACF facets"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:351
+msgid "ACF optional"
+msgstr ""
+
+#: app/Admin/DocsPage.php:104
+msgid "Activate the plugin"
+msgstr ""
+
+#: app/Admin/DocsPage.php:289
+msgid "Add products to the cart or open Quick View (if you enabled those options)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:175
+msgid "Add the module"
+msgstr ""
+
+#: app/Admin/DocsPage.php:131
+msgid "Add the module to a page"
+msgstr ""
+
+#: app/Admin/DocsPage.php:176
+msgid "Add the OmniLoop Filter module"
+msgstr ""
+
+#: app/Admin/DocsPage.php:199
+msgid "Add to Cart"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:768 app/Core/LoopRenderer.php:771
+msgid "Add to cart"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:818
+msgid "Add to cart: %s"
+msgstr ""
+
+#: app/Admin/DocsPage.php:309 app/Admin/DocsPage.php:310
+msgid "Admin settings"
+msgstr ""
+
+#: app/Admin/DocsPage.php:202
+msgid "Advanced. Smart mode usually means â€œany categoryâ€ but â€œall selected attributesâ€. Most shops can leave this on Smart."
+msgstr ""
+
+#: app/Admin/DocsPage.php:187
+msgid "After plugin updates, hard-refresh the front page once (Ctrl+F5 / Cmd+Shift+R) so new styles and scripts load."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:621
+msgid "After saving"
+msgstr ""
+
+#: app/Admin/DocsPage.php:338
+msgid "Always confirm filters on the published page. The builder preview is helpful, but shoppers use the front end."
+msgstr ""
+
+#: app/Admin/DocsPage.php:293
+msgid "As shoppers scroll, the result count and active filter chips stay visible near the top so they never lose track of what is selected."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:381
+msgid "Auto-sync index on save"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:315
+msgid "Auto-sync off"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:313
+msgid "Auto-sync on"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1278
+msgid "Average rating"
+msgstr ""
+
+#: app/Admin/DocsPage.php:303
+msgid "Badge position & title lines"
+msgstr ""
+
+#: app/Admin/DocsPage.php:223
+msgid "Bar above results"
+msgstr ""
+
+#: app/Admin/DocsPage.php:338
+msgid "Builder vs live page differ"
+msgstr ""
+
+#: app/Admin/DocsPage.php:204
+msgid "Card builder"
+msgstr ""
+
+#: app/Admin/DocsPage.php:244 app/Admin/DocsPage.php:245
+msgid "Card layouts"
+msgstr ""
+
+#: app/Admin/DocsPage.php:246
+msgid "Card Style changes how each item looks in the grid. Click one to learn when to use it."
+msgstr ""
+
+#: app/Admin/DocsPage.php:264 app/Admin/DocsPage.php:265
+msgid "Carousel"
+msgstr ""
+
+#: app/Admin/DocsPage.php:124
+msgid "Check the content types you want to filter â€” for example Products, Posts, or Pages. If you use Advanced Custom Fields, you can also tick those fields here."
+msgstr ""
+
+#: app/Admin/DocsPage.php:233 app/Admin/DocsPage.php:234
+msgid "Chip Only"
+msgstr ""
+
+#: app/Admin/DocsPage.php:231
+msgid "Chip-style choices"
+msgstr ""
+
+#: app/Admin/DocsPage.php:326
+msgid "Choose ACF fields to use as filters (if ACF is installed)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:181
+msgid "Choose OmniLoop Filter."
+msgstr ""
+
+#: app/Admin/DocsPage.php:123
+msgid "Choose what to index"
+msgstr ""
+
+#: app/Admin/DocsPage.php:198
+msgid "Choose which filters appear (price, categories, color, and so on). Leave empty to show all available filters."
+msgstr ""
+
+#: app/Admin/DocsPage.php:248 app/Admin/DocsPage.php:249 app/Admin/DocsPage.php:274
+msgid "Classic"
+msgstr ""
+
+#: app/Admin/DocsPage.php:74
+msgid "Click a topic, or search below"
+msgstr ""
+
+#: app/Admin/DocsPage.php:128
+msgid "Click Rebuild index and wait until it says complete. This builds a fast lookup table so filters stay snappy."
+msgstr ""
+
+#: app/Admin/DocsPage.php:180
+msgid "Click to add a module and search for â€œOmniLoopâ€."
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1163
+msgid "Close filters"
+msgstr ""
+
+#: app/Admin/DocsPage.php:219
+msgid "Collapsible groups"
+msgstr ""
+
+#: app/Admin/DocsPage.php:301
+msgid "Columns & image ratio"
+msgstr ""
+
+#: app/Admin/DocsPage.php:260 app/Admin/DocsPage.php:261
+msgid "Compact"
+msgstr ""
+
+#: app/Admin/DocsPage.php:337
+msgid "Confirm Post Type is Products, those products are published, and Products is checked in Settings."
+msgstr ""
+
+#: app/Admin/DocsPage.php:191
+msgid "Content settings"
+msgstr ""
+
+#: app/Admin/DocsPage.php:192
+msgid "Content settings (plain English)"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:432
+msgid "Create reusable filter combinations for modules. Share a preset with ?ol_preset=preset-id on any page."
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1282
+msgid "Custom meta"
+msgstr ""
+
+#: app/Admin/DocsPage.php:305
+msgid "Decoration groups"
+msgstr ""
+
+#: app/Admin/DocsPage.php:262
+msgid "Dense grid"
+msgstr ""
+
+#: app/Admin/DocsPage.php:297
+msgid "Design tab"
+msgstr ""
+
+#: app/Admin/DocsPage.php:298
+msgid "Design tab basics"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:336
+msgid "Divi 5"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:246
+msgid "Divi 5 extension"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:336
+msgid "Divi missing"
+msgstr ""
+
+#: app/Admin/DocsPage.php:285
+msgid "Drag the dual price slider or type Fromâ€“To amounts."
+msgstr ""
+
+#: app/Admin/DocsPage.php:235
+msgid "Drawer + active chips"
+msgstr ""
+
+#: app/Admin/DocsPage.php:217
+msgid "Each filter group collapses to save space. Nice when you have many facets."
+msgstr ""
+
+#: app/Admin/DocsPage.php:137
+msgid "Edit a page in Divi, insert OmniLoop Filter, save, then view the page. Start from <a href=\"%s\">Pages</a> if you need a new shop page."
+msgstr ""
+
+#: app/Admin/DocsPage.php:205
+msgid "Empty state"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:493
+msgid "Example facets JSON: {\"on_sale\":[\"1\"],\"product_cat\":[\"shoes\"],\"price_range\":[10,120]}"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:485
+msgid "Facets JSON"
+msgstr ""
+
+#: app/Core/WooFacets.php:160 app/Core/WooFacets.php:203
+msgid "Featured"
+msgstr ""
+
+#: app/Admin/DocsPage.php:209 app/Admin/DocsPage.php:210
+msgid "Filter layouts"
+msgstr ""
+
+#: app/Admin/DocsPage.php:211
+msgid "Filter Style changes where filters sit on the page. Click a style below to see a simple explanation."
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1157 app/Core/LoopRenderer.php:1158 app/Core/LoopRenderer.php:1162
+msgid "Filters"
+msgstr ""
+
+#: app/Admin/DocsPage.php:334
+msgid "Filters look empty or outdated"
+msgstr ""
+
+#: app/Admin/DocsPage.php:229
+msgid "Filters look like rounded chips. Friendly and visual â€” good for fashion or brand filters."
+msgstr ""
+
+#: app/Admin/DocsPage.php:215
+msgid "Filters on the left"
+msgstr ""
+
+#: app/Admin/DocsPage.php:221
+msgid "Filters sit in a compact bar above the results â€” clean and modern."
+msgstr ""
+
+#: app/Admin/DocsPage.php:213 app/Admin/DocsPage.php:240
+msgid "Filters sit in a left column. Great for classic shop pages with lots of options."
+msgstr ""
+
+#: app/Admin/DocsPage.php:98 app/Admin/DocsPage.php:100
+msgid "First-time setup"
+msgstr ""
+
+#: app/Admin/DocsPage.php:101
+msgid "Follow these steps once after you install OmniLoop. After that, you mostly work inside the Divi Visual Builder."
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1185
+msgid "From"
+msgstr ""
+
+#: app/Admin/DocsPage.php:302
+msgid "Gaps"
+msgstr ""
+
+#: app/Admin/DocsPage.php:114
+msgid "Go to <a href=\"%s\">OmniLoop â†’ Settings</a>."
+msgstr ""
+
+#: app/Admin/DocsPage.php:335
+msgid "Go to Settings â†’ Permalinks and click Save (you do not need to change anything)."
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1110
+msgid "Grid view"
+msgstr ""
+
+#: app/Admin/DocsPage.php:71
+msgid "Guide sections"
+msgstr ""
+
+#: app/Admin/DocsPage.php:25 app/Admin/DocsPage.php:63 app/Admin/SettingsPage.php:255
+msgid "Help Guide"
+msgstr ""
+
+#: app/Admin/DocsPage.php:258
+msgid "Horizontal rows"
+msgstr ""
+
+#: app/Admin/DocsPage.php:301
+msgid "How many cards per row, and whether images are square, wide, or tall."
+msgstr ""
+
+#: app/Admin/DocsPage.php:196
+msgid "How many items show before â€œnext pageâ€."
+msgstr ""
+
+#: app/Admin/DocsPage.php:304
+msgid "Image hover zoom"
+msgstr ""
+
+#: app/Admin/DocsPage.php:248 app/Admin/DocsPage.php:275
+msgid "Image on top, title and price below. The safest default for most shops."
+msgstr ""
+
+#: app/Admin/DocsPage.php:182
+msgid "In Content, pick Post Type (for shops, choose Products)."
+msgstr ""
+
+#: app/Core/WooFacets.php:194
+msgid "In stock"
+msgstr ""
+
+#: app/Admin/DocsPage.php:105
+msgid "In WordPress, open Plugins and make sure OmniLoop for Divi is active. Divi 5 must also be active."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:363
+msgid "Incremental index"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:249
+msgid "Index post types for live facets, then drop the OmniLoop Filter module into any Divi 5 layout."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:184
+msgid "Index rebuild complete."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:185
+msgid "Index rebuild failed."
+msgstr ""
+
+#: app/Admin/DocsPage.php:161
+msgid "Index rebuilt"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:266
+msgid "Index status"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:399
+msgid "Indexable post types"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:279
+msgid "Indexed posts"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:268
+msgid "Indexed rows"
+msgstr ""
+
+#: app/Admin/DocsPage.php:204
+msgid "Inside OmniLoop Filter, add OmniLoop Card Item children. Each item is Image, Title, Excerpt, Price, Rating, Add to Cart, or Quick View. Drag to reorder. If you add none, Card Style presets are used."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:580
+msgid "Install and activate Advanced Custom Fields to filter by ACF fields."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:334
+msgid "Integrations"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:364
+msgid "Keep facets up to date when posts, products, terms, or price meta change. Use Rebuild index for a full refresh."
+msgstr ""
+
+#: app/Admin/DocsPage.php:233
+msgid "Keeps the page open. A Filters button opens a drawer; active choices show as chips on the page."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:457
+msgid "Label"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:296
+msgid "Last sync"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1105
+msgid "Layout"
+msgstr ""
+
+#: app/Admin/DocsPage.php:200
+msgid "Lets shoppers peek at an item in a popup without leaving the list."
+msgstr ""
+
+#: app/Admin/DocsPage.php:256 app/Admin/DocsPage.php:257
+msgid "List"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1118
+msgid "List view"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:388 app/Core/LoopRenderer.php:506
+msgid "Load more"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:389
+msgid "Loadingâ€¦"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:519
+msgid "Low-stock threshold"
+msgstr ""
+
+#: app/Admin/DocsPage.php:268 app/Admin/DocsPage.php:269
+msgid "Masonry"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:559
+msgid "Match facets JSON"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1189 app/Core/LoopRenderer.php:1196
+msgid "Maximum price"
+msgstr ""
+
+#: app/Admin/DocsPage.php:225 app/Admin/DocsPage.php:226
+msgid "Mega Bar"
+msgstr ""
+
+#: app/Admin/DocsPage.php:203 app/Admin/SettingsPage.php:501
+msgid "Merchandising"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1186 app/Core/LoopRenderer.php:1195
+msgid "Minimum price"
+msgstr ""
+
+#: app/Admin/DocsPage.php:168
+msgid "Module on a page"
+msgstr ""
+
+#: app/Admin/DocsPage.php:305
+msgid "Native Divi controls for filters, cards, titles, prices, and sale badges (colors, fonts, borders, shadows)."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:275
+msgid "Needs rebuild"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:308
+msgid "Never"
+msgstr ""
+
+#: app/Admin/DocsPage.php:336
+msgid "New options missing in Divi"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1272
+msgid "Newest"
+msgstr ""
+
+#: app/Admin/DocsPage.php:348
+msgid "Next â†’"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:492
+msgid "Next products"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:515 app/Core/AcfFacets.php:228
+msgid "No"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:584
+msgid "No facetable ACF fields found. Add Select, Checkbox, Radio, Button Group, or True/False fields."
+msgstr ""
+
+#: app/Admin/DocsPage.php:337
+msgid "No products appear"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:115
+msgid "No results found"
+msgstr ""
+
+#: app/Admin/DocsPage.php:84
+msgid "No sections match your search. Try another word."
+msgstr ""
+
+#: app/Core/FilterPresets.php:51
+msgid "None"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:326
+msgid "of %d available"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:33
+msgid "OmniLoop"
+msgstr ""
+
+#: app/Admin/DocsPage.php:169
+msgid "OmniLoop Filter is inserted and saved"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:32 app/Admin/SettingsPage.php:247
+msgid "OmniLoop for Divi"
+msgstr ""
+
+#: app/Admin/DocsPage.php:155
+msgid "OmniLoop for Divi is on"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:128
+msgid "OmniLoop for Divi needs Divi 5. Activate the Divi theme (or Extra with Divi Builder 5) to use the Visual Builder module."
+msgstr ""
+
+#: app/Admin/DocsPage.php:24
+msgid "OmniLoop Help"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:152
+msgid "OmniLoop index is empty. Rebuild it so filters work at full speed."
+msgstr ""
+
+#: app/Admin/DocsPage.php:89
+msgid "OmniLoop is a Divi 5 tool that builds a smart product or post grid with filters on the side (or above the grid). Visitors can search, sort, and narrow results instantly â€” without reloading the whole page."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:43
+msgid "OmniLoop Settings"
+msgstr ""
+
+#: app/Core/WooFacets.php:200
+msgid "On backorder"
+msgstr ""
+
+#: app/Core/WooFacets.php:157 app/Core/WooFacets.php:203
+msgid "On sale"
+msgstr ""
+
+#: app/Admin/DocsPage.php:281
+msgid "On the published page, visitors can:"
+msgstr ""
+
+#: app/Admin/DocsPage.php:73
+msgid "On this page"
+msgstr ""
+
+#: app/Admin/DocsPage.php:92
+msgid "One module, one job"
+msgstr ""
+
+#: app/Core/Merchandising.php:372
+msgid "Only %d left"
+msgstr ""
+
+#: app/Core/Merchandising.php:367
+msgid "Only 1 left"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:400
+msgid "Only checked types are indexed and available in the OmniLoop Filter module."
+msgstr ""
+
+#: app/Admin/DocsPage.php:316
+msgid "Open <a href=\"%s\">OmniLoop â†’ Settings</a> any time you need to:"
+msgstr ""
+
+#: app/Admin/DocsPage.php:179
+msgid "Open a page with the Divi Visual Builder."
+msgstr ""
+
+#: app/Admin/DocsPage.php:108
+msgid "Open OmniLoop Settings"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:153
+msgid "Open OmniLoop settings"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:258
+msgid "Open Pages"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:574
+msgid "Optional. Select fields to expose as filters after rebuild."
+msgstr ""
+
+#: app/Core/WooFacets.php:197
+msgid "Out of stock"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:512
+msgid "Out of stock last"
+msgstr ""
+
+#: app/Admin/DocsPage.php:252 app/Admin/DocsPage.php:253
+msgid "Overlay"
+msgstr ""
+
+#: app/Admin/DocsPage.php:196
+msgid "Per Page"
+msgstr ""
+
+#: app/Admin/DocsPage.php:229 app/Admin/DocsPage.php:230
+msgid "Pills"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:502
+msgid "Pin products to the top of matching results, push out-of-stock items down, and show promo or low-stock badges."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:523
+msgid "Pinned IDs stay at the top only when they still match the current filters. Set the threshold to 0 to hide â€œOnly X leftâ€."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:508
+msgid "Pinned product IDs"
+msgstr ""
+
+#: app/Admin/DocsPage.php:154
+msgid "Plugin activated"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1277
+msgid "Popularity"
+msgstr ""
+
+#: app/Admin/DocsPage.php:195
+msgid "Post Type"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:465 app/Admin/SettingsPage.php:551
+msgid "Post type"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:319
+msgid "Post types"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:461
+msgid "Preset ID"
+msgstr ""
+
+#: app/Admin/DocsPage.php:335
+msgid "Pretty filter URLs show 404"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:484
+msgid "Previous products"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1181 app/Core/LoopRenderer.php:1182 app/Rest/FilterEndpoint.php:308
+msgid "Price"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1276
+msgid "Price: high to low"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1275
+msgid "Price: low to high"
+msgstr ""
+
+#: app/Rest/FilterEndpoint.php:277
+msgid "Product"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:566
+msgid "Products that have those facet values get the promo badge. Example: {\"product_cat\":[\"shoes\"]}"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:543
+msgid "Promo badge"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:844 app/Core/LoopRenderer.php:845
+msgid "Quick view"
+msgstr ""
+
+#: app/Admin/DocsPage.php:200
+msgid "Quick View"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1035
+msgid "Rated %s out of 5"
+msgstr ""
+
+#: app/Core/WooFacets.php:163
+msgid "Rating"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:273
+msgid "Ready"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:261 app/Admin/SettingsPage.php:632
+msgid "Rebuild index"
+msgstr ""
+
+#: app/Admin/DocsPage.php:127
+msgid "Rebuild the index"
+msgstr ""
+
+#: app/Admin/DocsPage.php:327
+msgid "Rebuild the index after catalog or field changes."
+msgstr ""
+
+#: app/Admin/DocsPage.php:334
+msgid "Rebuild the index in OmniLoop â†’ Settings."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:622
+msgid "Rebuild the index whenever you change post types or ACF facets, then insert OmniLoop Filter in the Divi 5 Visual Builder."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:186
+msgid "Rebuildingâ€¦"
+msgstr ""
+
+#: app/Admin/DocsPage.php:147
+msgid "Remember"
+msgstr ""
+
+#: app/Admin/DocsPage.php:336
+msgid "Remove the old OmniLoop module and insert a fresh one, then hard-refresh."
+msgstr ""
+
+#: app/Core/LoopRenderer.php:121 app/Core/LoopRenderer.php:1285
+msgid "Reset filters"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:547
+msgid "Rule ID"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1077
+msgid "Sale"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:629
+msgid "Save changes"
+msgstr ""
+
+#: app/Admin/DocsPage.php:183
+msgid "Save the page, then open the live page (not only the builder) to test filters."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:431
+msgid "Saved filter presets"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:481 app/Core/LoopRenderer.php:1165
+msgid "Search"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1229
+msgid "Search facet"
+msgstr ""
+
+#: app/Admin/DocsPage.php:286
+msgid "Search inside long filter lists (type to narrow categories or brands)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:77
+msgid "Search the guide"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1166 app/Core/LoopRenderer.php:1230
+msgid "Searchâ€¦"
+msgstr ""
+
+#: app/Admin/DocsPage.php:78
+msgid "Searchâ€¦ (try â€œpriceâ€ or â€œcarouselâ€)"
+msgstr ""
+
+#: app/Admin/DocsPage.php:288
+msgid "See active choices as chips under the result count, and clear them anytime."
+msgstr ""
+
+#: app/Admin/DocsPage.php:324
+msgid "See how many rows are indexed (your â€œReadyâ€ status)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:342
+msgid "Send your WordPress, Divi, PHP, and OmniLoop versions, plus a screenshot of OmniLoop â†’ Settings and the page URL."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:44
+msgid "Settings"
+msgstr ""
+
+#: app/Admin/DocsPage.php:162
+msgid "Settings shows indexed rows above zero"
+msgstr ""
+
+#: app/Admin/DocsPage.php:197
+msgid "Show Filters"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1257
+msgid "Show less"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1257
+msgid "Show more"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1261
+msgid "Show more (%d)"
+msgstr ""
+
+#: app/Admin/DocsPage.php:201
+msgid "Show Pagination"
+msgstr ""
+
+#: app/Admin/DocsPage.php:199
+msgid "Shows a cart button on product cards (WooCommerce). Simple products add instantly; variable products open the product page."
+msgstr ""
+
+#: app/Admin/DocsPage.php:201
+msgid "Shows page numbers under the loop. Turn off to display only the first page of results."
+msgstr ""
+
+#: app/Admin/DocsPage.php:213 app/Admin/DocsPage.php:214 app/Admin/DocsPage.php:239
+msgid "Sidebar"
+msgstr ""
+
+#: app/Admin/DocsPage.php:260
+msgid "Smaller cards so more products fit on screen. Good for large catalogs."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:473 app/Core/LoopRenderer.php:1270
+msgid "Sort"
+msgstr ""
+
+#: app/Admin/DocsPage.php:287
+msgid "Sort by newest, title, price, popularity, or average rating."
+msgstr ""
+
+#: app/Admin/DocsPage.php:302
+msgid "Space between cards, and space between filters and results."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:544
+msgid "Staff pick"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:548
+msgid "staff-pick"
+msgstr ""
+
+#: app/Admin/DocsPage.php:270
+msgid "Staggered collage"
+msgstr ""
+
+#: app/Admin/DocsPage.php:250
+msgid "Standard product card"
+msgstr ""
+
+#: app/Admin/DocsPage.php:87
+msgid "Start here"
+msgstr ""
+
+#: app/Admin/DocsPage.php:292
+msgid "Sticky active bar"
+msgstr ""
+
+#: app/Admin/DocsPage.php:341
+msgid "Still stuck?"
+msgstr ""
+
+#: app/Core/WooFacets.php:154
+msgid "Stock"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:458
+msgid "Summer Sale"
+msgstr ""
+
+#: app/Admin/SettingsPage.php:462
+msgid "summer-sale"
+msgstr ""
+
+#: app/Admin/DocsPage.php:266
+msgid "Swipeable row + autoplay options"
+msgstr ""
+
+#: app/Admin/DocsPage.php:254
+msgid "Text on the image"
+msgstr ""
+
+#: app/Admin/DocsPage.php:252
+msgid "Text sits over the image. More editorial and visually bold."
+msgstr ""
+
+#: app/Admin/DocsPage.php:205
+msgid "The friendly message when no items match the current filters."
+msgstr ""
+
+#: app/Admin/DocsPage.php:193
+msgid "These live in the moduleâ€™s Content tab. You do not need to understand code â€” just pick what visitors should see."
+msgstr ""
+
+#: app/Admin/DocsPage.php:90
+msgid "Think of it like a modern online shop catalog: pick a category, choose a color, set a price range, and the list updates right away."
+msgstr ""
+
+#: app/Rest/FilterEndpoint.php:138
+msgid "This post type cannot be queried."
+msgstr ""
+
+#: app/Admin/DocsPage.php:66
+msgid "This short guide explains what OmniLoop does and how to use it â€” in plain English. No coding needed."
+msgstr ""
+
+#: app/Admin/DocsPage.php:186
+msgid "Tip"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1273
+msgid "Title"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:1188
+msgid "To"
+msgstr ""
+
+#: app/Admin/DocsPage.php:221 app/Admin/DocsPage.php:222
+msgid "Toolbar"
+msgstr ""
+
+#: app/Admin/DocsPage.php:331 app/Admin/DocsPage.php:332
+msgid "Troubleshooting"
+msgstr ""
+
+#: app/Core/LoopRenderer.php:118
+msgid "Try clearing filters or searching for something else."
+msgstr ""
+
+#: app/Admin/DocsPage.php:325
+msgid "Turn post types on or off for indexing."
+msgstr ""
+
+#: app/Admin/DocsPage.php:197
+msgid "Turn the filter panel on or off. Off is useful if you only want a styled grid."
+msgstr ""
+
+#: app/Admin/DocsPage.php:283
+msgid "Type in Search to find items by title."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:382
+msgid "Updates one post at a time when you edit content, stock, price, terms, or ACF fields."
+msgstr ""
+
+#: app/Admin/DocsPage.php:284
+msgid "Use category, brand, attribute, stock, sale, featured, and rating filters (when available)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:299
+msgid "Use the Design tab when you want the loop to match your brand colors and spacing."
+msgstr ""
+
+#: app/Admin/DocsPage.php:203
+msgid "Uses rules from OmniLoop â†’ Settings: pin products, push out-of-stock last, promo badges, and â€œOnly X leftâ€. Extra Pin IDs apply only to this module."
+msgstr ""
+
+#: app/Admin/DocsPage.php:198
+msgid "Visible Filters"
+msgstr ""
+
+#: app/Admin/DocsPage.php:64
+msgid "Welcome to OmniLoop"
+msgstr ""
+
+#: app/Admin/DocsPage.php:86 app/Admin/DocsPage.php:88
+msgid "What is OmniLoop?"
+msgstr ""
+
+#: app/Admin/DocsPage.php:195
+msgid "What kind of items appear in the grid (Products, Posts, Pages, and other public types you indexed)."
+msgstr ""
+
+#: app/Admin/DocsPage.php:279 app/Admin/DocsPage.php:280
+msgid "What shoppers can do"
+msgstr ""
+
+#: app/Admin/DocsPage.php:148
+msgid "Whenever you change indexed post types, attributes, or ACF fields, rebuild the index again."
+msgstr ""
+
+#: app/Admin/DocsPage.php:303
+msgid "Where the Sale badge sits, and how many lines titles can use."
+msgstr ""
+
+#: app/Admin/DocsPage.php:227
+msgid "Wide filter panel"
+msgstr ""
+
+#: app/Admin/DocsPage.php:256
+msgid "Wide rows with image beside the details. Easy to scan many items. The Columns setting hides because list is always one item per row."
+msgstr ""
+
+#: app/Admin/DocsPage.php:202
+msgid "Within-facet match"
+msgstr ""
+
+#: app/Admin/DocsPage.php:95
+msgid "WooCommerce is optional. Without it, OmniLoop still works for blog posts and other content types. With WooCommerce, you unlock product price, stock, sale, ratings, and attribute filters."
+msgstr ""
+
+#: app/Admin/SettingsPage.php:514 app/Core/AcfFacets.php:224
+msgid "Yes"
+msgstr ""
+
+#: app/Admin/DocsPage.php:177
+msgid "You build everything from one Divi module. Here is the everyday workflow:"
+msgstr ""
+
+#: app/Admin/DocsPage.php:93
+msgid "You only need one Divi module: â€œOmniLoop Filterâ€. Place it on a page, choose what to show, and you are done."
+msgstr ""
+

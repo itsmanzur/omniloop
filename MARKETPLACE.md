@@ -18,17 +18,21 @@ OmniLoop for Divi
 
 ### Short description (≈160 characters)
 
-Faceted product & post loops for Divi 5 — live filters, SEO URLs, swatches, carousel & masonry. WooCommerce optional.
+Faceted Divi 5 loops with live filters, presets, merchandising, swatches, and custom card builders. WooCommerce optional.
 
 ### Long description
 
-OmniLoop for Divi is a Divi 5 Visual Builder extension that turns any page into a fast, faceted shop or archive.
+OmniLoop for Divi is a premium Divi 5 Visual Builder extension that turns any page into a fast, faceted shop or archive.
 
 Insert one module — **OmniLoop Filter** — and get:
 
 - Live AJAX filtering with search, sort, pagination, and active chips  
+- Filter Sync for multiple OmniLoop modules on the same page  
+- Saved filter presets from Settings, with shareable preset URLs  
 - Filter layouts: Sidebar, Accordion, Toolbar, Mega Bar, Pills, Chip Only  
 - Card layouts: Classic, Overlay, List, Compact, Carousel, Masonry  
+- Loop Item Builder: nest **OmniLoop Card Item** children to reorder image, title, excerpt, price, rating, and buttons  
+- Merchandising controls: pinned products, out-of-stock last, promo badges, and stock urgency  
 - WooCommerce extras when Woo is active: attributes with color/image/size swatches, price From–To, stock, on sale, featured, star rating  
 - Optional ACF facets from Settings  
 - Pretty SEO filter URLs  
@@ -60,10 +64,11 @@ Capture on a clean Divi 5 site with sample Woo products. Avoid Unsplash / Pixaba
 | 2 | Visual Builder | Module selected; Content / Design panels visible |
 | 3 | Filter styles | Collage or 2–3 crops: Mega Bar, Chip Only, Pills |
 | 4 | Card styles | Carousel + Masonry (or Classic + Overlay) |
-| 5 | Swatches | Color and/or image attribute filters |
-| 6 | Empty state | Filtered to zero results with custom empty template |
+| 5 | Card Builder | Layers panel showing nested Card Item children and custom order |
+| 6 | Swatches | Color and/or image attribute filters |
 | 7 | Mobile | Filters drawer open |
-| 8 | Settings | OmniLoop → Settings with Rebuild index |
+| 8 | Settings | OmniLoop → Settings with presets / merchandising / Rebuild index |
+| 9 | Empty state | Filtered to zero results with custom empty template |
 
 Recommended size: Marketplace listing ratio (typically wide hero + square thumbs). Keep UI chrome readable.
 
@@ -78,13 +83,25 @@ Recommended size: Marketplace listing ratio (typically wide hero + square thumbs
 - `app/`, `assets/`, `languages/` (if present)
 - Compiled VB asset: `app/Integrations/Divi5/visual-builder/build/loop.js`
 - `app/Integrations/Divi5/visual-builder/loop/` (`module.json`, source ok)
+- `app/Integrations/Divi5/visual-builder/item/` (`module.json`, source ok)
 
 ### Exclude
 
 - `.git/`, `.gitignore`, IDE folders
 - `**/node_modules/`
 - Local env / secrets
-- Optional (cleaner customer ZIP): `omniloop_technical_blueprint.html`, `docs-assets/` (internal blueprint demo)
+- Internal docs/demo files: `omniloop_technical_blueprint.html`, `docs-assets/`
+- Dev-only build tooling files: `app/Integrations/Divi5/visual-builder/package.json`, `package-lock.json`, `webpack.config.js`
+
+### Build command
+
+From the plugin root on Windows / PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-marketplace-zip.ps1 -Version 2.0.0
+```
+
+Output ZIP: `dist/omniloop-marketplace-2.0.0.zip`
 
 ### Pre-flight
 
@@ -93,6 +110,9 @@ Recommended size: Marketplace listing ratio (typically wide hero + square thumbs
 - [ ] Works with Divi + WP only (Woo/ACF optional)  
 - [ ] PHP 7.4+ compatible  
 - [ ] Version in `omniloop.php` matches `CHANGELOG.md`  
+- [ ] Listing copy reflects Filter Sync, Saved Presets, Merchandising, and Loop Item Builder  
+- [ ] Plugin header `Plugin URI` points to Marketplace listing (or is blank) before release ZIP  
+- [ ] `languages/omniloop.pot` included if shipping translation-ready package  
 - [ ] Fresh install → Rebuild index → insert module → front-end filter works  
 - [ ] No console/PHP fatals with Woo active and inactive  
 
@@ -104,11 +124,13 @@ Recommended size: Marketplace listing ratio (typically wide hero + square thumbs
 2. **OmniLoop → Settings** → ensure `product` or `post` selected → **Rebuild index**.  
 3. New page → Visual Builder → add **OmniLoop Filter**.  
 4. Set Post Type, Filter Style = Sidebar, Card Style = Classic → Save.  
-5. Front end: change a facet; grid updates without full reload; skeleton may flash briefly.  
-6. Switch Filter Style to Mega Bar / Chip Only; Card Style to Carousel / Masonry.  
-7. With WooCommerce: confirm price, category, and an attribute appear.  
-8. Apply filters until empty; confirm empty-state title/message.  
-9. Confirm no third-party CDN scripts are enqueued by the plugin on the front.
+5. Add nested **OmniLoop Card Item** children and reorder them in the layers panel.  
+6. Front end: change a facet; grid updates without full reload; skeleton may flash briefly.  
+7. Switch Filter Style to Mega Bar / Chip Only; Card Style to Carousel / Masonry.  
+8. With WooCommerce: confirm price, category, rating, and an attribute appear.  
+9. Enable merchandising-related options and confirm promo badge / stock urgency output when data exists.  
+10. Apply filters until empty; confirm empty-state title/message.  
+11. Confirm no third-party CDN scripts are enqueued by the plugin on the front.
 
 ---
 
