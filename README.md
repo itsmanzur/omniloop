@@ -100,6 +100,17 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 - Chip Only and mobile layouts open filters in a drawer
 - Carousel supports arrows, dots, and swipe
 
+## Tests
+
+Core sanitizers and SEO URL parsing run without WordPress:
+
+```bash
+composer install
+composer test
+```
+
+PHPUnit + Brain Monkey live in `require-dev`. Marketplace ZIPs exclude `tests/` and `vendor/`.
+
 ## License
 
 GPL-2.0-or-later. See [`license.txt`](license.txt).

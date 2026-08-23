@@ -21,6 +21,11 @@ $excludeTopLevel = @(
 	"docs-assets",
 	"dist",
 	"node_modules",
+	"vendor",
+	"tests",
+	"composer.json",
+	"composer.lock",
+	"phpunit.xml.dist",
 	"omniloop_technical_blueprint.html"
 )
 

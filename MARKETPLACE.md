@@ -92,6 +92,7 @@ Recommended size: Marketplace listing ratio (typically wide hero + square thumbs
 - Local env / secrets
 - Internal docs/demo files: `omniloop_technical_blueprint.html`, `docs-assets/`
 - Dev-only build tooling files: `app/Integrations/Divi5/visual-builder/package.json`, `package-lock.json`, `webpack.config.js`
+- Test tooling: `tests/`, `vendor/`, `composer.json`, `composer.lock`, `phpunit.xml.dist`
 
 ### Build command
 
