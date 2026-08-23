@@ -13,9 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class QueryBuilder {
 
-	public const MAX_PER_PAGE = 48;
-	public const SORTS        = [ 'date', 'title', 'price_asc', 'price_desc', 'popularity', 'rating', 'meta' ];
-	public const FACET_LOGICS = [ 'smart', 'or', 'and' ];
+	public const MAX_PER_PAGE         = 48;
+	public const MAX_FACET_KEYS       = 24;
+	public const MAX_VALUES_PER_FACET = 20;
+	public const SORTS                = [ 'date', 'title', 'price_asc', 'price_desc', 'popularity', 'rating', 'meta' ];
+	public const FACET_LOGICS         = [ 'smart', 'or', 'and' ];
 
 	/** @var array<string,bool> */
 	private $has_index = [];
@@ -25,6 +27,9 @@ final class QueryBuilder {
 
 	/** @var array<string,int[]> */
 	private $ids_cache = [];
+
+	/** @var array<string,array{sql:string,params:array<int,mixed>}> */
+	private $base_filter_cache = [];
 
 	/**
 	 * @param array<string,mixed> $args Sanitized query args.
@@ -92,9 +97,6 @@ final class QueryBuilder {
 		$table     = Installer::table_name();
 		$has_index = $this->has_index_rows( $post_type );
 
-		$price_range = $this->parse_price_range( $facets['price_range'] ?? null );
-		unset( $facets['price_range'] );
-
 		if ( 'meta' === $sort && '' === $sort_meta ) {
 			$sort = 'date';
 		}
@@ -113,22 +115,7 @@ final class QueryBuilder {
 			$params = [ $post_type ];
 		}
 
-		if ( '' !== $search ) {
-			$like     = '%' . $wpdb->esc_like( $search ) . '%';
-			$sql     .= ' AND p.post_title LIKE %s';
-			$params[] = $like;
-		}
-
-		if ( $has_index && $price_range ) {
-			$sql     .= " AND p.ID IN (SELECT i.post_id FROM {$table} i WHERE i.post_type = %s AND i.facet_key = 'price' AND i.numeric_value BETWEEN %f AND %f)";
-			$params[] = $post_type;
-			$params[] = $price_range[0];
-			$params[] = $price_range[1];
-		}
-
-		if ( $has_index ) {
-			$this->append_facet_filters( $sql, $params, $post_type, $facets, $facet_logic, $table );
-		}
+		$this->apply_post_filters( $sql, $params, $post_type, $facets, $search, $facet_logic, $table, $has_index );
 
 		if ( $has_index && null !== $sort_facet ) {
 			$sql .= " GROUP BY p.ID ORDER BY ol_sort IS NULL ASC, ol_sort {$sort_dir}, p.ID ASC";
@@ -284,15 +271,148 @@ final class QueryBuilder {
 			$out[ $key ] = $map;
 		}
 
+		$active_keys = [];
 		foreach ( $keys as $facet_key ) {
-			if ( ! isset( $active[ $facet_key ] ) ) {
-				continue;
+			if ( isset( $active[ $facet_key ] ) ) {
+				$active_keys[] = $facet_key;
 			}
+		}
+		$active_keys = array_slice( $active_keys, 0, self::MAX_FACET_KEYS );
+
+		foreach ( $this->count_active_facet_values( $post_type, $facets, $search, $facet_logic, $active_keys ) as $key => $map ) {
+			$out[ $key ] = $map;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Search + price filters reused by ID matching and batched facet counts.
+	 *
+	 * @param array<string,mixed> $facets
+	 * @return array{sql:string,params:array<int,mixed>}
+	 */
+	private function base_post_filter_fragment( string $post_type, array $facets, string $search, string $table, bool $has_index ): array {
+		$price     = $facets['price_range'] ?? null;
+		$cache_key = md5(
+			(string) wp_json_encode(
+				[
+					$post_type,
+					$search,
+					$price,
+					$has_index,
+					$table,
+				]
+			)
+		);
+		if ( isset( $this->base_filter_cache[ $cache_key ] ) ) {
+			return $this->base_filter_cache[ $cache_key ];
+		}
+
+		global $wpdb;
+
+		$sql    = '';
+		$params = [];
+
+		if ( '' !== $search ) {
+			$sql     .= ' AND p.post_title LIKE %s';
+			$params[] = '%' . $wpdb->esc_like( $search ) . '%';
+		}
+
+		$price_range = $this->parse_price_range( $price );
+		if ( $has_index && $price_range ) {
+			$sql     .= " AND p.ID IN (SELECT i.post_id FROM {$table} i WHERE i.post_type = %s AND i.facet_key = 'price' AND i.numeric_value BETWEEN %f AND %f)";
+			$params[] = $post_type;
+			$params[] = $price_range[0];
+			$params[] = $price_range[1];
+		}
+
+		$fragment = [
+			'sql'    => $sql,
+			'params' => $params,
+		];
+		$this->base_filter_cache[ $cache_key ] = $fragment;
+
+		return $fragment;
+	}
+
+	/**
+	 * @param array<string,mixed> $facets
+	 * @param mixed[]             $params
+	 */
+	private function apply_post_filters( string &$sql, array &$params, string $post_type, array $facets, string $search, string $facet_logic, string $table, bool $has_index ): void {
+		$base    = $this->base_post_filter_fragment( $post_type, $facets, $search, $table, $has_index );
+		$sql    .= $base['sql'];
+		$params  = array_merge( $params, $base['params'] );
+
+		unset( $facets['price_range'] );
+		if ( $has_index ) {
+			$this->append_facet_filters( $sql, $params, $post_type, $facets, $facet_logic, $table );
+		}
+	}
+
+	/**
+	 * One UNION ALL instead of matching_ids() + count per active facet.
+	 *
+	 * @param array<string,mixed> $facets
+	 * @param string[]            $active_keys
+	 * @return array<string,array<string,int>>
+	 */
+	private function count_active_facet_values( string $post_type, array $facets, string $search, string $facet_logic, array $active_keys ): array {
+		$out = [];
+		foreach ( $active_keys as $key ) {
+			$out[ $key ] = [];
+		}
+		if ( ! $active_keys ) {
+			return $out;
+		}
+
+		global $wpdb;
+
+		$table     = Installer::table_name();
+		$has_index = $this->has_index_rows( $post_type );
+		$branches  = [];
+		$params    = [];
+
+		foreach ( $active_keys as $facet_key ) {
 			$others = $facets;
 			unset( $others[ $facet_key ] );
-			$ids     = $this->matching_ids( $post_type, $others, $search, 'date', $facet_logic, '' );
-			$counted = $this->count_values_for_keys( $post_type, [ $facet_key ], $ids );
-			$out[ $facet_key ] = $counted[ $facet_key ] ?? [];
+
+			$sql           = "SELECT i.facet_key, i.facet_value, COUNT(DISTINCT i.post_id) AS c
+				FROM {$table} i
+				INNER JOIN {$wpdb->posts} p ON p.ID = i.post_id
+				WHERE i.post_type = %s AND i.facet_key = %s
+				AND p.post_type = %s AND p.post_status = 'publish' AND p.post_password = ''";
+			$branch_params = [ $post_type, $facet_key, $post_type ];
+			$this->apply_post_filters( $sql, $branch_params, $post_type, $others, $search, $facet_logic, $table, $has_index );
+			$sql .= ' GROUP BY i.facet_key, i.facet_value';
+
+			$branches[] = '(' . $sql . ')';
+			$params     = array_merge( $params, $branch_params );
+		}
+
+		$prepared = $wpdb->prepare( implode( ' UNION ALL ', $branches ), $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( ! is_string( $prepared ) ) {
+			return $out;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( $prepared );
+		if ( ! is_array( $rows ) ) {
+			return $out;
+		}
+
+		foreach ( $rows as $row ) {
+			$key = (string) $row->facet_key;
+			if ( ! isset( $out[ $key ] ) ) {
+				continue;
+			}
+			$out[ $key ][ (string) $row->facet_value ] = (int) $row->c;
+		}
+
+		foreach ( $out as $key => $map ) {
+			arsort( $map, SORT_NUMERIC );
+			$out[ $key ] = array_slice( $map, 0, 80, true );
 		}
 
 		return $out;
@@ -447,7 +567,7 @@ final class QueryBuilder {
 		}
 
 		$out = [];
-		foreach ( array_slice( $values, 0, 20 ) as $value ) {
+		foreach ( array_slice( $values, 0, self::MAX_VALUES_PER_FACET ) as $value ) {
 			if ( is_array( $value ) ) {
 				continue;
 			}

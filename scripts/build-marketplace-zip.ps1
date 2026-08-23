@@ -26,6 +26,8 @@ $excludeTopLevel = @(
 	"composer.json",
 	"composer.lock",
 	"phpunit.xml.dist",
+	"composer.phar",
+	".phpunit.result.cache",
 	"omniloop_technical_blueprint.html"
 )
 

@@ -11,6 +11,7 @@ All notable changes to OmniLoop for Divi are documented here.
 
 ### Changed
 - Facet count queries memoize matching ID sets within a request to avoid repeating the same SQL for overlapping filters
+- Active facet counts run as one UNION ALL against the index instead of a full matching_ids() query per selected facet
 
 ### Added
 - PHPUnit + Brain Monkey scaffold for QueryBuilder, Indexer::sanitize_facet_key, and SeoUrls parsing helpers
