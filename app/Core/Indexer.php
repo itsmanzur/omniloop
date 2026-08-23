@@ -286,50 +286,45 @@ final class Indexer {
 	}
 
 	/**
-	 * Cron / admin batch. Returns progress payload.
+	 * Cron / admin batch. Cursor is last indexed post ID, not a row offset.
 	 *
 	 * @return array{processed:int,total:int,done:bool,offset:int,indexed_rows:int}
 	 */
-	public static function process_batch( int $offset = -1 ): array {
+	public static function process_batch( int $after_id = -1 ): array {
 		$types = Installer::allowed_post_types();
 
 		if ( empty( $types ) ) {
 			$types = [ 'post' ];
 		}
 
-		if ( $offset < 0 ) {
-			$offset = (int) get_option( 'omniloop_reindex_cursor', 0 );
+		if ( $after_id < 0 ) {
+			$after_id = (int) get_option( 'omniloop_reindex_cursor', 0 );
 		}
 
-		$query = new \WP_Query(
-			[
-				'post_type'              => $types,
-				'post_status'            => 'publish',
-				'posts_per_page'         => self::BATCH,
-				'offset'                 => $offset,
-				'orderby'                => 'ID',
-				'order'                  => 'ASC',
-				'fields'                 => 'ids',
-				'no_found_rows'          => false,
-				'ignore_sticky_posts'    => true,
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			]
-		);
-
-		foreach ( $query->posts as $post_id ) {
-			self::index_post_id( (int) $post_id );
+		$processed = (int) get_option( 'omniloop_reindex_processed', 0 );
+		if ( 0 === $after_id ) {
+			$processed = 0;
 		}
 
-		$next = $offset + count( $query->posts );
-		$done = $next >= (int) $query->found_posts || empty( $query->posts );
+		$ids = self::next_indexable_ids( $types, $after_id, self::BATCH );
+		foreach ( $ids as $post_id ) {
+			self::index_post_id( $post_id );
+		}
+
+		$batch     = count( $ids );
+		$processed = $processed + $batch;
+		$last_id   = $batch ? $ids[ $batch - 1 ] : $after_id;
+		$total     = self::count_indexable_posts( $types );
+		$done      = $batch < self::BATCH;
 
 		if ( $done ) {
 			delete_option( 'omniloop_reindex_cursor' );
+			delete_option( 'omniloop_reindex_processed' );
 			wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
 			self::touch_sync_time();
 		} else {
-			update_option( 'omniloop_reindex_cursor', $next, false );
+			update_option( 'omniloop_reindex_cursor', $last_id, false );
+			update_option( 'omniloop_reindex_processed', $processed, false );
 			if ( ! wp_next_scheduled( 'omniloop_reindex_batch' ) ) {
 				wp_schedule_single_event( time() + 5, 'omniloop_reindex_batch' );
 			}
@@ -346,12 +341,60 @@ final class Indexer {
 		}
 
 		return [
-			'processed'    => $next,
-			'total'        => (int) $query->found_posts,
+			'processed'    => $processed,
+			'total'        => $total,
 			'done'         => $done,
-			'offset'       => $done ? 0 : $next,
+			'offset'       => $done ? 0 : $last_id,
 			'indexed_rows' => $indexed,
 		];
+	}
+
+	/**
+	 * @param string[] $types
+	 * @return int[]
+	 */
+	private static function next_indexable_ids( array $types, int $after_id, int $limit ): array {
+		global $wpdb;
+
+		$types = array_values( array_filter( array_map( 'sanitize_key', $types ) ) );
+		if ( ! $types ) {
+			return [];
+		}
+
+		$in     = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+		$sql    = "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ({$in}) AND post_status = 'publish' AND ID > %d ORDER BY ID ASC LIMIT %d";
+		$params = array_merge( $types, [ $after_id, $limit ] );
+		$prepared = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( ! is_string( $prepared ) ) {
+			return [];
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$col = $wpdb->get_col( $prepared );
+
+		return array_map( 'intval', is_array( $col ) ? $col : [] );
+	}
+
+	/**
+	 * @param string[] $types
+	 */
+	private static function count_indexable_posts( array $types ): int {
+		global $wpdb;
+
+		$types = array_values( array_filter( array_map( 'sanitize_key', $types ) ) );
+		if ( ! $types ) {
+			return 0;
+		}
+
+		$in       = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+		$sql      = "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type IN ({$in}) AND post_status = 'publish'";
+		$prepared = $wpdb->prepare( $sql, $types ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( ! is_string( $prepared ) ) {
+			return 0;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return (int) $wpdb->get_var( $prepared );
 	}
 
 	public static function is_indexable_type( string $post_type ): bool {

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: OmniLoop for Divi
  * Description: Faceted product and post loop for the Divi 5 Visual Builder. Custom index, live filters, WooCommerce-ready.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: OmniLoop
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'OMNILOOP_VERSION', '2.0.0' );
+define( 'OMNILOOP_VERSION', '2.0.1' );
 define( 'OMNILOOP_DB_VERSION', '1.0.0' );
 define( 'OMNILOOP_FILE', __FILE__ );
 define( 'OMNILOOP_PATH', plugin_dir_path( __FILE__ ) );

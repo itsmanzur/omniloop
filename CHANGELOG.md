@@ -2,6 +2,16 @@
 
 All notable changes to OmniLoop for Divi are documented here.
 
+## 2.0.1 — 2026-08-23
+
+### Fixed
+- Product post type can be unchecked in Settings; WooCommerce no longer force-re-enables it on every page load (one-time bootstrap only)
+- Uninstall now deletes leftover options (`last_index_sync`, `asset_version`, `sort_meta_keys`, `rewrite_version`) and `olq_*` query transients
+- Full reindex walks `post_id > last_id` instead of `OFFSET`, so posts are not skipped or duplicated if the catalog changes mid-run
+
+### Changed
+- Facet count queries memoize matching ID sets within a request to avoid repeating the same SQL for overlapping filters
+
 ## 2.0.0 — 2026-08-19
 
 ### Added

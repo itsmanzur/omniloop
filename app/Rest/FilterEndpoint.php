@@ -99,16 +99,18 @@ final class FilterEndpoint {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public static function reindex( \WP_REST_Request $request ) {
-		$reset  = rest_sanitize_boolean( $request->get_param( 'reset' ) );
-		$offset = $reset ? 0 : (int) get_option( 'omniloop_reindex_cursor', 0 );
+		$reset = rest_sanitize_boolean( $request->get_param( 'reset' ) );
 
 		if ( $reset ) {
 			delete_option( 'omniloop_reindex_cursor' );
+			delete_option( 'omniloop_reindex_processed' );
 		}
+
+		$after_id = $reset ? 0 : (int) get_option( 'omniloop_reindex_cursor', 0 );
 
 		return rest_ensure_response(
 			array_merge(
-				Indexer::process_batch( $offset ),
+				Indexer::process_batch( $after_id ),
 				[ 'status' => Indexer::status() ]
 			)
 		);

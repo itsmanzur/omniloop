@@ -23,6 +23,9 @@ final class QueryBuilder {
 	/** @var array<string,string[]> */
 	private $keys_cache = [];
 
+	/** @var array<string,int[]> */
+	private $ids_cache = [];
+
 	/**
 	 * @param array<string,mixed> $args Sanitized query args.
 	 * @return array{post_ids:int[],total:int,facets:array<string,array<string,int>>,price_min:float,price_max:float}
@@ -68,6 +71,22 @@ final class QueryBuilder {
 	 * @return int[]
 	 */
 	private function matching_ids( string $post_type, array $facets, string $search, string $sort, string $facet_logic = 'smart', string $sort_meta = '' ): array {
+		$cache_key = md5(
+			wp_json_encode(
+				[
+					$post_type,
+					$facets,
+					$search,
+					$sort,
+					$facet_logic,
+					$sort_meta,
+				]
+			)
+		);
+		if ( isset( $this->ids_cache[ $cache_key ] ) ) {
+			return $this->ids_cache[ $cache_key ];
+		}
+
 		global $wpdb;
 
 		$table     = Installer::table_name();
@@ -121,13 +140,17 @@ final class QueryBuilder {
 
 		$prepared = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		if ( ! is_string( $prepared ) ) {
+			$this->ids_cache[ $cache_key ] = [];
 			return [];
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 		$col = $wpdb->get_col( $prepared );
 
-		return array_map( 'intval', is_array( $col ) ? $col : [] );
+		$ids = array_map( 'intval', is_array( $col ) ? $col : [] );
+		$this->ids_cache[ $cache_key ] = $ids;
+
+		return $ids;
 	}
 
 	/**

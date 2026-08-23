@@ -69,11 +69,15 @@ final class Installer {
 	}
 
 	/**
-	 * WooCommerce registers `product` after some plugins boot. Add it to
-	 * saved settings so the Divi dropdown and indexer can see it.
+	 * WooCommerce may register `product` after first activation. Add it once
+	 * as a default; later admin checkbox choices are left unchanged.
 	 */
 	public static function maybe_enable_product(): void {
 		if ( ! post_type_exists( 'product' ) ) {
+			return;
+		}
+
+		if ( get_option( 'omniloop_product_bootstrapped', '' ) ) {
 			return;
 		}
 
@@ -86,13 +90,13 @@ final class Installer {
 			? array_map( 'sanitize_key', $settings['post_types'] )
 			: self::default_post_types();
 
-		if ( in_array( 'product', $types, true ) ) {
-			return;
+		if ( ! in_array( 'product', $types, true ) ) {
+			$types[]                = 'product';
+			$settings['post_types'] = array_values( array_unique( array_filter( $types ) ) );
+			update_option( 'omniloop_settings', $settings, false );
 		}
 
-		$types[]                 = 'product';
-		$settings['post_types']  = array_values( array_unique( array_filter( $types ) ) );
-		update_option( 'omniloop_settings', $settings, false );
+		update_option( 'omniloop_product_bootstrapped', '1', false );
 	}
 
 	/**
@@ -104,11 +108,16 @@ final class Installer {
 			? array_map( 'sanitize_key', $settings['post_types'] )
 			: self::default_post_types();
 
-		if ( post_type_exists( 'product' ) ) {
-			$types[] = 'product';
-		}
+		$types = array_values( array_unique( array_filter( $types ) ) );
 
-		return array_values( array_unique( array_filter( $types ) ) );
+		return array_values(
+			array_filter(
+				$types,
+				static function ( string $type ): bool {
+					return post_type_exists( $type );
+				}
+			)
+		);
 	}
 
 	public static function create_table(): void {
