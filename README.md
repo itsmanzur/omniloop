@@ -95,7 +95,7 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 
 ## OmniLoop Help Guide
 
-- Plain-English interactive docs: intro, setup checklist, module settings, filter/card layouts, troubleshooting
+- Plain-English interactive docs: setup, layouts, Google/filter pages, smarter filters, other languages, and troubleshooting
 
 ## Support notes for buyers
 
