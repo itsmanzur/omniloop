@@ -40,7 +40,8 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 - WooCommerce: categories, tags, attributes (color / image / size swatches), price From–To, stock, on sale, featured, star rating
 - ACF facets (opt-in in Settings)
 - Active filter chips + clear all
-- Pretty SEO URLs (`/page/ol/color/blue+red/...`) with legacy query-string 301
+- Pretty SEO URLs (`/page/ol/color/blue+red/...`) with title/description/H1 templates, noindex controls, and optional sitemap entries
+- Conditional facets, hide empty values, typo-tolerant search, and filter analytics
 
 ### Layout presets
 
@@ -87,6 +88,9 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 
 - Post types to index
 - ACF field allow-list
+- SEO templates, robots, and sitemap
+- Conditional facets and empty-result hiding
+- Settings export / import
 - Rebuild index
 
 ## OmniLoop Help Guide

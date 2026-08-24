@@ -18,11 +18,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'OMNILOOP_VERSION' ) ) {
-	define( 'OMNILOOP_VERSION', '2.0.1' );
+	define( 'OMNILOOP_VERSION', '2.4.0' );
 }
 
 if ( ! defined( 'OMNILOOP_DB_VERSION' ) ) {
-	define( 'OMNILOOP_DB_VERSION', '1.0.0' );
+	define( 'OMNILOOP_DB_VERSION', '1.1.0' );
 }
 
 if ( ! defined( 'OMNILOOP_PATH' ) ) {
@@ -67,5 +67,44 @@ if ( ! function_exists( 'wp_json_encode' ) ) {
 	 */
 	function wp_json_encode( $data ) {
 		return json_encode( $data );
+	}
+}
+
+if ( ! function_exists( '__' ) ) {
+	/**
+	 * @param mixed $text
+	 */
+	function __( $text, $domain = 'default' ) {
+		unset( $domain );
+
+		return (string) $text;
+	}
+}
+
+if ( ! class_exists( 'WP_Error' ) ) {
+	class WP_Error {
+		/** @var string */
+		public $code;
+		/** @var string */
+		public $message;
+
+		/**
+		 * @param mixed $code
+		 * @param mixed $message
+		 */
+		public function __construct( $code = '', $message = '', $data = '' ) {
+			unset( $data );
+			$this->code    = (string) $code;
+			$this->message = (string) $message;
+		}
+	}
+}
+
+if ( ! function_exists( 'is_wp_error' ) ) {
+	/**
+	 * @param mixed $thing
+	 */
+	function is_wp_error( $thing ): bool {
+		return $thing instanceof WP_Error;
 	}
 }

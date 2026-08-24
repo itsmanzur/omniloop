@@ -12,8 +12,11 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 $table = $wpdb->prefix . 'omniloop_index';
+$events = $wpdb->prefix . 'omniloop_facet_events';
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$wpdb->query( "DROP TABLE IF EXISTS {$events}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 $options = [
 	'omniloop_db_version',
@@ -42,3 +45,4 @@ $wpdb->query(
 );
 
 wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
+wp_clear_scheduled_hook( 'omniloop_prune_facet_events' );

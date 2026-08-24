@@ -9,9 +9,15 @@ namespace OmniLoop\Engine\Admin;
 
 use OmniLoop\Engine\Core\AcfFacets;
 use OmniLoop\Engine\Core\CacheManager;
+use OmniLoop\Engine\Core\FacetAnalytics;
+use OmniLoop\Engine\Core\FacetUi;
 use OmniLoop\Engine\Core\FilterPresets;
+use OmniLoop\Engine\Core\I18n;
 use OmniLoop\Engine\Core\Installer;
 use OmniLoop\Engine\Core\Merchandising;
+use OmniLoop\Engine\Core\QueryBuilder;
+use OmniLoop\Engine\Core\SeoMeta;
+use OmniLoop\Engine\Core\SettingsIo;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,6 +31,9 @@ final class SettingsPage {
 		add_action( 'admin_enqueue_scripts', [ self::class, 'assets' ] );
 		add_action( 'admin_notices', [ self::class, 'empty_index_notice' ] );
 		add_action( 'admin_notices', [ self::class, 'divi_required_notice' ] );
+		add_action( 'admin_notices', [ self::class, 'import_notice' ] );
+		add_action( 'admin_post_' . SettingsIo::EXPORT_ACTION, [ self::class, 'handle_export' ] );
+		add_action( 'admin_post_' . SettingsIo::IMPORT_ACTION, [ self::class, 'handle_import' ] );
 	}
 
 	public static function menu(): void {
@@ -56,11 +65,14 @@ final class SettingsPage {
 				'type'              => 'array',
 				'sanitize_callback' => [ self::class, 'sanitize' ],
 				'default'           => [
-					'post_types' => Installer::default_post_types(),
-					'acf_fields' => [],
-					'auto_sync'  => 'on',
+					'post_types'     => Installer::default_post_types(),
+					'acf_fields'     => [],
+					'auto_sync'      => 'on',
 					'filter_presets' => [],
 					'merchandising'  => [],
+					'seo'            => SeoMeta::sanitize( [] ),
+					'facet_ui'       => FacetUi::sanitize( [] ),
+					'search'         => [ 'fuzzy' => 'on' ],
 				],
 			]
 		);
@@ -109,6 +121,11 @@ final class SettingsPage {
 			'auto_sync'      => ( is_array( $raw ) && isset( $raw['auto_sync'] ) && 'off' === $raw['auto_sync'] ) ? 'off' : 'on',
 			'filter_presets' => FilterPresets::sanitize_list( is_array( $raw ) && isset( $raw['filter_presets'] ) ? $raw['filter_presets'] : [] ),
 			'merchandising'  => Merchandising::sanitize( is_array( $raw ) && isset( $raw['merchandising'] ) ? $raw['merchandising'] : [] ),
+			'seo'            => SeoMeta::sanitize( is_array( $raw ) && isset( $raw['seo'] ) ? $raw['seo'] : [] ),
+			'facet_ui'       => FacetUi::sanitize( is_array( $raw ) && isset( $raw['facet_ui'] ) ? $raw['facet_ui'] : [] ),
+			'search'         => [
+				'fuzzy' => ( is_array( $raw ) && isset( $raw['search']['fuzzy'] ) && 'off' === $raw['search']['fuzzy'] ) ? 'off' : 'on',
+			],
 		];
 		CacheManager::bump();
 
@@ -189,6 +206,61 @@ final class SettingsPage {
 		);
 	}
 
+	public static function import_notice(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$status = isset( $_GET['omniloop_import'] ) ? sanitize_key( (string) wp_unslash( $_GET['omniloop_import'] ) ) : '';
+		if ( '' === $status ) {
+			return;
+		}
+		if ( 'ok' === $status ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'OmniLoop settings imported.', 'omniloop' ) . '</p></div>';
+			return;
+		}
+		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Could not import that settings file.', 'omniloop' ) . '</p></div>';
+	}
+
+	public static function handle_export(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'omniloop' ) );
+		}
+		check_admin_referer( SettingsIo::EXPORT_ACTION );
+		$payload = wp_json_encode( SettingsIo::export_payload(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+		$filename = 'omniloop-settings-' . gmdate( 'Ymd-His' ) . '.json';
+		nocache_headers();
+		header( 'Content-Type: application/json; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		echo is_string( $payload ) ? $payload : '{}';
+		exit;
+	}
+
+	public static function handle_import(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'omniloop' ) );
+		}
+		check_admin_referer( SettingsIo::IMPORT_ACTION );
+		$redirect = admin_url( 'admin.php?page=omniloop' );
+		$file     = isset( $_FILES['omniloop_import_file'] ) && is_array( $_FILES['omniloop_import_file'] ) ? $_FILES['omniloop_import_file'] : [];
+		$error    = isset( $file['error'] ) ? (int) $file['error'] : UPLOAD_ERR_NO_FILE;
+		$tmp      = isset( $file['tmp_name'] ) ? (string) $file['tmp_name'] : '';
+		if ( UPLOAD_ERR_OK !== $error || '' === $tmp || ! is_readable( $tmp ) ) {
+			wp_safe_redirect( add_query_arg( 'omniloop_import', 'fail', $redirect ) );
+			exit;
+		}
+		$contents = file_get_contents( $tmp );
+		$parsed   = SettingsIo::parse_import( is_string( $contents ) ? $contents : '' );
+		if ( is_wp_error( $parsed ) ) {
+			wp_safe_redirect( add_query_arg( 'omniloop_import', 'fail', $redirect ) );
+			exit;
+		}
+		$merged = SettingsIo::merge_into_current( $parsed );
+		update_option( 'omniloop_settings', self::sanitize( $merged ), false );
+		wp_safe_redirect( add_query_arg( 'omniloop_import', 'ok', $redirect ) );
+		exit;
+	}
+
 	public static function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -209,6 +281,12 @@ final class SettingsPage {
 		$auto_sync_on = ! isset( $settings['auto_sync'] ) || 'off' !== $settings['auto_sync'];
 		$presets      = FilterPresets::all();
 		$merch        = Merchandising::settings();
+		$seo          = SeoMeta::settings();
+		$facet_ui     = FacetUi::settings();
+		$fuzzy_on     = QueryBuilder::uses_fuzzy_search();
+		$facet_choices = \OmniLoop\Engine\Rest\FilterEndpoint::selectable_facets();
+		$analytics_clicks = FacetAnalytics::top_clicks( 8 );
+		$analytics_empty  = FacetAnalytics::empty_count();
 		$sort_options = [ 'date', 'title', 'price_asc', 'price_desc', 'popularity', 'rating', 'meta' ];
 
 		$public = get_post_types( [ 'public' => true ], 'objects' );
@@ -356,7 +434,15 @@ final class SettingsPage {
 			<form method="post" action="options.php" class="omniloop-admin-form">
 				<?php settings_fields( 'omniloop' ); ?>
 
-				<div class="omniloop-admin-grid">
+				<nav class="omniloop-admin-tabs" aria-label="<?php esc_attr_e( 'Settings sections', 'omniloop' ); ?>">
+					<button type="button" class="omniloop-admin-tab is-active" data-tab="index"><?php esc_html_e( 'Index', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" data-tab="seo"><?php esc_html_e( 'SEO', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" data-tab="facets"><?php esc_html_e( 'Facets', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" data-tab="analytics"><?php esc_html_e( 'Analytics', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" data-tab="tools"><?php esc_html_e( 'Tools', 'omniloop' ); ?></button>
+				</nav>
+
+				<div class="omniloop-admin-grid is-active" data-tab-panel="index">
 					<section class="omniloop-admin-card">
 						<div class="omniloop-admin-card__head">
 							<div>
@@ -610,6 +696,287 @@ final class SettingsPage {
 					</section>
 				</div>
 
+				<div class="omniloop-admin-grid" data-tab-panel="seo" hidden>
+					<section class="omniloop-admin-card omniloop-admin-card--wide">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Filtered page SEO', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Templates apply when shoppers land on pretty /ol/ filter URLs. Placeholders: {page_title}, {site_name}, {facet_value}, {facet_labels}, {category}, {search}, {page}.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<div class="omniloop-admin-preset__grid">
+								<label class="omniloop-admin-preset__wide">
+									<span><?php esc_html_e( 'Title template', 'omniloop' ); ?></span>
+									<input type="text" name="omniloop_settings[seo][title_template]" value="<?php echo esc_attr( $seo['title_template'] ); ?>">
+								</label>
+								<label class="omniloop-admin-preset__wide">
+									<span><?php esc_html_e( 'Meta description template', 'omniloop' ); ?></span>
+									<input type="text" name="omniloop_settings[seo][description_template]" value="<?php echo esc_attr( $seo['description_template'] ); ?>">
+								</label>
+								<label class="omniloop-admin-preset__wide">
+									<span><?php esc_html_e( 'H1 template', 'omniloop' ); ?></span>
+									<input type="text" name="omniloop_settings[seo][h1_template]" value="<?php echo esc_attr( $seo['h1_template'] ); ?>">
+								</label>
+								<label>
+									<span><?php esc_html_e( 'Sitemap page', 'omniloop' ); ?></span>
+									<select name="omniloop_settings[seo][sitemap_page_id]">
+										<option value="0"><?php esc_html_e( 'Front page', 'omniloop' ); ?></option>
+										<?php foreach ( get_pages( [ 'number' => 80, 'sort_column' => 'post_title' ] ) as $page ) : ?>
+											<option value="<?php echo esc_attr( (string) $page->ID ); ?>" <?php selected( $seo['sitemap_page_id'], (int) $page->ID ); ?>><?php echo esc_html( $page->post_title ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</label>
+								<label>
+									<span><?php esc_html_e( 'Max sitemap URLs', 'omniloop' ); ?></span>
+									<input type="number" min="10" max="1000" name="omniloop_settings[seo][sitemap_max]" value="<?php echo esc_attr( (string) $seo['sitemap_max'] ); ?>">
+								</label>
+							</div>
+							<ul class="omniloop-admin-checks" style="margin-top:1rem">
+								<li class="omniloop-admin-check">
+									<label>
+										<input type="hidden" name="omniloop_settings[seo][noindex_filtered]" value="off">
+										<input type="checkbox" name="omniloop_settings[seo][noindex_filtered]" value="on" <?php checked( 'on' === $seo['noindex_filtered'] ); ?>>
+										<span class="omniloop-admin-check__ui">
+											<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+											<span class="omniloop-admin-check__text">
+												<span class="omniloop-admin-check__label"><?php esc_html_e( 'Noindex all filtered URLs', 'omniloop' ); ?></span>
+												<span class="omniloop-admin-check__slug"><?php esc_html_e( 'Adds noindex,nofollow whenever a filter, search, or sort is active.', 'omniloop' ); ?></span>
+											</span>
+										</span>
+									</label>
+								</li>
+								<li class="omniloop-admin-check">
+									<label>
+										<input type="hidden" name="omniloop_settings[seo][noindex_paged]" value="off">
+										<input type="checkbox" name="omniloop_settings[seo][noindex_paged]" value="on" <?php checked( 'on' === $seo['noindex_paged'] ); ?>>
+										<span class="omniloop-admin-check__ui">
+											<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+											<span class="omniloop-admin-check__text">
+												<span class="omniloop-admin-check__label"><?php esc_html_e( 'Noindex page 2+', 'omniloop' ); ?></span>
+												<span class="omniloop-admin-check__slug"><?php esc_html_e( 'Recommended. Paginated filter URLs are usually duplicate listings.', 'omniloop' ); ?></span>
+											</span>
+										</span>
+									</label>
+								</li>
+								<li class="omniloop-admin-check">
+									<label>
+										<input type="hidden" name="omniloop_settings[seo][sitemap]" value="off">
+										<input type="checkbox" name="omniloop_settings[seo][sitemap]" value="on" <?php checked( 'on' === $seo['sitemap'] ); ?>>
+										<span class="omniloop-admin-check__ui">
+											<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+											<span class="omniloop-admin-check__text">
+												<span class="omniloop-admin-check__label"><?php esc_html_e( 'Include filtered URLs in the sitemap', 'omniloop' ); ?></span>
+												<span class="omniloop-admin-check__slug"><?php esc_html_e( 'Adds single-facet combinations from the keys below. Leave keys empty to use the first index facets.', 'omniloop' ); ?></span>
+											</span>
+										</span>
+									</label>
+								</li>
+							</ul>
+							<?php if ( $facet_choices ) : ?>
+								<p class="omniloop-admin-status" style="margin-top:1rem"><?php esc_html_e( 'Sitemap facet keys', 'omniloop' ); ?></p>
+								<ul class="omniloop-admin-checks">
+									<?php foreach ( $facet_choices as $facet_key => $facet_label ) : ?>
+										<li class="omniloop-admin-check">
+											<label>
+												<input type="checkbox" name="omniloop_settings[seo][sitemap_facets][]" value="<?php echo esc_attr( $facet_key ); ?>" <?php checked( in_array( $facet_key, $seo['sitemap_facets'], true ) ); ?>>
+												<span class="omniloop-admin-check__ui">
+													<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+													<span class="omniloop-admin-check__text">
+														<span class="omniloop-admin-check__label"><?php echo esc_html( $facet_label ); ?></span>
+														<span class="omniloop-admin-check__slug"><?php echo esc_html( $facet_key ); ?></span>
+													</span>
+												</span>
+											</label>
+										</li>
+									<?php endforeach; ?>
+								</ul>
+							<?php endif; ?>
+						</div>
+					</section>
+				</div>
+
+				<div class="omniloop-admin-grid" data-tab-panel="facets" hidden>
+					<section class="omniloop-admin-card">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Empty results', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Hide facet values (or whole groups) when nothing matches the current filters.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<ul class="omniloop-admin-checks">
+								<li class="omniloop-admin-check">
+									<label>
+										<input type="hidden" name="omniloop_settings[facet_ui][hide_zero_count]" value="off">
+										<input type="checkbox" name="omniloop_settings[facet_ui][hide_zero_count]" value="on" <?php checked( 'on' === $facet_ui['hide_zero_count'] ); ?>>
+										<span class="omniloop-admin-check__ui">
+											<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+											<span class="omniloop-admin-check__text">
+												<span class="omniloop-admin-check__label"><?php esc_html_e( 'Hide zero-count values', 'omniloop' ); ?></span>
+												<span class="omniloop-admin-check__slug"><?php esc_html_e( 'Keeps a checked value visible even if the count drops to zero.', 'omniloop' ); ?></span>
+											</span>
+										</span>
+									</label>
+								</li>
+								<li class="omniloop-admin-check">
+									<label>
+										<input type="hidden" name="omniloop_settings[facet_ui][hide_empty_groups]" value="off">
+										<input type="checkbox" name="omniloop_settings[facet_ui][hide_empty_groups]" value="on" <?php checked( 'on' === $facet_ui['hide_empty_groups'] ); ?>>
+										<span class="omniloop-admin-check__ui">
+											<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+											<span class="omniloop-admin-check__text">
+												<span class="omniloop-admin-check__label"><?php esc_html_e( 'Hide empty facet groups', 'omniloop' ); ?></span>
+												<span class="omniloop-admin-check__slug"><?php esc_html_e( 'Removes a whole filter when no values remain.', 'omniloop' ); ?></span>
+											</span>
+										</span>
+									</label>
+								</li>
+								<li class="omniloop-admin-check">
+									<label>
+										<input type="hidden" name="omniloop_settings[search][fuzzy]" value="off">
+										<input type="checkbox" name="omniloop_settings[search][fuzzy]" value="on" <?php checked( $fuzzy_on ); ?>>
+										<span class="omniloop-admin-check__ui">
+											<span class="omniloop-admin-check__tick"><?php echo $tick_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG ?></span>
+											<span class="omniloop-admin-check__text">
+												<span class="omniloop-admin-check__label"><?php esc_html_e( 'Typo-tolerant search', 'omniloop' ); ?></span>
+												<span class="omniloop-admin-check__slug"><?php esc_html_e( 'Matches similar titles (SOUNDEX) alongside exact words.', 'omniloop' ); ?></span>
+											</span>
+										</span>
+									</label>
+								</li>
+							</ul>
+						</div>
+					</section>
+					<section class="omniloop-admin-card">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Conditional facets', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Show: target appears only after the source is selected. Hide: target disappears when the source matches.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<div class="omniloop-admin-presets">
+								<?php
+								$rule_rows = $facet_ui['rules'];
+								if ( empty( $rule_rows ) ) {
+									$rule_rows = [
+										[
+											'id'            => '',
+											'source_facet'  => '',
+											'source_values' => [],
+											'action'        => 'show',
+											'target_facet'  => '',
+										],
+									];
+								}
+								foreach ( $rule_rows as $index => $rule ) :
+									$rule_values = implode( ', ', $rule['source_values'] );
+									?>
+									<div class="omniloop-admin-preset">
+										<div class="omniloop-admin-preset__grid">
+											<label>
+												<span><?php esc_html_e( 'When facet', 'omniloop' ); ?></span>
+												<select name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][source_facet]">
+													<option value=""><?php esc_html_e( '—', 'omniloop' ); ?></option>
+													<?php foreach ( $facet_choices as $facet_key => $facet_label ) : ?>
+														<option value="<?php echo esc_attr( $facet_key ); ?>" <?php selected( $rule['source_facet'], $facet_key ); ?>><?php echo esc_html( $facet_label ); ?></option>
+													<?php endforeach; ?>
+												</select>
+											</label>
+											<label>
+												<span><?php esc_html_e( 'Has values (optional)', 'omniloop' ); ?></span>
+												<input type="text" name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][source_values]" value="<?php echo esc_attr( $rule_values ); ?>" placeholder="<?php esc_attr_e( 'red, navy — empty = any', 'omniloop' ); ?>">
+											</label>
+											<label>
+												<span><?php esc_html_e( 'Then', 'omniloop' ); ?></span>
+												<select name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][action]">
+													<option value="show" <?php selected( $rule['action'], 'show' ); ?>><?php esc_html_e( 'Show', 'omniloop' ); ?></option>
+													<option value="hide" <?php selected( $rule['action'], 'hide' ); ?>><?php esc_html_e( 'Hide', 'omniloop' ); ?></option>
+												</select>
+											</label>
+											<label>
+												<span><?php esc_html_e( 'Target facet', 'omniloop' ); ?></span>
+												<select name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][target_facet]">
+													<option value=""><?php esc_html_e( '—', 'omniloop' ); ?></option>
+													<?php foreach ( $facet_choices as $facet_key => $facet_label ) : ?>
+														<option value="<?php echo esc_attr( $facet_key ); ?>" <?php selected( $rule['target_facet'], $facet_key ); ?>><?php echo esc_html( $facet_label ); ?></option>
+													<?php endforeach; ?>
+												</select>
+											</label>
+											<input type="hidden" name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][id]" value="<?php echo esc_attr( $rule['id'] ); ?>">
+										</div>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						</div>
+					</section>
+				</div>
+
+				<div class="omniloop-admin-grid" data-tab-panel="analytics" hidden>
+					<section class="omniloop-admin-card omniloop-admin-card--wide">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Filter analytics (30 days)', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Anonymous facet clicks and empty-result combinations. Also shown on the WordPress dashboard.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<p class="omniloop-admin-status">
+								<?php
+								echo esc_html(
+									sprintf(
+										/* translators: %d: empty-result events */
+										_n( '%d empty-result filter.', '%d empty-result filters.', $analytics_empty, 'omniloop' ),
+										$analytics_empty
+									)
+								);
+								?>
+							</p>
+							<?php if ( $analytics_clicks ) : ?>
+								<table class="widefat striped">
+									<thead>
+										<tr>
+											<th><?php esc_html_e( 'Facet', 'omniloop' ); ?></th>
+											<th><?php esc_html_e( 'Value', 'omniloop' ); ?></th>
+											<th><?php esc_html_e( 'Clicks', 'omniloop' ); ?></th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php foreach ( $analytics_clicks as $row ) : ?>
+											<tr>
+												<td><?php echo esc_html( I18n::facet_label( $row['facet_key'] ) ); ?></td>
+												<td><?php echo esc_html( I18n::value_label( $row['facet_key'], $row['facet_value'] ) ); ?></td>
+												<td><?php echo esc_html( (string) $row['clicks'] ); ?></td>
+											</tr>
+										<?php endforeach; ?>
+									</tbody>
+								</table>
+							<?php else : ?>
+								<p class="omniloop-admin-empty"><?php esc_html_e( 'No clicks recorded yet. They appear as shoppers use filters on the front end.', 'omniloop' ); ?></p>
+							<?php endif; ?>
+						</div>
+					</section>
+				</div>
+
+				<div class="omniloop-admin-grid" data-tab-panel="tools" hidden>
+					<section class="omniloop-admin-card omniloop-admin-card--wide">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Export / import', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Copy presets, merchandising, SEO, and facet rules between sites. Index data is not included — rebuild the index after import.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<p>
+								<a class="omniloop-admin-btn omniloop-admin-btn--ghost" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=' . SettingsIo::EXPORT_ACTION ), SettingsIo::EXPORT_ACTION ) ); ?>">
+									<?php esc_html_e( 'Download settings JSON', 'omniloop' ); ?>
+								</a>
+							</p>
+						</div>
+					</section>
+				</div>
+
 				<div class="omniloop-admin-tip">
 					<span class="omniloop-admin-tip__icon" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -639,6 +1006,17 @@ final class SettingsPage {
 						<p class="omniloop-admin-status" id="omniloop-reindex-status" aria-live="polite"></p>
 					</div>
 				</footer>
+			</form>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data" class="omniloop-admin-import" data-tab-panel="tools" hidden>
+				<?php wp_nonce_field( SettingsIo::IMPORT_ACTION ); ?>
+				<input type="hidden" name="action" value="<?php echo esc_attr( SettingsIo::IMPORT_ACTION ); ?>">
+				<p>
+					<label>
+						<span class="screen-reader-text"><?php esc_html_e( 'Settings JSON file', 'omniloop' ); ?></span>
+						<input type="file" name="omniloop_import_file" accept="application/json,.json" required>
+					</label>
+				</p>
+				<button type="submit" class="omniloop-admin-btn omniloop-admin-btn--primary"><?php esc_html_e( 'Import settings', 'omniloop' ); ?></button>
 			</form>
 		</div>
 		<?php

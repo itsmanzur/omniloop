@@ -1,5 +1,5 @@
 param(
-	[string]$Version = "2.0.0"
+	[string]$Version = "2.4.0"
 )
 
 Set-StrictMode -Version Latest
@@ -28,6 +28,7 @@ $excludeTopLevel = @(
 	"phpunit.xml.dist",
 	"composer.phar",
 	".phpunit.result.cache",
+	"omniloop-roadmap.md",
 	"omniloop_technical_blueprint.html"
 )
 

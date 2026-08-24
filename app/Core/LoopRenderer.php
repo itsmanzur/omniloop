@@ -410,6 +410,8 @@ final class LoopRenderer {
 					'keys'    => SeoUrls::key_aliases( $post_type ),
 					'applied' => $seo_on && SeoUrls::state_is_filtered( $state ),
 				],
+				'facetUi'       => FacetUi::frontend_config(),
+				'eventUrl'      => rest_url( 'omniloop/v1/event' ),
 			],
 			JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS
 		);
@@ -1167,8 +1169,11 @@ final class LoopRenderer {
 
 		$min = (float) ( $result['price_min'] ?? 0 );
 		$max = (float) ( $result['price_max'] ?? 0 );
+		$display_bounds = MultiCurrency::bounds_for_display( $min, $max );
+		$min = $display_bounds['min'];
+		$max = $display_bounds['max'];
 		if ( 'product' === $post_type && $max > 0 && self::facet_is_visible( 'price', $visible ) ) {
-			$currency  = WooFacets::currency_symbol();
+			$currency  = MultiCurrency::symbol();
 			$bound_min = (int) floor( $min );
 			$bound_max = (int) ceil( $max );
 			$from_val  = null !== $price_from ? (int) max( $bound_min, min( $bound_max, $price_from ) ) : $bound_min;
@@ -1197,9 +1202,32 @@ final class LoopRenderer {
 			$html  .= '</div></div></div>';
 		}
 
+		$ui           = FacetUi::settings();
+		$hide_zero    = 'on' === $ui['hide_zero_count'];
+		$hide_empty   = 'on' === $ui['hide_empty_groups'];
+		$facet_rules  = $ui['rules'];
+		$visibility   = FacetUi::visibility_map( $keys, $selected, $facet_rules );
+
 		foreach ( $keys as $key ) {
+			if ( empty( $visibility[ $key ] ) ) {
+				continue;
+			}
 			$map = isset( $counts[ $key ] ) && is_array( $counts[ $key ] ) ? $counts[ $key ] : [];
 			if ( empty( $map ) ) {
+				continue;
+			}
+
+			$picked = isset( $selected[ $key ] ) && is_array( $selected[ $key ] ) ? $selected[ $key ] : [];
+			if ( $hide_zero ) {
+				$map = array_filter(
+					$map,
+					static function ( $count, $value ) use ( $picked ): bool {
+						return (int) $count > 0 || in_array( (string) $value, $picked, true );
+					},
+					ARRAY_FILTER_USE_BOTH
+				);
+			}
+			if ( $hide_empty && ! $map ) {
 				continue;
 			}
 
@@ -1222,19 +1250,18 @@ final class LoopRenderer {
 				$facet_class .= ' omniloop-facet--rating';
 			}
 
-			$label  = WooFacets::label( $key );
-			$html  .= '<div class="' . esc_attr( $facet_class ) . '" role="group" aria-label="' . esc_attr( $label ) . '">';
+			$label  = I18n::facet_label( $key );
+			$html  .= '<div class="' . esc_attr( $facet_class ) . '" role="group" aria-label="' . esc_attr( $label ) . '" data-facet-key="' . esc_attr( $key ) . '">';
 			$html  .= '<div class="omniloop-facet__title">' . esc_html( $label ) . '</div>';
 			if ( ! $is_swatch && 'rating' !== $mode && count( $map ) > self::FACET_VISIBLE ) {
 				$html .= '<label class="omniloop-facet__find"><span class="screen-reader-text">' . esc_html__( 'Search facet', 'omniloop' ) . '</span>';
 				$html .= '<input type="search" class="omniloop-facet__find-input" placeholder="' . esc_attr__( 'Search…', 'omniloop' ) . '" autocomplete="off"></label>';
 			}
 			$html  .= '<div class="omniloop-facet__list">';
-			$picked = isset( $selected[ $key ] ) && is_array( $selected[ $key ] ) ? $selected[ $key ] : [];
 			$index  = 0;
 			$extra  = $is_swatch || 'rating' === $mode ? 0 : count( $map ) - self::FACET_VISIBLE;
 			foreach ( $map as $value => $count ) {
-				$display  = WooFacets::value_label( $key, (string) $value );
+				$display  = I18n::value_label( $key, (string) $value );
 				$checked  = in_array( (string) $value, $picked, true );
 				$class    = 'omniloop-check';
 				if ( 'color' === $mode ) {
@@ -1378,7 +1405,7 @@ final class LoopRenderer {
 
 		if ( 'size' === $mode ) {
 			return sprintf(
-				'<label class="%s" title="%s"><input type="checkbox" data-facet="%s" data-value="%s"%s> <span>%s</span> <em>%d</em></label>',
+				'<label class="%s" title="%s"><input type="checkbox" data-facet="%s" data-value="%s"%s> <span class="omniloop-check__text">%s</span> <em>%d</em></label>',
 				esc_attr( $class ),
 				esc_attr( $title ),
 				esc_attr( $key ),
@@ -1405,7 +1432,7 @@ final class LoopRenderer {
 		}
 
 		return sprintf(
-			'<label class="%s"><input type="checkbox" data-facet="%s" data-value="%s"%s> <span>%s</span> <em>%d</em></label>',
+			'<label class="%s"><input type="checkbox" data-facet="%s" data-value="%s"%s> <span class="omniloop-check__text">%s</span> <em>%d</em></label>',
 			esc_attr( $class ),
 			esc_attr( $key ),
 			esc_attr( $value ),

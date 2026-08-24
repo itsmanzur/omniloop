@@ -2,6 +2,39 @@
 
 All notable changes to OmniLoop for Divi are documented here.
 
+## 2.4.0 — 2026-08-24
+
+### Added
+- Attach OmniLoop facet state to native Divi 5 / WordPress loop queries (`omniloop_attach`, `omniloop_attach_native_loop`, Loop Builder query-arg filters)
+- REST `GET /omniloop/v1/facet-keys` and `omniloop_matching_ids()` so Loop Builder conditions can use the custom index
+- Help Guide section comparing the OmniLoop Filter module vs native Loop Builder + OmniLoop facets
+
+## 2.3.0 — 2026-08-24
+
+### Added
+- WPML / Polylang: facet labels follow the current language; queries stay inside that language
+- Settings export / import JSON (presets, merchandising, SEO, facet rules)
+- Multi-currency price facet conversion for WOOMULTI / CURCY-style plugins
+
+## 2.2.0 — 2026-08-24
+
+### Added
+- Typo-tolerant search (title/excerpt + SOUNDEX), toggle on the Facets tab
+- Facet search-within-facet highlight and keyboard navigation
+- Filter analytics table (`omniloop_facet_events`, 30-day prune) plus dashboard widget and Settings → Analytics
+
+### Changed
+- Dual-handle price slider thumbs are larger and easier to drag
+
+## 2.1.0 — 2026-08-24
+
+### Added
+- Settings → SEO: title, description, and H1 templates for filtered URLs (`{facet_value}`, `{facet_labels}`, `{category}`, …)
+- Robots/noindex for all filtered URLs and automatic noindex on page 2+
+- Optional sitemap of single-facet pretty URLs
+- Hide zero-count values and empty facet groups (Settings → Facets)
+- Conditional facet visibility rules (show/hide Facet B when Facet A is selected)
+
 ## 2.0.1 — 2026-08-23
 
 ### Fixed

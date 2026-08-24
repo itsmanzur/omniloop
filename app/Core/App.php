@@ -10,6 +10,7 @@ namespace OmniLoop\Engine\Core;
 use OmniLoop\Engine\Admin\DocsPage;
 use OmniLoop\Engine\Admin\SettingsPage;
 use OmniLoop\Engine\Integrations\Divi5\Bootstrap as DiviBootstrap;
+use OmniLoop\Engine\Integrations\Divi5\NativeLoop;
 use OmniLoop\Engine\Rest\FilterEndpoint;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,6 +41,10 @@ final class App {
 
 		Indexer::init();
 		SeoUrls::init();
+		SeoMeta::init();
+		FilteredSitemap::init();
+		FacetAnalytics::init();
+		NativeLoop::init();
 		FilterEndpoint::init();
 		DiviBootstrap::init();
 		SettingsPage::init();

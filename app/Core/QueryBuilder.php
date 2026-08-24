@@ -40,15 +40,10 @@ final class QueryBuilder {
 		$per_page    = max( 1, min( self::MAX_PER_PAGE, (int) $args['per_page'] ) );
 		$page        = max( 1, (int) $args['page'] );
 		$search      = (string) $args['search'];
-		$sort        = (string) $args['sort_by'];
 		$facets      = is_array( $args['facets'] ?? null ) ? $args['facets'] : [];
 		$facet_logic = self::sanitize_facet_logic( (string) ( $args['facet_logic'] ?? 'smart' ) );
-		$sort_meta   = Indexer::sanitize_facet_key( (string) ( $args['sort_meta_key'] ?? '' ) );
 
-		$ids = $this->matching_ids( $post_type, $facets, $search, $sort, $facet_logic, $sort_meta );
-		if ( Merchandising::is_enabled( $args['merchandising'] ?? true ) ) {
-			$ids = Merchandising::reorder( $post_type, $ids, $args['extra_pin_ids'] ?? [] );
-		}
+		$ids = $this->ids( $args );
 
 		$total     = count( $ids );
 		$offset    = ( $page - 1 ) * $per_page;
@@ -63,6 +58,40 @@ final class QueryBuilder {
 			'price_min' => $bounds['min'],
 			'price_max' => $bounds['max'],
 		];
+	}
+
+	/**
+	 * All matching IDs (unpaged), with merchandising applied when enabled.
+	 *
+	 * @param array<string,mixed> $args Sanitized query args.
+	 * @return int[]
+	 */
+	public function ids( array $args ): array {
+		$post_type   = (string) $args['post_type'];
+		$search      = (string) $args['search'];
+		$sort        = (string) $args['sort_by'];
+		$facets      = is_array( $args['facets'] ?? null ) ? $args['facets'] : [];
+		$facet_logic = self::sanitize_facet_logic( (string) ( $args['facet_logic'] ?? 'smart' ) );
+		$sort_meta   = Indexer::sanitize_facet_key( (string) ( $args['sort_meta_key'] ?? '' ) );
+
+		$ids = $this->matching_ids( $post_type, $facets, $search, $sort, $facet_logic, $sort_meta );
+		if ( Merchandising::is_enabled( $args['merchandising'] ?? true ) ) {
+			$ids = Merchandising::reorder( $post_type, $ids, $args['extra_pin_ids'] ?? [] );
+		}
+
+		return $ids;
+	}
+
+	public static function uses_fuzzy_search(): bool {
+		if ( ! function_exists( 'get_option' ) ) {
+			return true;
+		}
+		$settings = get_option( 'omniloop_settings', [] );
+		$search   = is_array( $settings ) && isset( $settings['search'] ) && is_array( $settings['search'] )
+			? $settings['search']
+			: [];
+
+		return ! isset( $search['fuzzy'] ) || 'off' !== $search['fuzzy'];
 	}
 
 	public static function sanitize_facet_logic( string $logic ): string {
@@ -85,6 +114,8 @@ final class QueryBuilder {
 					$sort,
 					$facet_logic,
 					$sort_meta,
+					I18n::current_language(),
+					self::uses_fuzzy_search(),
 				]
 			)
 		);
@@ -302,6 +333,8 @@ final class QueryBuilder {
 					$price,
 					$has_index,
 					$table,
+					I18n::current_language(),
+					self::uses_fuzzy_search(),
 				]
 			)
 		);
@@ -315,8 +348,16 @@ final class QueryBuilder {
 		$params = [];
 
 		if ( '' !== $search ) {
-			$sql     .= ' AND p.post_title LIKE %s';
-			$params[] = '%' . $wpdb->esc_like( $search ) . '%';
+			$like = '%' . $wpdb->esc_like( $search ) . '%';
+			if ( self::uses_fuzzy_search() && strlen( $search ) >= 3 ) {
+				$sql     .= ' AND (p.post_title LIKE %s OR p.post_excerpt LIKE %s OR SOUNDEX(p.post_title) = SOUNDEX(%s))';
+				$params[] = $like;
+				$params[] = $like;
+				$params[] = $search;
+			} else {
+				$sql     .= ' AND p.post_title LIKE %s';
+				$params[] = $like;
+			}
 		}
 
 		$price_range = $this->parse_price_range( $price );
@@ -344,6 +385,7 @@ final class QueryBuilder {
 		$base    = $this->base_post_filter_fragment( $post_type, $facets, $search, $table, $has_index );
 		$sql    .= $base['sql'];
 		$params  = array_merge( $params, $base['params'] );
+		I18n::append_post_language( $sql, $params, $post_type );
 
 		unset( $facets['price_range'] );
 		if ( $has_index ) {
@@ -551,7 +593,9 @@ final class QueryBuilder {
 			$max = $tmp;
 		}
 
-		return [ $min, $max ];
+		$converted = MultiCurrency::range_to_base( [ $min, $max ] );
+
+		return [ $converted[0], $converted[1] ];
 	}
 
 	/**

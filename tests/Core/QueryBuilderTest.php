@@ -34,6 +34,10 @@ final class QueryBuilderTest extends TestCase {
 		parent::tearDown();
 	}
 
+	public function test_fuzzy_search_defaults_on(): void {
+		$this->assertTrue( QueryBuilder::uses_fuzzy_search() );
+	}
+
 	public function test_sanitize_facet_logic_keeps_allowed_values(): void {
 		$this->assertSame( 'smart', QueryBuilder::sanitize_facet_logic( 'smart' ) );
 		$this->assertSame( 'or', QueryBuilder::sanitize_facet_logic( 'OR' ) );
@@ -176,6 +180,7 @@ final class QueryBuilderTest extends TestCase {
 
 	private function stub_facet_keys(): void {
 		Functions\when( 'get_object_taxonomies' )->justReturn( [] );
+		Functions\when( 'get_option' )->justReturn( [] );
 		Functions\when( 'apply_filters' )->alias(
 			static function ( $hook, $value = null ) {
 				if ( 'omniloop_facet_keys' === $hook ) {

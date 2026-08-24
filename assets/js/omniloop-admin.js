@@ -99,5 +99,37 @@
 		var secondary = $("omniloop-reindex-secondary");
 		if (primary) primary.addEventListener("click", startRebuild);
 		if (secondary) secondary.addEventListener("click", startRebuild);
+
+		var tabs = document.querySelectorAll(".omniloop-admin-tab");
+		if (!tabs.length) return;
+
+		function showTab(id) {
+			tabs.forEach(function (tab) {
+				tab.classList.toggle("is-active", tab.getAttribute("data-tab") === id);
+			});
+			document.querySelectorAll("[data-tab-panel]").forEach(function (panel) {
+				var on = panel.getAttribute("data-tab-panel") === id;
+				if (on) {
+					panel.removeAttribute("hidden");
+					panel.classList.add("is-active");
+				} else {
+					panel.setAttribute("hidden", "hidden");
+					panel.classList.remove("is-active");
+				}
+			});
+		}
+
+		tabs.forEach(function (tab) {
+			tab.addEventListener("click", function () {
+				var id = tab.getAttribute("data-tab") || "index";
+				showTab(id);
+				if (window.history && window.history.replaceState) {
+					window.history.replaceState(null, "", "#" + id);
+				}
+			});
+		});
+
+		var hash = (window.location.hash || "").replace("#", "");
+		if (hash) showTab(hash);
 	});
 })();

@@ -21,6 +21,7 @@ final class Installer {
 
 	public static function activate(): void {
 		self::create_table();
+		FacetAnalytics::create_table();
 		update_option( 'omniloop_db_version', OMNILOOP_DB_VERSION, false );
 
 		if ( false === get_option( 'omniloop_settings', false ) ) {
@@ -44,6 +45,7 @@ final class Installer {
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
+		wp_clear_scheduled_hook( FacetAnalytics::CRON );
 		flush_rewrite_rules( false );
 		delete_option( 'omniloop_rewrite_version' );
 	}
@@ -52,6 +54,7 @@ final class Installer {
 		$installed = (string) get_option( 'omniloop_db_version', '' );
 		if ( $installed !== OMNILOOP_DB_VERSION ) {
 			self::create_table();
+			FacetAnalytics::create_table();
 			update_option( 'omniloop_db_version', OMNILOOP_DB_VERSION, false );
 		}
 	}

@@ -1183,8 +1183,181 @@
 		return cur + Math.round(range[0]) + " – " + cur + Math.round(range[1]);
 	}
 
+	function facetUiConfig(root) {
+		var cfg = readConfig(root) || {};
+		var ui = cfg.facetUi && typeof cfg.facetUi === "object" ? cfg.facetUi : {};
+		return {
+			hideZeroCount: ui.hideZeroCount !== false,
+			hideEmptyGroups: ui.hideEmptyGroups !== false,
+			rules: Array.isArray(ui.rules) ? ui.rules : []
+		};
+	}
+
+	function applyFacetVisibility(root) {
+		var ui = facetUiConfig(root);
+		var selected = selectedFacets(root);
+		var showTargets = {};
+		ui.rules.forEach(function (rule) {
+			if (rule && rule.action === "show" && rule.target_facet) {
+				showTargets[rule.target_facet] = true;
+			}
+		});
+		var vis = {};
+		qsa(root, ".omniloop-facet[data-facet-key]").forEach(function (facet) {
+			var key = facet.getAttribute("data-facet-key") || "";
+			vis[key] = !showTargets[key];
+		});
+		ui.rules.forEach(function (rule) {
+			if (!rule || !rule.target_facet) return;
+			var picked = selected[rule.source_facet] || [];
+			var needed = Array.isArray(rule.source_values) ? rule.source_values.map(String) : [];
+			var matched = picked.length > 0 && (!needed.length || needed.some(function (v) { return picked.indexOf(v) !== -1; }));
+			if (rule.action === "show" && matched) vis[rule.target_facet] = true;
+			if (rule.action === "hide" && matched) vis[rule.target_facet] = false;
+		});
+		qsa(root, ".omniloop-facet[data-facet-key]").forEach(function (facet) {
+			var key = facet.getAttribute("data-facet-key") || "";
+			if (vis[key] === false) {
+				facet.hidden = true;
+				facet.setAttribute("data-ol-rule-hidden", "1");
+			} else {
+				facet.removeAttribute("data-ol-rule-hidden");
+			}
+		});
+	}
+
+	function labelTextOf(opt) {
+		var span = qs(opt, ".omniloop-check__text") || qs(opt, "span:not(.screen-reader-text)");
+		return String((span && span.textContent) || opt.getAttribute("title") || opt.textContent || "").replace(/\s+/g, " ").trim();
+	}
+
+	function highlightLabel(opt, query) {
+		var span = qs(opt, ".omniloop-check__text");
+		if (!span) return;
+		var raw = String(span.getAttribute("data-ol-label") || span.textContent || "");
+		if (!span.getAttribute("data-ol-label")) {
+			span.setAttribute("data-ol-label", raw);
+		} else {
+			raw = span.getAttribute("data-ol-label") || raw;
+		}
+		while (span.firstChild) span.removeChild(span.firstChild);
+		if (!query) {
+			span.appendChild(document.createTextNode(raw));
+			return;
+		}
+		var lower = raw.toLowerCase();
+		var idx = lower.indexOf(query);
+		if (idx < 0) {
+			span.appendChild(document.createTextNode(raw));
+			return;
+		}
+		span.appendChild(document.createTextNode(raw.slice(0, idx)));
+		var mark = document.createElement("mark");
+		mark.className = "omniloop-facet__mark";
+		mark.textContent = raw.slice(idx, idx + query.length);
+		span.appendChild(mark);
+		span.appendChild(document.createTextNode(raw.slice(idx + query.length)));
+	}
+
+	function visibleFacetOptions(facet) {
+		return qsa(facet, ".omniloop-check").filter(function (opt) {
+			return !opt.hidden && !opt.classList.contains("is-facet-hidden");
+		});
+	}
+
+	function setFacetFindActive(facet, index) {
+		var opts = visibleFacetOptions(facet);
+		opts.forEach(function (opt, i) {
+			opt.classList.toggle("is-facet-active", i === index);
+		});
+		if (opts[index]) {
+			opts[index].scrollIntoView({ block: "nearest" });
+		}
+	}
+
+	function filterFacetOptions(input) {
+		var facet = input.closest ? input.closest(".omniloop-facet") : null;
+		if (!facet) return;
+		var q = String(input.value || "").trim().toLowerCase();
+		qsa(facet, ".omniloop-check").forEach(function (opt) {
+			var label = labelTextOf(opt).toLowerCase();
+			var match = !q || label.indexOf(q) !== -1;
+			opt.classList.toggle("is-facet-hidden", !match);
+			opt.hidden = !match;
+			highlightLabel(opt, q);
+		});
+		setFacetFindActive(facet, q ? 0 : -1);
+	}
+
+	function handleFacetFindKey(input, e) {
+		var facet = input.closest ? input.closest(".omniloop-facet") : null;
+		if (!facet) return;
+		var opts = visibleFacetOptions(facet);
+		if (!opts.length) return;
+		var current = opts.findIndex(function (opt) { return opt.classList.contains("is-facet-active"); });
+		if (e.key === "ArrowDown") {
+			e.preventDefault();
+			setFacetFindActive(facet, current < opts.length - 1 ? current + 1 : 0);
+		} else if (e.key === "ArrowUp") {
+			e.preventDefault();
+			setFacetFindActive(facet, current > 0 ? current - 1 : opts.length - 1);
+		} else if (e.key === "Enter") {
+			e.preventDefault();
+			var target = opts[current] || opts[0];
+			var box = target ? qs(target, "input[data-facet]") : null;
+			if (box) {
+				box.checked = !box.checked;
+				box.dispatchEvent(new Event("change", { bubbles: true }));
+			}
+		} else if (e.key === "Escape") {
+			input.value = "";
+			filterFacetOptions(input);
+		}
+	}
+
+	function trackEvent(root, extra) {
+		var cfg = readConfig(root) || {};
+		if (!cfg.eventUrl) return;
+		var now = Date.now();
+		if (root._olEventAt && now - root._olEventAt < 400) return;
+		root._olEventAt = now;
+		var body = {
+			post_type: cfg.postType || "post",
+			event_type: extra.event_type || "click",
+			facet_key: extra.facet_key || "",
+			facet_value: extra.facet_value || "",
+			result_count: extra.result_count || 0
+		};
+		try {
+			fetch(cfg.eventUrl, {
+				method: "POST",
+				credentials: "same-origin",
+				headers: {
+					"Content-Type": "application/json",
+					"X-WP-Nonce": cfg.nonce || ""
+				},
+				body: JSON.stringify(body),
+				keepalive: true
+			}).catch(function () {});
+		} catch (err) {}
+	}
+
+	function trackQueryResult(root, data) {
+		if (!data || Number(data.total_posts) !== 0) return;
+		var facets = selectedFacets(root);
+		var keys = Object.keys(facets).filter(function (key) { return key !== "price_range"; });
+		var first = keys[0] || "";
+		trackEvent(root, {
+			event_type: "empty",
+			facet_key: first,
+			facet_value: first && facets[first] && facets[first][0] ? String(facets[first][0]) : "",
+			result_count: 0
+		});
+	}
+
 	function updateFacetCounts(root, counts) {
 		if (!counts || typeof counts !== "object") return;
+		var ui = facetUiConfig(root);
 		qsa(root, "input[data-facet]").forEach(function (input) {
 			var key = input.getAttribute("data-facet") || "";
 			var value = input.getAttribute("data-value") || "";
@@ -1194,16 +1367,22 @@
 			if (em) em.textContent = String(n);
 			var label = input.closest ? input.closest(".omniloop-check") : input.parentNode;
 			if (label) {
-				var hide = n === 0 && !input.checked;
+				var hide = ui.hideZeroCount && n === 0 && !input.checked;
+				if (label.classList.contains("is-facet-hidden")) hide = true;
 				label.hidden = hide;
-				input.disabled = hide;
+				input.disabled = ui.hideZeroCount && n === 0 && !input.checked;
 			}
 		});
+		applyFacetVisibility(root);
 		qsa(root, ".omniloop-facet").forEach(function (facet) {
+			if (facet.getAttribute("data-ol-rule-hidden") === "1") {
+				facet.hidden = true;
+				return;
+			}
 			var checks = qsa(facet, ".omniloop-check");
 			if (!checks.length) return;
 			var visible = checks.some(function (el) { return !el.hidden; });
-			facet.hidden = !visible;
+			facet.hidden = ui.hideEmptyGroups ? !visible : false;
 		});
 	}
 
@@ -1230,6 +1409,7 @@
 		updateOpenLabel(root);
 		restartCarousel(root);
 		updatePaging(root, data);
+		trackQueryResult(root, data);
 	}
 
 	function setLoadMoreLoading(root, loading) {
@@ -1960,6 +2140,13 @@
 						if (other !== el) other.checked = false;
 					});
 				}
+				if (el.getAttribute && el.getAttribute("data-facet") && el.checked) {
+					trackEvent(root, {
+						event_type: "click",
+						facet_key: el.getAttribute("data-facet") || "",
+						facet_value: el.getAttribute("data-value") || ""
+					});
+				}
 				query(root, config, 1);
 			});
 		});
@@ -2020,16 +2207,13 @@
 		syncPriceSlider(root);
 
 		qsa(root, ".omniloop-facet__find-input").forEach(function (input) {
+			input.setAttribute("role", "combobox");
+			input.setAttribute("aria-autocomplete", "list");
 			input.addEventListener("input", function () {
-				var facet = input.closest ? input.closest(".omniloop-facet") : null;
-				if (!facet) return;
-				var q = String(input.value || "").trim().toLowerCase();
-				qsa(facet, ".omniloop-check").forEach(function (opt) {
-					var label = String(opt.getAttribute("title") || opt.textContent || "").toLowerCase();
-					var match = !q || label.indexOf(q) !== -1;
-					opt.classList.toggle("is-facet-hidden", !match);
-					opt.hidden = !match;
-				});
+				filterFacetOptions(input);
+			});
+			input.addEventListener("keydown", function (e) {
+				handleFacetFindKey(input, e);
 			});
 		});
 
@@ -2051,6 +2235,7 @@
 		});
 
 		var fromUrl = applyFromUrl(root);
+		applyFacetVisibility(root);
 		syncFacetMore(root);
 		renderChips(root);
 		updateOpenLabel(root);

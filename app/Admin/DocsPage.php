@@ -306,7 +306,7 @@ final class DocsPage {
 						</ul>
 					</section>
 
-					<section class="omniloop-docs-section" data-section="settings" data-title="<?php esc_attr_e( 'Admin settings', 'omniloop' ); ?>" data-keywords="admin settings rebuild index acf post types dashboard">
+					<section class="omniloop-docs-section" data-section="settings" data-title="<?php esc_attr_e( 'Admin settings', 'omniloop' ); ?>" data-keywords="admin settings rebuild index acf post types dashboard seo analytics export import wpml">
 						<h2><?php esc_html_e( 'Admin settings', 'omniloop' ); ?></h2>
 						<p>
 							<?php
@@ -325,7 +325,45 @@ final class DocsPage {
 							<li><?php esc_html_e( 'Turn post types on or off for indexing.', 'omniloop' ); ?></li>
 							<li><?php esc_html_e( 'Choose ACF fields to use as filters (if ACF is installed).', 'omniloop' ); ?></li>
 							<li><?php esc_html_e( 'Rebuild the index after catalog or field changes.', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'SEO tab: title, description, and H1 templates for filtered URLs, plus noindex and sitemap options.', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'Facets tab: hide zero-count values, show/hide one facet based on another, and typo-tolerant search.', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'Analytics tab: which filters shoppers click most, and which combinations return nothing.', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'Tools tab: export or import settings JSON when you copy a setup to another site.', 'omniloop' ); ?></li>
 						</ul>
+					</section>
+
+					<section class="omniloop-docs-section" data-section="seo" data-title="<?php esc_attr_e( 'Filtered URL SEO', 'omniloop' ); ?>" data-keywords="seo title description h1 robots noindex sitemap pretty url placeholders">
+						<h2><?php esc_html_e( 'Filtered URL SEO', 'omniloop' ); ?></h2>
+						<p><?php esc_html_e( 'Pretty URLs like /ol/category/shoes/ already work. The SEO tab lets you control what search engines see on those pages.', 'omniloop' ); ?></p>
+						<ul>
+							<li><strong><?php esc_html_e( 'Templates', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Use placeholders such as {facet_labels}, {category}, {page_title}, and {site_name}.', 'omniloop' ); ?></li>
+							<li><strong><?php esc_html_e( 'Noindex', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Turn on “page 2+” to avoid duplicate listings. Use “all filtered URLs” only if you do not want those pages indexed at all.', 'omniloop' ); ?></li>
+							<li><strong><?php esc_html_e( 'Sitemap', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Optional. Adds single-facet URLs (for example each category) for the page you choose.', 'omniloop' ); ?></li>
+						</ul>
+					</section>
+
+					<section class="omniloop-docs-section" data-section="workflows" data-title="<?php esc_attr_e( 'Two ways to build a loop', 'omniloop' ); ?>" data-keywords="divi 5 native loop builder workflow module facets attach query condition index keys">
+						<h2><?php esc_html_e( 'Two ways to build a loop', 'omniloop' ); ?></h2>
+						<p><?php esc_html_e( 'OmniLoop can power the whole catalog, or sit next to Divi 5’s own Loop Builder.', 'omniloop' ); ?></p>
+						<ol>
+							<li>
+								<strong><?php esc_html_e( 'Workflow A — OmniLoop Filter module', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Insert OmniLoop Filter. It owns the filters, the grid, pagination, merchandising, and pretty URLs. This is the usual shop setup.', 'omniloop' ); ?></span>
+							</li>
+							<li>
+								<strong><?php esc_html_e( 'Workflow B — native Loop Builder + OmniLoop facets', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Keep Divi’s Loop Builder for the cards. When shoppers use OmniLoop pretty URLs (or you set omniloop_attach=1 on the query), OmniLoop restricts that loop to matching IDs from its index — no extra postmeta joins.', 'omniloop' ); ?></span>
+							</li>
+						</ol>
+						<div class="omniloop-docs-callout">
+							<strong><?php esc_html_e( 'Loop Builder query conditions', 'omniloop' ); ?></strong>
+							<p><?php esc_html_e( 'Facet keys from the index are available at GET /wp-json/omniloop/v1/facet-keys?post_type=product and via the omniloop_loop_builder_facet_keys filter. PHP helper: omniloop_matching_ids( \'product\', [ \'product_cat\' => [ \'shoes\' ] ] ).', 'omniloop' ); ?></p>
+						</div>
+					</section>
+
+					<section class="omniloop-docs-section" data-section="i18n" data-title="<?php esc_attr_e( 'Languages and currency', 'omniloop' ); ?>" data-keywords="wpml polylang language translation multi currency woomulti price">
+						<h2><?php esc_html_e( 'Languages and currency', 'omniloop' ); ?></h2>
+						<p><?php esc_html_e( 'If WPML or Polylang is active, facet labels and term names follow the current language, and the index query stays inside that language. Price sliders follow WOOMULTI / CURCY when that plugin converts WooCommerce prices.', 'omniloop' ); ?></p>
 					</section>
 
 					<section class="omniloop-docs-section" data-section="fix" data-title="<?php esc_attr_e( 'Troubleshooting', 'omniloop' ); ?>" data-keywords="fix help fix 404 empty filter slow rebuild permalinks">

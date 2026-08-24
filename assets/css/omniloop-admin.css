@@ -219,12 +219,55 @@
 	color: #475569;
 }
 
+.omniloop-admin-form {
+	margin-top: 0.25rem;
+}
+
+.omniloop-admin-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin: 1rem 0 0;
+}
+
+.omniloop-admin-tab {
+	margin: 0;
+	padding: 0.45rem 0.85rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--ol-admin-muted);
+	font: inherit;
+	font-size: 0.86rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.omniloop-admin-tab.is-active {
+	background: var(--ol-admin-accent, #0f766e);
+	border-color: transparent;
+	color: #fff;
+}
+
 .omniloop-admin-grid {
 	display: grid;
 	grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
 	gap: 1rem;
 	margin-top: 1rem;
 	align-items: start;
+}
+
+.omniloop-admin-grid[hidden],
+.omniloop-admin-import[hidden] {
+	display: none !important;
+}
+
+.omniloop-admin-card--wide {
+	grid-column: 1 / -1;
+}
+
+.omniloop-admin-import {
+	margin-top: 1rem;
 }
 
 .omniloop-admin-card {

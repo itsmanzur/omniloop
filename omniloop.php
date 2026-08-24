@@ -2,7 +2,7 @@
 /**
  * Plugin Name: OmniLoop for Divi
  * Description: Faceted product and post loop for the Divi 5 Visual Builder. Custom index, live filters, WooCommerce-ready.
- * Version: 2.0.1
+ * Version: 2.4.0
  * Author: OmniLoop
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,8 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'OMNILOOP_VERSION', '2.0.1' );
-define( 'OMNILOOP_DB_VERSION', '1.0.0' );
+define( 'OMNILOOP_VERSION', '2.4.0' );
+define( 'OMNILOOP_DB_VERSION', '1.1.0' );
 define( 'OMNILOOP_FILE', __FILE__ );
 define( 'OMNILOOP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'OMNILOOP_URL', plugin_dir_url( __FILE__ ) );
@@ -55,3 +55,15 @@ add_action(
 		\OmniLoop\Engine\Core\App::instance()->boot();
 	}
 );
+
+if ( ! function_exists( 'omniloop_matching_ids' ) ) {
+	/**
+	 * Matching post IDs from the OmniLoop index (for native Loop Builder queries).
+	 *
+	 * @param array<string,mixed> $facets
+	 * @return int[]
+	 */
+	function omniloop_matching_ids( string $post_type = 'product', array $facets = [], string $search = '' ): array {
+		return \OmniLoop\Engine\Integrations\Divi5\NativeLoop::matching_ids( $post_type, $facets, $search );
+	}
+}

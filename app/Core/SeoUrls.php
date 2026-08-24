@@ -290,8 +290,12 @@ final class SeoUrls {
 	/**
 	 * @param array{page?:int,sort?:string,search?:string,view?:string,facets?:array<string,mixed>} $state
 	 */
-	public static function url_for( array $state, string $post_type ): string {
-		$base = self::page_base_url();
+	public static function url_for( array $state, string $post_type, string $base = '' ): string {
+		if ( '' === $base ) {
+			$base = self::page_base_url();
+		} else {
+			$base = trailingslashit( $base );
+		}
 		if ( '' === $base ) {
 			return '';
 		}

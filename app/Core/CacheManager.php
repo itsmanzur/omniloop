@@ -32,7 +32,10 @@ final class CacheManager {
 	}
 
 	public static function query_key( array $args ): string {
-		return md5( wp_json_encode( $args ) );
+		$args['_ol_lang'] = I18n::current_language();
+		$args['_ol_cur']  = MultiCurrency::symbol();
+
+		return md5( (string) wp_json_encode( $args ) );
 	}
 
 	private static function prefix(): string {

@@ -35,7 +35,9 @@ Insert one module — **OmniLoop Filter** — and get:
 - Merchandising controls: pinned products, out-of-stock last, promo badges, and stock urgency  
 - WooCommerce extras when Woo is active: attributes with color/image/size swatches, price From–To, stock, on sale, featured, star rating  
 - Optional ACF facets from Settings  
-- Pretty SEO filter URLs  
+- Pretty SEO filter URLs with title/description/H1 templates, noindex, and sitemap options  
+- Native Divi 5 Loop Builder attach (use OmniLoop’s index inside Divi’s own loop)  
+- Settings export/import, WPML/Polylang labels, and multi-currency price facets  
 - Skeleton loading and a customizable empty state  
 - Native Divi Design controls for cards, filters, typography, and sale badges  
 

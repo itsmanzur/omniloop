@@ -8,13 +8,18 @@
 namespace OmniLoop\Engine\Rest;
 
 use OmniLoop\Engine\Core\CacheManager;
+use OmniLoop\Engine\Core\FacetAnalytics;
+use OmniLoop\Engine\Core\FacetUi;
 use OmniLoop\Engine\Core\FilterPresets;
+use OmniLoop\Engine\Core\I18n;
 use OmniLoop\Engine\Core\Indexer;
 use OmniLoop\Engine\Core\Installer;
 use OmniLoop\Engine\Core\LoopRenderer;
 use OmniLoop\Engine\Core\Merchandising;
+use OmniLoop\Engine\Core\MultiCurrency;
 use OmniLoop\Engine\Core\QueryBuilder;
 use OmniLoop\Engine\Core\WooFacets;
+use OmniLoop\Engine\Integrations\Divi5\NativeLoop;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -67,6 +72,26 @@ final class FilterEndpoint {
 				'permission_callback' => static function () {
 					return current_user_can( 'manage_options' );
 				},
+			]
+		);
+
+		register_rest_route(
+			'omniloop/v1',
+			'/event',
+			[
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => [ self::class, 'event' ],
+				'permission_callback' => '__return_true',
+			]
+		);
+
+		register_rest_route(
+			'omniloop/v1',
+			'/facet-keys',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ self::class, 'facet_keys' ],
+				'permission_callback' => '__return_true',
 			]
 		);
 	}
@@ -123,6 +148,47 @@ final class FilterEndpoint {
 		unset( $request );
 
 		return rest_ensure_response( Indexer::status() );
+	}
+
+	/**
+	 * @return \WP_REST_Response
+	 */
+	public static function event( \WP_REST_Request $request ) {
+		$ok = FacetAnalytics::record(
+			[
+				'post_type'    => $request->get_param( 'post_type' ),
+				'event_type'   => $request->get_param( 'event_type' ),
+				'facet_key'    => $request->get_param( 'facet_key' ),
+				'facet_value'  => $request->get_param( 'facet_value' ),
+				'result_count' => $request->get_param( 'result_count' ),
+			]
+		);
+
+		return rest_ensure_response( [ 'ok' => $ok ] );
+	}
+
+	/**
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function facet_keys( \WP_REST_Request $request ) {
+		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
+		if ( '' === $post_type ) {
+			$post_type = LoopRenderer::default_post_type();
+		}
+		if ( ! self::is_allowed_post_type( $post_type ) ) {
+			return new \WP_Error(
+				'omniloop_forbidden_type',
+				__( 'This post type cannot be queried.', 'omniloop' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		return rest_ensure_response(
+			[
+				'post_type' => $post_type,
+				'keys'      => NativeLoop::index_keys( $post_type ),
+			]
+		);
 	}
 
 	/**
@@ -318,7 +384,7 @@ final class FilterEndpoint {
 		foreach ( $types as $type ) {
 			foreach ( $builder->facet_keys_for_type( $type ) as $key ) {
 				if ( ! isset( $out[ $key ] ) ) {
-					$out[ $key ] = WooFacets::label( $key );
+					$out[ $key ] = I18n::facet_label( $key );
 				}
 			}
 		}
@@ -349,14 +415,21 @@ final class FilterEndpoint {
 
 		$facet_labels = [];
 		$facet_ui     = [];
-		foreach ( $result['facets'] as $key => $map ) {
-			$key                  = (string) $key;
-			$facet_labels[ $key ] = WooFacets::label( $key );
+		$counts       = is_array( $result['facets'] ) ? $result['facets'] : [];
+		$visibility   = FacetUi::visibility_map( array_map( 'strval', array_keys( $counts ) ), $parsed['facets'] );
+		foreach ( $counts as $key => $map ) {
+			$key = (string) $key;
+			if ( isset( $visibility[ $key ] ) && ! $visibility[ $key ] ) {
+				continue;
+			}
+			$facet_labels[ $key ] = I18n::facet_label( $key );
 			$ui                   = WooFacets::facet_ui( $key, is_array( $map ) ? array_keys( $map ) : [] );
 			if ( $ui ) {
 				$facet_ui[ $key ] = $ui;
 			}
 		}
+
+		$display = MultiCurrency::bounds_for_display( (float) $result['price_min'], (float) $result['price_max'] );
 
 		return [
 			'status'        => 'success',
@@ -364,12 +437,12 @@ final class FilterEndpoint {
 			'total_pages'   => $total_pages,
 			'page'          => (int) $parsed['page'],
 			'posts'         => $posts,
-			'facets_counts' => $result['facets'],
+			'facets_counts' => $counts,
 			'facet_labels'  => $facet_labels,
 			'facet_ui'      => $facet_ui,
-			'price_min'     => $result['price_min'],
-			'price_max'     => $result['price_max'],
-			'currency'      => WooFacets::currency_symbol(),
+			'price_min'     => $display['min'],
+			'price_max'     => $display['max'],
+			'currency'      => MultiCurrency::symbol(),
 		];
 	}
 
