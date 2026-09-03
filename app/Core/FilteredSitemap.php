@@ -13,6 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class FilteredSitemap {
 
+	private const PAGE_SIZE = 50;
+
+	/**
+	 * Request-lifetime URL list. Null means not built yet.
+	 *
+	 * @var list<array{loc:string}>|null
+	 */
+	private static $urls_cache = null;
+
 	public static function init(): void {
 		add_action( 'init', [ self::class, 'register' ], 30 );
 	}
@@ -62,58 +71,25 @@ final class FilteredSitemap {
 	 * @return list<array{loc:string,lastmod?:string}>
 	 */
 	public static function url_list( int $page_num = 1 ): array {
-		$settings = SeoMeta::settings();
-		$page_id  = (int) $settings['sitemap_page_id'];
-		if ( $page_id < 1 ) {
-			$page_id = (int) get_option( 'page_on_front' );
-		}
-		if ( $page_id < 1 ) {
-			return [];
-		}
+		$offset = ( max( 1, $page_num ) - 1 ) * self::PAGE_SIZE;
 
-		$permalink = get_permalink( $page_id );
-		if ( ! is_string( $permalink ) || '' === $permalink ) {
-			return [];
-		}
-
-		$post_type = LoopRenderer::default_post_type();
-		$keys      = $settings['sitemap_facets'];
-		if ( ! $keys ) {
-			$builder = new QueryBuilder();
-			$keys    = array_slice( $builder->facet_keys_for_type( $post_type ), 0, 8 );
-		}
-
-		$max   = max( 10, (int) $settings['sitemap_max'] );
-		$urls  = [];
-		$seen  = [];
-		foreach ( $keys as $key ) {
-			foreach ( self::indexed_values( $post_type, (string) $key, 80 ) as $value ) {
-				$state = [
-					'page'   => 1,
-					'sort'   => 'date',
-					'search' => '',
-					'view'   => '',
-					'facets' => [ $key => [ $value ] ],
-				];
-				$url = SeoUrls::url_for( $state, $post_type, trailingslashit( $permalink ) );
-				if ( '' === $url || isset( $seen[ $url ] ) ) {
-					continue;
-				}
-				$seen[ $url ] = true;
-				$urls[]       = [ 'loc' => $url ];
-				if ( count( $urls ) >= $max ) {
-					break 2;
-				}
-			}
-		}
-
-		$offset = ( max( 1, $page_num ) - 1 ) * 50;
-
-		return array_slice( $urls, $offset, 50 );
+		return array_slice( self::build_urls(), $offset, self::PAGE_SIZE );
 	}
 
 	public static function max_pages(): int {
-		return 1;
+		$total = count( self::build_urls() );
+		if ( $total < 1 ) {
+			return 0;
+		}
+
+		return (int) ceil( $total / self::PAGE_SIZE );
+	}
+
+	/**
+	 * Drop the memoized URL list. Tests (and cache bumps) call this.
+	 */
+	public static function reset_cache(): void {
+		self::$urls_cache = null;
 	}
 
 	/**
@@ -149,5 +125,72 @@ final class FilteredSitemap {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * All sitemap URLs for this request, capped by sitemap_max.
+	 *
+	 * @return list<array{loc:string}>
+	 */
+	private static function build_urls(): array {
+		if ( is_array( self::$urls_cache ) ) {
+			return self::$urls_cache;
+		}
+
+		self::$urls_cache = self::collect_urls();
+
+		return self::$urls_cache;
+	}
+
+	/**
+	 * @return list<array{loc:string}>
+	 */
+	private static function collect_urls(): array {
+		$settings = SeoMeta::settings();
+		$page_id  = (int) $settings['sitemap_page_id'];
+		if ( $page_id < 1 ) {
+			$page_id = (int) get_option( 'page_on_front' );
+		}
+		if ( $page_id < 1 ) {
+			return [];
+		}
+
+		$permalink = get_permalink( $page_id );
+		if ( ! is_string( $permalink ) || '' === $permalink ) {
+			return [];
+		}
+
+		$post_type = LoopRenderer::default_post_type();
+		$keys      = $settings['sitemap_facets'];
+		if ( ! $keys ) {
+			$builder = new QueryBuilder();
+			$keys    = array_slice( $builder->facet_keys_for_type( $post_type ), 0, 8 );
+		}
+
+		$max  = max( 10, (int) $settings['sitemap_max'] );
+		$urls = [];
+		$seen = [];
+		foreach ( $keys as $key ) {
+			foreach ( self::indexed_values( $post_type, (string) $key, 80 ) as $value ) {
+				$state = [
+					'page'   => 1,
+					'sort'   => 'date',
+					'search' => '',
+					'view'   => '',
+					'facets' => [ $key => [ $value ] ],
+				];
+				$url = SeoUrls::url_for( $state, $post_type, trailingslashit( $permalink ) );
+				if ( '' === $url || isset( $seen[ $url ] ) ) {
+					continue;
+				}
+				$seen[ $url ] = true;
+				$urls[]       = [ 'loc' => $url ];
+				if ( count( $urls ) >= $max ) {
+					break 2;
+				}
+			}
+		}
+
+		return $urls;
 	}
 }

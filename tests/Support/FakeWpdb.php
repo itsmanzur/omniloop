@@ -166,7 +166,7 @@ final class FakeWpdb {
 		}
 
 		foreach ( $this->facet_clauses( $interpolated ) as $clause ) {
-			if ( ! $this->post_has_facet( (int) $post['ID'], $clause['key'], $clause['values'], $clause['numeric'] ) ) {
+			if ( ! $this->post_has_facet( (int) $post['ID'], $clause['key'], $clause['values'], $clause['numeric'], ! empty( $clause['overlap'] ) ) ) {
 				return false;
 			}
 		}
@@ -256,6 +256,17 @@ final class FakeWpdb {
 					'key'     => 'price',
 					'values'  => [],
 					'numeric' => [ (float) $match[1], (float) $match[2] ],
+					'overlap' => false,
+				];
+			}
+		}
+		if ( preg_match_all( '/HAVING MIN\(i\.numeric_value\) <= ([0-9.]+) AND MAX\(i\.numeric_value\) >= ([0-9.]+)/', $sql, $have_matches, PREG_SET_ORDER ) ) {
+			foreach ( $have_matches as $match ) {
+				$clauses[] = [
+					'key'     => 'price',
+					'values'  => [],
+					'numeric' => [ (float) $match[2], (float) $match[1] ],
+					'overlap' => true,
 				];
 			}
 		}
@@ -288,7 +299,25 @@ final class FakeWpdb {
 	 * @param string[]                    $values
 	 * @param array{0:float,1:float}|null $numeric
 	 */
-	private function post_has_facet( int $post_id, string $key, array $values, ?array $numeric ): bool {
+	private function post_has_facet( int $post_id, string $key, array $values, ?array $numeric, bool $overlap = false ): bool {
+		if ( null !== $numeric && $overlap ) {
+			$min = null;
+			$max = null;
+			foreach ( $this->index_rows as $row ) {
+				if ( (int) $row['post_id'] !== $post_id || (string) $row['facet_key'] !== $key || null === $row['numeric_value'] ) {
+					continue;
+				}
+				$n   = (float) $row['numeric_value'];
+				$min = null === $min ? $n : min( $min, $n );
+				$max = null === $max ? $n : max( $max, $n );
+			}
+			if ( null === $min || null === $max ) {
+				return false;
+			}
+
+			return $min <= $numeric[1] && $max >= $numeric[0];
+		}
+
 		foreach ( $this->index_rows as $row ) {
 			if ( (int) $row['post_id'] !== $post_id || (string) $row['facet_key'] !== $key ) {
 				continue;

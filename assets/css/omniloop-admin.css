@@ -2,25 +2,41 @@
  * OmniLoop admin settings — product dashboard shell.
  */
 
+body.toplevel_page_omniloop {
+	background: #f1f5f9;
+}
+
+body.toplevel_page_omniloop #wpcontent,
+body.toplevel_page_omniloop #wpbody-content {
+	background: #f1f5f9;
+}
+
 .omniloop-admin {
 	--ol-admin-ink: #0f172a;
 	--ol-admin-muted: #64748b;
 	--ol-admin-line: #e2e8f0;
+	--ol-admin-line-strong: #cbd5e1;
 	--ol-admin-soft: #f8fafc;
 	--ol-admin-card: #ffffff;
 	--ol-admin-accent: #0f766e;
+	--ol-admin-accent-hover: #0d9488;
 	--ol-admin-accent-soft: #ccfbf1;
+	--ol-admin-accent-ring: rgba(15, 118, 110, 0.18);
 	--ol-admin-warn: #b45309;
 	--ol-admin-warn-soft: #ffedd5;
 	--ol-admin-ok: #047857;
 	--ol-admin-ok-soft: #d1fae5;
-	--ol-admin-radius: 14px;
-	--ol-admin-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px rgba(15, 23, 42, 0.05);
-	max-width: 1080px;
-	margin: 1.25rem 1.25rem 2.5rem 0;
+	--ol-admin-danger: #b91c1c;
+	--ol-admin-radius: 16px;
+	--ol-admin-radius-sm: 10px;
+	--ol-admin-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 24px rgba(15, 23, 42, 0.04);
+	--ol-admin-shadow-hover: 0 1px 2px rgba(15, 23, 42, 0.06), 0 14px 32px rgba(15, 23, 42, 0.07);
+	max-width: 1120px;
+	margin: 1rem 1.25rem 3.5rem 0;
 	color: var(--ol-admin-ink);
 	font-size: 14px;
 	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
 }
 
 .omniloop-admin *,
@@ -29,17 +45,34 @@
 	box-sizing: border-box;
 }
 
+.omniloop-admin.wrap p,
+.omniloop-admin.wrap ul {
+	margin: 0;
+}
+
+.omniloop-admin.wrap h1,
+.omniloop-admin.wrap h2 {
+	padding: 0;
+}
+
+.omniloop-admin .notice,
+.omniloop-admin .updated,
+.omniloop-admin .error {
+	margin: 0 0 1rem;
+}
+
 .omniloop-admin-hero {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: space-between;
 	gap: 1.25rem;
 	padding: 1.35rem 1.5rem;
 	border: 1px solid var(--ol-admin-line);
 	border-radius: var(--ol-admin-radius);
 	background:
-		radial-gradient(1200px 280px at 0% 0%, rgba(15, 118, 110, 0.1), transparent 55%),
+		radial-gradient(900px 220px at -8% -40%, rgba(15, 118, 110, 0.14), transparent 58%),
+		radial-gradient(640px 180px at 100% 0%, rgba(15, 118, 110, 0.05), transparent 46%),
 		linear-gradient(180deg, #ffffff 0%, var(--ol-admin-soft) 100%);
 	box-shadow: var(--ol-admin-shadow);
 }
@@ -47,7 +80,7 @@
 .omniloop-admin-hero__brand {
 	display: flex;
 	gap: 1rem;
-	align-items: flex-start;
+	align-items: center;
 	min-width: min(100%, 28rem);
 }
 
@@ -58,9 +91,9 @@
 	width: 3rem;
 	height: 3rem;
 	border-radius: 12px;
-	background: var(--ol-admin-ink);
+	background: linear-gradient(160deg, #0f766e 0%, #134e4a 100%);
 	color: #fff;
-	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+	box-shadow: 0 10px 20px rgba(15, 118, 110, 0.28);
 }
 
 .omniloop-admin-hero__mark svg {
@@ -68,28 +101,28 @@
 }
 
 .omniloop-admin-hero__eyebrow {
-	margin: 0 0 0.2rem;
-	font-size: 0.72rem;
+	margin: 0 0 0.15rem;
+	font-size: 0.68rem;
 	font-weight: 700;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.1em;
 	text-transform: uppercase;
 	color: var(--ol-admin-accent);
 }
 
 .omniloop-admin-hero h1 {
-	margin: 0 0 0.35rem;
-	padding: 0;
-	font-size: 1.55rem;
+	margin: 0 0 0.3rem;
+	font-size: 1.5rem;
 	font-weight: 700;
-	letter-spacing: -0.02em;
-	line-height: 1.2;
+	letter-spacing: -0.03em;
+	line-height: 1.15;
 	color: var(--ol-admin-ink);
 }
 
 .omniloop-admin-hero__lead {
 	margin: 0;
-	max-width: 36rem;
+	max-width: 38rem;
 	color: var(--ol-admin-muted);
+	font-size: 0.92rem;
 }
 
 .omniloop-admin-hero__actions {
@@ -104,17 +137,17 @@
 	align-items: center;
 	justify-content: center;
 	gap: 0.4rem;
-	min-height: 2.35rem;
+	min-height: 2.4rem;
 	margin: 0;
-	padding: 0.45rem 0.95rem;
+	padding: 0.45rem 1rem;
 	border: 1px solid transparent;
-	border-radius: 10px;
+	border-radius: 11px;
 	font-size: 0.875rem;
 	font-weight: 600;
 	line-height: 1.2;
 	text-decoration: none;
 	cursor: pointer;
-	transition: background 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+	transition: background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
 .omniloop-admin-btn:focus-visible {
@@ -123,15 +156,15 @@
 }
 
 .omniloop-admin-btn--primary {
-	background: var(--ol-admin-ink);
-	border-color: var(--ol-admin-ink);
+	background: var(--ol-admin-accent);
+	border-color: var(--ol-admin-accent);
 	color: #fff;
-	box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+	box-shadow: 0 6px 16px rgba(15, 118, 110, 0.24);
 }
 
 .omniloop-admin-btn--primary:hover {
-	background: #1e293b;
-	border-color: #1e293b;
+	background: var(--ol-admin-accent-hover);
+	border-color: var(--ol-admin-accent-hover);
 	color: #fff;
 }
 
@@ -139,6 +172,7 @@
 	opacity: 0.65;
 	cursor: wait;
 	box-shadow: none;
+	transform: none;
 }
 
 .omniloop-admin-btn--ghost {
@@ -148,31 +182,44 @@
 }
 
 .omniloop-admin-btn--ghost:hover {
-	border-color: #cbd5e1;
+	border-color: var(--ol-admin-line-strong);
 	background: var(--ol-admin-soft);
 	color: var(--ol-admin-ink);
 }
 
 .omniloop-admin-stats {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 0.85rem;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 0;
 	margin: 1rem 0 0;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: var(--ol-admin-radius);
+	background: var(--ol-admin-card);
+	box-shadow: var(--ol-admin-shadow);
+	overflow: hidden;
 }
 
 .omniloop-admin-stat {
-	padding: 1rem 1.1rem;
-	border: 1px solid var(--ol-admin-line);
-	border-radius: 12px;
-	background: var(--ol-admin-card);
-	box-shadow: var(--ol-admin-shadow);
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	padding: 1.05rem 1.15rem 1.1rem;
+	border: 0;
+	border-right: 1px solid var(--ol-admin-line);
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+.omniloop-admin-stat:last-child {
+	border-right: 0;
 }
 
 .omniloop-admin-stat__label {
-	margin: 0 0 0.35rem;
-	font-size: 0.72rem;
+	margin: 0 0 0.4rem;
+	font-size: 0.68rem;
 	font-weight: 700;
-	letter-spacing: 0.06em;
+	letter-spacing: 0.07em;
 	text-transform: uppercase;
 	color: var(--ol-admin-muted);
 }
@@ -181,27 +228,54 @@
 	margin: 0;
 	font-size: 1.55rem;
 	font-weight: 700;
-	letter-spacing: -0.03em;
+	letter-spacing: -0.04em;
 	line-height: 1.1;
 	color: var(--ol-admin-ink);
 	font-variant-numeric: tabular-nums;
 }
 
+.omniloop-admin-stat__value--sm {
+	font-size: 1.05rem;
+	letter-spacing: -0.02em;
+	line-height: 1.25;
+}
+
+.omniloop-admin-stat__value.is-warn {
+	color: var(--ol-admin-warn);
+}
+
 .omniloop-admin-stat__meta {
-	margin: 0.35rem 0 0;
-	font-size: 0.8rem;
+	margin: 0.4rem 0 0;
+	font-size: 0.78rem;
 	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-stat__pill,
+.omniloop-admin-stat__meta {
+	margin-top: auto;
+	padding-top: 0.55rem;
 }
 
 .omniloop-admin-stat__pill {
 	display: inline-flex;
 	align-items: center;
-	margin-top: 0.4rem;
-	padding: 0.15rem 0.5rem;
+	gap: 0.35rem;
+	width: fit-content;
+	margin-top: auto;
+	padding: 0.18rem 0.55rem 0.18rem 0.45rem;
 	border-radius: 999px;
-	font-size: 0.72rem;
+	font-size: 0.7rem;
 	font-weight: 700;
 	letter-spacing: 0.02em;
+	line-height: 1.2;
+}
+
+.omniloop-admin-stat__pill::before {
+	content: "";
+	width: 0.4rem;
+	height: 0.4rem;
+	border-radius: 999px;
+	background: currentColor;
 }
 
 .omniloop-admin-stat__pill--ok {
@@ -220,38 +294,55 @@
 }
 
 .omniloop-admin-form {
-	margin-top: 0.25rem;
+	margin-top: 0.15rem;
 }
 
 .omniloop-admin-tabs {
-	display: flex;
+	display: inline-flex;
 	flex-wrap: wrap;
-	gap: 0.35rem;
-	margin: 1rem 0 0;
+	gap: 0.2rem;
+	margin: 1.15rem 0 0;
+	padding: 0.28rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 14px;
+	background: #eef2f6;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .omniloop-admin-tab {
 	margin: 0;
-	padding: 0.45rem 0.85rem;
-	border: 1px solid var(--ol-admin-line);
-	border-radius: 999px;
-	background: #fff;
+	padding: 0.48rem 0.95rem;
+	border: 0;
+	border-radius: 10px;
+	background: transparent;
 	color: var(--ol-admin-muted);
 	font: inherit;
 	font-size: 0.86rem;
 	font-weight: 600;
+	line-height: 1.2;
 	cursor: pointer;
+	transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.omniloop-admin-tab:hover {
+	color: var(--ol-admin-ink);
+	background: rgba(255, 255, 255, 0.55);
+}
+
+.omniloop-admin-tab:focus-visible {
+	outline: 2px solid var(--ol-admin-accent);
+	outline-offset: 1px;
 }
 
 .omniloop-admin-tab.is-active {
-	background: var(--ol-admin-accent, #0f766e);
-	border-color: transparent;
-	color: #fff;
+	background: #fff;
+	color: var(--ol-admin-ink);
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 10px rgba(15, 23, 42, 0.05);
 }
 
 .omniloop-admin-grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 1rem;
 	margin-top: 1rem;
 	align-items: start;
@@ -283,41 +374,76 @@
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 1rem;
-	padding: 1.05rem 1.2rem;
+	padding: 1.1rem 1.25rem 1rem;
 	border-bottom: 1px solid var(--ol-admin-line);
-	background: linear-gradient(180deg, #fff, var(--ol-admin-soft));
+	background: linear-gradient(180deg, #fff, #fbfdff);
 }
 
 .omniloop-admin-card__head h2 {
-	margin: 0 0 0.25rem;
-	padding: 0;
-	font-size: 1.05rem;
+	margin: 0 0 0.28rem;
+	font-size: 1.02rem;
 	font-weight: 700;
-	letter-spacing: -0.01em;
+	letter-spacing: -0.02em;
 	color: var(--ol-admin-ink);
 }
 
 .omniloop-admin-card__head p {
 	margin: 0;
+	max-width: 44rem;
 	color: var(--ol-admin-muted);
 	font-size: 0.84rem;
+	line-height: 1.45;
 }
 
 .omniloop-admin-card__body {
-	padding: 1rem 1.2rem 1.2rem;
+	padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.omniloop-admin-preset__grid + .omniloop-admin-checks,
+.omniloop-admin-preset__grid + .omniloop-admin-hint,
+.omniloop-admin-preset__grid + .omniloop-admin-file-row,
+.omniloop-admin-hint + .omniloop-admin-table-wrap {
+	margin-top: 1rem;
+}
+
+.omniloop-admin-subhead {
+	margin: 1.15rem 0 0.7rem;
+	padding-top: 1.05rem;
+	border-top: 1px dashed var(--ol-admin-line);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-subhead:first-child {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
 }
 
 .omniloop-admin-checks {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.55rem;
+	gap: 0.6rem;
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
+.omniloop-admin-checks--solo,
+.omniloop-admin-checks--stack {
+	grid-template-columns: 1fr;
+}
+
 .omniloop-admin-check {
 	position: relative;
+	margin: 0;
+}
+
+.omniloop-admin-check label {
+	display: block;
 	margin: 0;
 }
 
@@ -330,18 +456,18 @@
 .omniloop-admin-check__ui {
 	display: flex;
 	align-items: center;
-	gap: 0.7rem;
-	min-height: 3.1rem;
-	padding: 0.55rem 0.75rem;
+	gap: 0.75rem;
+	min-height: 3.25rem;
+	padding: 0.65rem 0.8rem;
 	border: 1px solid var(--ol-admin-line);
-	border-radius: 11px;
+	border-radius: 12px;
 	background: #fff;
 	cursor: pointer;
-	transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+	transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .omniloop-admin-check:hover .omniloop-admin-check__ui {
-	border-color: #cbd5e1;
+	border-color: var(--ol-admin-line-strong);
 	background: var(--ol-admin-soft);
 }
 
@@ -351,21 +477,22 @@
 }
 
 .omniloop-admin-check input:checked + .omniloop-admin-check__ui {
-	border-color: rgba(15, 118, 110, 0.45);
-	background: var(--ol-admin-accent-soft);
-	box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.12);
+	border-color: rgba(15, 118, 110, 0.42);
+	background: linear-gradient(180deg, #f0fdfa, var(--ol-admin-accent-soft));
+	box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.1);
 }
 
 .omniloop-admin-check__tick {
 	flex: 0 0 auto;
 	display: grid;
 	place-items: center;
-	width: 1.15rem;
-	height: 1.15rem;
+	width: 1.2rem;
+	height: 1.2rem;
 	border: 1.5px solid #94a3b8;
-	border-radius: 5px;
+	border-radius: 6px;
 	background: #fff;
 	color: transparent;
+	transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
 }
 
 .omniloop-admin-check input:checked + .omniloop-admin-check__ui .omniloop-admin-check__tick {
@@ -384,7 +511,7 @@
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.1rem;
+	gap: 0.12rem;
 }
 
 .omniloop-admin-check__label {
@@ -396,14 +523,35 @@
 	font-size: 0.75rem;
 	color: var(--ol-admin-muted);
 	font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Consolas, monospace;
+	line-height: 1.4;
+}
+
+.omniloop-admin-checks--solo .omniloop-admin-check__slug {
+	font-family: inherit;
 }
 
 .omniloop-admin-empty {
 	margin: 0;
-	padding: 0.95rem 1rem;
-	border: 1px dashed #cbd5e1;
-	border-radius: 11px;
-	background: var(--ol-admin-soft);
+	padding: 1.15rem 1.1rem;
+	border: 1px dashed var(--ol-admin-line-strong);
+	border-radius: 12px;
+	background:
+		repeating-linear-gradient(
+			-12deg,
+			transparent,
+			transparent 8px,
+			rgba(148, 163, 184, 0.06) 8px,
+			rgba(148, 163, 184, 0.06) 16px
+		),
+		var(--ol-admin-soft);
+	color: var(--ol-admin-muted);
+	text-align: center;
+}
+
+.omniloop-admin-hint {
+	margin: 0.7rem 0 0;
+	font-size: 0.8rem;
+	line-height: 1.45;
 	color: var(--ol-admin-muted);
 }
 
@@ -412,10 +560,10 @@
 	gap: 0.85rem;
 	align-items: flex-start;
 	margin-top: 1rem;
-	padding: 1rem 1.15rem;
-	border: 1px solid var(--ol-admin-line);
+	padding: 1rem 1.2rem;
+	border: 1px solid rgba(15, 118, 110, 0.18);
 	border-radius: var(--ol-admin-radius);
-	background: #fff;
+	background: linear-gradient(180deg, #f0fdfa, #fff);
 	box-shadow: var(--ol-admin-shadow);
 }
 
@@ -425,34 +573,40 @@
 	place-items: center;
 	width: 2.25rem;
 	height: 2.25rem;
-	border-radius: 9px;
+	border-radius: 10px;
 	background: var(--ol-admin-accent-soft);
 	color: var(--ol-admin-accent);
 }
 
 .omniloop-admin-tip strong {
 	display: block;
-	margin-bottom: 0.15rem;
+	margin-bottom: 0.18rem;
 	color: var(--ol-admin-ink);
+	font-size: 0.9rem;
 }
 
 .omniloop-admin-tip p {
 	margin: 0;
 	color: var(--ol-admin-muted);
+	font-size: 0.86rem;
 }
 
 .omniloop-admin-foot {
+	position: sticky;
+	bottom: 12px;
+	z-index: 20;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.85rem;
 	margin-top: 1rem;
-	padding: 0.95rem 1.15rem;
+	padding: 0.85rem 1.1rem;
 	border: 1px solid var(--ol-admin-line);
 	border-radius: var(--ol-admin-radius);
-	background: #fff;
-	box-shadow: var(--ol-admin-shadow);
+	background: rgba(255, 255, 255, 0.92);
+	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+	backdrop-filter: blur(12px);
 }
 
 .omniloop-admin-foot__actions {
@@ -469,7 +623,7 @@
 }
 
 .omniloop-admin-preset {
-	padding: 0.95rem 1rem;
+	padding: 1rem 1.05rem;
 	border: 1px solid var(--ol-admin-line);
 	border-radius: 12px;
 	background: var(--ol-admin-soft);
@@ -478,48 +632,122 @@
 .omniloop-admin-preset__grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.65rem 0.85rem;
+	gap: 0.75rem 0.9rem;
 }
 
 .omniloop-admin-preset__grid label {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
+	gap: 0.32rem;
 	margin: 0;
-	font-size: 0.82rem;
+	font-size: 0.78rem;
 	font-weight: 600;
-	color: var(--ol-admin-ink);
+	color: #334155;
 }
 
 .omniloop-admin-preset__grid input,
 .omniloop-admin-preset__grid select,
-.omniloop-admin-preset__grid textarea {
+.omniloop-admin-preset__grid textarea,
+.omniloop-admin-file {
 	width: 100%;
+	max-width: 100%;
 	margin: 0;
-	padding: 0.45rem 0.55rem;
-	border: 1px solid var(--ol-admin-line);
-	border-radius: 8px;
+	padding: 0.52rem 0.7rem;
+	border: 1px solid var(--ol-admin-line-strong);
+	border-radius: 9px;
 	background: #fff;
 	font-size: 0.875rem;
 	font-weight: 400;
+	line-height: 1.35;
 	color: var(--ol-admin-ink);
+	box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
+	transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.omniloop-admin-preset__grid input:hover,
+.omniloop-admin-preset__grid select:hover,
+.omniloop-admin-preset__grid textarea:hover {
+	border-color: #94a3b8;
+}
+
+.omniloop-admin-preset__grid input:focus,
+.omniloop-admin-preset__grid select:focus,
+.omniloop-admin-preset__grid textarea:focus,
+.omniloop-admin-file:focus {
+	outline: none;
+	border-color: var(--ol-admin-accent);
+	box-shadow: 0 0 0 3px var(--ol-admin-accent-ring);
 }
 
 .omniloop-admin-preset__grid textarea {
 	font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Consolas, monospace;
 	font-size: 0.8rem;
 	resize: vertical;
-	min-height: 5rem;
+	min-height: 5.25rem;
 }
 
 .omniloop-admin-preset__wide {
 	grid-column: 1 / -1;
 }
 
+.omniloop-admin-table-wrap {
+	margin-top: 0.85rem;
+	overflow: auto;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 12px;
+	background: #fff;
+}
+
+.omniloop-admin-table {
+	width: 100%;
+	margin: 0;
+	border-collapse: collapse;
+	font-size: 0.86rem;
+}
+
+.omniloop-admin-table th,
+.omniloop-admin-table td {
+	padding: 0.7rem 0.9rem;
+	border-bottom: 1px solid var(--ol-admin-line);
+	text-align: left;
+	vertical-align: top;
+}
+
+.omniloop-admin-table th {
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--ol-admin-muted);
+	background: var(--ol-admin-soft);
+}
+
+.omniloop-admin-table tr:last-child td {
+	border-bottom: 0;
+}
+
+.omniloop-admin-table td:last-child {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.omniloop-admin-file-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	align-items: center;
+	margin: 0 0 0.85rem;
+}
+
+.omniloop-admin-file-row label {
+	margin: 0;
+	flex: 1 1 16rem;
+}
+
 .omniloop-admin-progress {
 	display: none;
 	width: min(100%, 18rem);
-	height: 0.4rem;
+	height: 0.42rem;
 	overflow: hidden;
 	border-radius: 999px;
 	background: #e2e8f0;
@@ -533,12 +761,13 @@
 	height: 100%;
 	width: 0%;
 	border-radius: inherit;
-	background: linear-gradient(90deg, var(--ol-admin-accent), #14b8a6);
+	background: linear-gradient(90deg, var(--ol-admin-accent), #2dd4bf);
 	transition: width 180ms ease;
 }
 
 .omniloop-admin-status {
 	min-height: 1.25rem;
+	margin: 0;
 	font-size: 0.84rem;
 	color: var(--ol-admin-muted);
 }
@@ -549,8 +778,31 @@
 }
 
 .omniloop-admin-status.is-error {
-	color: #b91c1c;
+	color: var(--ol-admin-danger);
 	font-weight: 600;
+}
+
+.omniloop-admin-status--warn {
+	margin-top: 0.85rem;
+	padding: 0.7rem 0.85rem;
+	border-radius: 10px;
+	background: var(--ol-admin-warn-soft);
+	color: var(--ol-admin-warn);
+	font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+	.omniloop-admin-stats {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.omniloop-admin-stat:nth-child(3) {
+		border-right: 0;
+	}
+
+	.omniloop-admin-stat:nth-child(n + 4) {
+		border-top: 1px solid var(--ol-admin-line);
+	}
 }
 
 @media (max-width: 960px) {
@@ -559,7 +811,20 @@
 	}
 
 	.omniloop-admin-stats {
-		grid-template-columns: 1fr;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.omniloop-admin-stat,
+	.omniloop-admin-stat:nth-child(3) {
+		border-right: 1px solid var(--ol-admin-line);
+	}
+
+	.omniloop-admin-stat:nth-child(2n) {
+		border-right: 0;
+	}
+
+	.omniloop-admin-stat:nth-child(n + 3) {
+		border-top: 1px solid var(--ol-admin-line);
 	}
 }
 
@@ -568,11 +833,293 @@
 		margin-right: 0.5rem;
 	}
 
-	.omniloop-admin-checks {
+	.omniloop-admin-checks,
+	.omniloop-admin-preset__grid,
+	.omniloop-admin-stats {
 		grid-template-columns: 1fr;
 	}
 
+	.omniloop-admin-stat,
+	.omniloop-admin-stat:nth-child(2n),
+	.omniloop-admin-stat:nth-child(3) {
+		border-right: 0;
+	}
+
+	.omniloop-admin-stat:nth-child(n + 2) {
+		border-top: 1px solid var(--ol-admin-line);
+	}
+
+	.omniloop-admin-hero,
+	.omniloop-admin-card__head,
+	.omniloop-admin-card__body {
+		padding-left: 1rem;
+		padding-right: 1rem;
+	}
+
 	.omniloop-admin-hero {
-		padding: 1.1rem;
+		padding-top: 1.1rem;
+		padding-bottom: 1.1rem;
+	}
+
+	.omniloop-admin-foot {
+		bottom: 8px;
+	}
+
+	.omniloop-admin-tabs {
+		display: flex;
+	}
+
+	.omniloop-admin-tab {
+		flex: 1 1 auto;
+		text-align: center;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.omniloop-admin-btn,
+	.omniloop-admin-tab,
+	.omniloop-admin-check__ui,
+	.omniloop-admin-progress__bar {
+		transition: none;
+	}
+}
+
+.omniloop-admin.wrap .omniloop-admin-hero h1 {
+	margin: 0 0 0.3rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-hero__eyebrow,
+.omniloop-admin.wrap .omniloop-admin-card__head h2 {
+	margin: 0 0 0.28rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-hero__lead,
+.omniloop-admin.wrap .omniloop-admin-card__head p,
+.omniloop-admin.wrap .omniloop-admin-tip p {
+	margin: 0;
+}
+
+.omniloop-admin.wrap .omniloop-admin-stat__label {
+	margin: 0 0 0.4rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-stat__meta {
+	margin-top: auto;
+	padding-top: 0.55rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-hint {
+	margin: 0.7rem 0 0;
+}
+
+.omniloop-admin.wrap .omniloop-admin-subhead {
+	margin: 1.15rem 0 0.7rem;
+	padding-top: 1.05rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-subhead:first-child {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.omniloop-admin.wrap .omniloop-admin-status--warn {
+	margin-top: 0.85rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-preset__grid + .omniloop-admin-checks,
+.omniloop-admin.wrap .omniloop-admin-preset__grid + .omniloop-admin-hint {
+	margin-top: 1rem;
+}
+
+.omniloop-admin.wrap .omniloop-admin-empty {
+	padding: 1.15rem 1.1rem;
+}
+
+.omniloop-admin-btn--small {
+	margin-top: 0.75rem;
+	padding: 0.4rem 0.75rem;
+	font-size: 0.8rem;
+}
+
+.omniloop-admin-preset__toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.omniloop-admin-preset__badge {
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ol-admin-muted);
+}
+
+.omniloop-admin-icon-btn {
+	margin: 0;
+	padding: 0;
+	width: 1.7rem;
+	height: 1.7rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 8px;
+	background: #fff;
+	color: var(--ol-admin-muted);
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.omniloop-admin-icon-btn:hover {
+	border-color: var(--ol-admin-danger);
+	color: var(--ol-admin-danger);
+}
+
+.omniloop-facet-builder {
+	margin-top: 0.9rem;
+}
+
+.omniloop-facet-row {
+	margin-bottom: 0.7rem;
+	padding: 0.7rem 0.75rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 10px;
+	background: #fff;
+}
+
+.omniloop-facet-row__head {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.omniloop-facet-row__key {
+	flex: 1 1 auto;
+	margin: 0;
+	padding: 0.45rem 0.6rem;
+	border: 1px solid var(--ol-admin-line-strong);
+	border-radius: 8px;
+	background: #fff;
+	font: inherit;
+}
+
+.omniloop-facet-checks {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.35rem 0.75rem;
+	margin-top: 0.65rem;
+}
+
+.omniloop-facet-check {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: 0;
+	font-size: 0.84rem;
+	font-weight: 500;
+	color: var(--ol-admin-ink);
+}
+
+.omniloop-facet-price {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.65rem;
+	margin-top: 0.65rem;
+}
+
+.omniloop-facet-price label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #334155;
+}
+
+.omniloop-pin-picker__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	min-height: 0.25rem;
+	margin-bottom: 0.55rem;
+}
+
+.omniloop-pin-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.28rem 0.35rem 0.28rem 0.6rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 0.8rem;
+	font-weight: 600;
+}
+
+.omniloop-pin-chip__remove {
+	margin: 0;
+	padding: 0;
+	width: 1.2rem;
+	height: 1.2rem;
+	border: 0;
+	border-radius: 999px;
+	background: var(--ol-admin-soft);
+	color: var(--ol-admin-muted);
+	cursor: pointer;
+	line-height: 1;
+}
+
+.omniloop-pin-picker__search-wrap {
+	position: relative;
+}
+
+.omniloop-pin-picker__search {
+	width: 100%;
+	margin: 0;
+	padding: 0.52rem 0.7rem;
+	border: 1px solid var(--ol-admin-line-strong);
+	border-radius: 9px;
+	background: #fff;
+	font: inherit;
+}
+
+.omniloop-pin-picker__results {
+	position: absolute;
+	z-index: 5;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	max-height: 16rem;
+	overflow: auto;
+	padding: 0.35rem;
+	border: 1px solid var(--ol-admin-line);
+	border-radius: 10px;
+	background: #fff;
+}
+
+.omniloop-pin-picker__hit {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0.45rem 0.6rem;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--ol-admin-ink);
+	font: inherit;
+	font-size: 0.86rem;
+	text-align: left;
+	cursor: pointer;
+}
+
+.omniloop-pin-picker__hit:hover {
+	background: var(--ol-admin-accent-soft);
+}
+
+@media (max-width: 640px) {
+	.omniloop-facet-checks,
+	.omniloop-facet-price {
+		grid-template-columns: 1fr;
 	}
 }

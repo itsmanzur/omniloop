@@ -33,15 +33,15 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 
 - Live search, sort, pagination (page numbers, Load More, or infinite scroll)
 - **Filter Sync** — multiple modules on one page share filter state via a Sync Group ID
-- **Saved filter presets** — reusable combinations from Settings; share with `?ol_preset=preset-id`
-- **Merchandising** — pin products, push out-of-stock last, promo badges, and “Only X left” urgency
+- **Saved filter presets** — reusable combinations from Settings (pick filters, no JSON); share with `?ol_preset=preset-id`
+- **Merchandising** — search to pin products, push out-of-stock last, promo badges, and “Only X left” urgency
 - **Loop Item Builder** — add Card Item children (image, title, price, rating, buttons) and reorder them to design the card
 - Taxonomy facets with counts and “Show more”
-- WooCommerce: categories, tags, attributes (color / image / size swatches), price From–To, stock, on sale, featured, star rating
+- WooCommerce: categories, tags, attributes (color / image / size swatches), price From–To, stock, on sale, featured, star rating; attribute/price/stock choices match the same variation
 - ACF facets (opt-in in Settings)
 - Active filter chips + clear all
 - Pretty SEO URLs (`/page/ol/color/blue+red/...`) with title/description/H1 templates, noindex controls, and optional sitemap entries
-- Conditional facets, hide empty values, typo-tolerant search, and filter analytics
+- Conditional facets, hide empty values, typo-tolerant title/content/SKU search, and opt-in anonymous conversion analytics
 
 ### Layout presets
 
@@ -61,9 +61,9 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 
 ### Performance
 
-- Custom index table for fast facet queries with incremental auto-sync on save
+- Custom index table for fast facet queries with incremental auto-sync, stale-row health reporting, and background reindex after schema upgrades
 - AJAX query with client cache + abort of stale requests
-- Skeleton shimmer while results load
+- Skeleton shimmer while results load, plus a localized error/retry state
 
 ## Module settings (Visual Builder)
 
@@ -91,6 +91,7 @@ If pretty URLs like `/ol/...` 404, visit **Settings → Permalinks** and click S
 - SEO templates, robots, and sitemap
 - Conditional facets and empty-result hiding
 - Settings export / import
+- Optional 30-day filter, product-click, and add-to-cart intent analytics (no IP address stored)
 - Rebuild index
 
 ## OmniLoop Help Guide

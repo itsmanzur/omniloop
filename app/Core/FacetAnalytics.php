@@ -43,10 +43,12 @@ final class FacetAnalytics {
 			event_type VARCHAR(20) NOT NULL,
 			facet_key VARCHAR(50) NOT NULL DEFAULT '',
 			facet_value VARCHAR(191) NOT NULL DEFAULT '',
+			post_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			result_count INT(11) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
 			KEY idx_created (created_at),
 			KEY idx_facet (facet_key, facet_value),
+			KEY idx_post_event (post_id, event_type),
 			KEY idx_type (event_type)
 		) {$charset};";
 
@@ -55,11 +57,11 @@ final class FacetAnalytics {
 
 	/**
 	 * @param array<string,mixed> $raw
-	 * @return array{post_type:string,event_type:string,facet_key:string,facet_value:string,result_count:int}|null
+	 * @return array{post_type:string,event_type:string,facet_key:string,facet_value:string,post_id:int,result_count:int}|null
 	 */
 	public static function sanitize_event( array $raw ): ?array {
 		$type = sanitize_key( (string) ( $raw['event_type'] ?? '' ) );
-		if ( ! in_array( $type, [ 'click', 'empty' ], true ) ) {
+		if ( ! in_array( $type, [ 'click', 'empty', 'product_click', 'add_to_cart' ], true ) ) {
 			return null;
 		}
 
@@ -72,7 +74,8 @@ final class FacetAnalytics {
 			'post_type'    => substr( $post_type, 0, 20 ),
 			'event_type'   => $type,
 			'facet_key'    => Indexer::sanitize_facet_key( (string) ( $raw['facet_key'] ?? '' ) ),
-			'facet_value'  => substr( sanitize_text_field( (string) ( $raw['facet_value'] ?? '' ) ), 0, 191 ),
+			'facet_value'  => Indexer::truncate_text( sanitize_text_field( (string) ( $raw['facet_value'] ?? '' ) ), 191 ),
+			'post_id'      => max( 0, (int) ( $raw['post_id'] ?? 0 ) ),
 			'result_count' => max( 0, (int) ( $raw['result_count'] ?? 0 ) ),
 		];
 	}
@@ -81,6 +84,9 @@ final class FacetAnalytics {
 	 * @param array<string,mixed> $raw
 	 */
 	public static function record( array $raw ): bool {
+		if ( ! self::enabled() ) {
+			return false;
+		}
 		$event = self::sanitize_event( $raw );
 		if ( ! $event ) {
 			return false;
@@ -100,12 +106,20 @@ final class FacetAnalytics {
 				'event_type'   => $event['event_type'],
 				'facet_key'    => $event['facet_key'],
 				'facet_value'  => $event['facet_value'],
+				'post_id'      => $event['post_id'],
 				'result_count' => $event['result_count'],
 			],
-			[ '%s', '%s', '%s', '%s', '%s', '%d' ]
+			[ '%s', '%s', '%s', '%s', '%s', '%d', '%d' ]
 		);
 
 		return false !== $ok;
+	}
+
+	public static function enabled(): bool {
+		$settings = get_option( 'omniloop_settings', [] );
+		$raw = is_array( $settings ) && isset( $settings['analytics'] ) && is_array( $settings['analytics'] ) ? $settings['analytics'] : [];
+
+		return isset( $raw['enabled'] ) && 'on' === $raw['enabled'];
 	}
 
 	public static function prune(): void {
@@ -173,8 +187,35 @@ final class FacetAnalytics {
 		return (int) $wpdb->get_var( $sql );
 	}
 
+	/** @return list<array{post_id:int,product_clicks:int,add_to_carts:int}> */
+	public static function top_products( int $limit = 8 ): array {
+		global $wpdb;
+		$table = self::table_name();
+		$limit = max( 1, min( 50, $limit ) );
+		$sql = $wpdb->prepare(
+			"SELECT post_id,
+			SUM(CASE WHEN event_type = 'product_click' THEN 1 ELSE 0 END) AS product_clicks,
+			SUM(CASE WHEN event_type = 'add_to_cart' THEN 1 ELSE 0 END) AS add_to_carts
+			FROM {$table} WHERE post_id > 0 AND created_at >= %s
+			GROUP BY post_id ORDER BY add_to_carts DESC, product_clicks DESC LIMIT %d",
+			gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS ),
+			$limit
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$rows = is_string( $sql ) ? $wpdb->get_results( $sql ) : [];
+		$out  = [];
+		foreach ( is_array( $rows ) ? $rows : [] as $row ) {
+			$out[] = [
+				'post_id'        => (int) $row->post_id,
+				'product_clicks' => (int) $row->product_clicks,
+				'add_to_carts'   => (int) $row->add_to_carts,
+			];
+		}
+		return $out;
+	}
+
 	public static function widget(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'manage_options' ) || ! self::enabled() ) {
 			return;
 		}
 		wp_add_dashboard_widget(
@@ -218,7 +259,7 @@ final class FacetAnalytics {
 		$ip  = (string) ( $_SERVER['REMOTE_ADDR'] ?? '' );
 		$key = 'ol_ev_' . md5( $ip !== '' ? $ip : 'anon' );
 		$n   = (int) get_transient( $key );
-		if ( $n > 120 ) {
+		if ( $n >= 120 ) {
 			return false;
 		}
 		set_transient( $key, $n + 1, HOUR_IN_SECONDS );

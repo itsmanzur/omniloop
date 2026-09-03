@@ -387,6 +387,29 @@ final class LoopRenderer {
 				'paginationStyle' => $pager_style,
 				'loadMoreLabel'   => __( 'Load more', 'omniloop' ),
 				'loadingLabel'    => __( 'Loading…', 'omniloop' ),
+				'i18n'            => [
+					'result'       => __( 'result', 'omniloop' ),
+					'results'      => __( 'results', 'omniloop' ),
+					'sale'         => __( 'Sale', 'omniloop' ),
+					'quickView'    => __( 'Quick view', 'omniloop' ),
+					'addToCart'    => __( 'Add to cart', 'omniloop' ),
+					'viewDetails'  => __( 'View details', 'omniloop' ),
+					'close'        => __( 'Close', 'omniloop' ),
+					'clearAll'     => __( 'Clear all', 'omniloop' ),
+					'requestError' => __( 'Could not load results. Check your connection and try again.', 'omniloop' ),
+					'retry'        => __( 'Retry', 'omniloop' ),
+					'rated'        => __( 'Rated', 'omniloop' ),
+					'outOfFive'    => __( 'out of 5', 'omniloop' ),
+					'pagination'   => __( 'Pagination', 'omniloop' ),
+					'previousPage' => __( 'Previous page', 'omniloop' ),
+					'nextPage'     => __( 'Next page', 'omniloop' ),
+					'page'         => __( 'Page', 'omniloop' ),
+					'showing'      => __( 'Showing', 'omniloop' ),
+					'of'           => __( 'of', 'omniloop' ),
+					'remove'       => __( 'Remove', 'omniloop' ),
+					'search'       => __( 'Search', 'omniloop' ),
+					'price'        => __( 'Price', 'omniloop' ),
+				],
 				'facetLogic'    => $facet_logic,
 				'sortMetaKey'   => $sort_meta,
 				'filterSync'    => self::is_flag_on( $attributes['filterSync'] ?? 'on' ),
@@ -411,7 +434,7 @@ final class LoopRenderer {
 					'applied' => $seo_on && SeoUrls::state_is_filtered( $state ),
 				],
 				'facetUi'       => FacetUi::frontend_config(),
-				'eventUrl'      => rest_url( 'omniloop/v1/event' ),
+				'eventUrl'      => FacetAnalytics::enabled() ? rest_url( 'omniloop/v1/event' ) : '',
 			],
 			JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS
 		);
@@ -756,14 +779,8 @@ final class LoopRenderer {
 			return null;
 		}
 
+		$id   = (int) $product->get_id();
 		$type = method_exists( $product, 'get_type' ) ? (string) $product->get_type() : 'simple';
-		$url  = method_exists( $product, 'add_to_cart_url' ) ? (string) $product->add_to_cart_url() : '';
-		if ( '' === $url && method_exists( $product, 'get_permalink' ) ) {
-			$url = (string) $product->get_permalink();
-		}
-		if ( '' === $url ) {
-			return null;
-		}
 
 		$label = method_exists( $product, 'add_to_cart_text' )
 			? (string) $product->add_to_cart_text()
@@ -780,10 +797,23 @@ final class LoopRenderer {
 			&& method_exists( $product, 'is_in_stock' )
 			&& $product->is_in_stock();
 
+		// WC builds a simple-product URL from the current request. During a REST
+		// response that would incorrectly point shoppers back to /wp-json/.
+		$url = $ajax ? (string) add_query_arg( 'add-to-cart', $id, home_url( '/' ) ) : '';
+		if ( '' === $url && method_exists( $product, 'add_to_cart_url' ) ) {
+			$url = (string) $product->add_to_cart_url();
+		}
+		if ( ( '' === $url || false !== strpos( $url, '/wp-json/' ) ) && method_exists( $product, 'get_permalink' ) ) {
+			$url = (string) $product->get_permalink();
+		}
+		if ( '' === $url ) {
+			return null;
+		}
+
 		$sku = method_exists( $product, 'get_sku' ) ? (string) $product->get_sku() : '';
 
 		return [
-			'id'    => (int) $product->get_id(),
+			'id'    => $id,
 			'url'   => $url,
 			'label' => $label,
 			'ajax'  => $ajax,

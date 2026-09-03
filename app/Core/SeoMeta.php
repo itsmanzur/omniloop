@@ -339,7 +339,7 @@ final class SeoMeta {
 	 * @return array{post_type:string,state:array{page:int,sort:string,search:string,view:string,facets:array<string,mixed>}}|null
 	 */
 	private static function context(): ?array {
-		if ( ! SeoUrls::frontend_enabled() ) {
+		if ( ! SeoUrls::frontend_enabled() || ! SeoUrls::is_filter_request() ) {
 			return null;
 		}
 		$post_type = LoopRenderer::default_post_type();
@@ -357,7 +357,7 @@ final class SeoMeta {
 	private static function sanitize_template( $raw ): string {
 		$text = sanitize_text_field( (string) $raw );
 
-		return substr( $text, 0, 200 );
+		return Indexer::truncate_text( $text, 200 );
 	}
 
 	private static function flag( $raw, string $default ): string {

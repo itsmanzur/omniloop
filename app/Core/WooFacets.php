@@ -30,7 +30,7 @@ final class WooFacets {
 	/**
 	 * Extra facet rows for a product: on_sale and featured.
 	 *
-	 * @return list<array{0:string,1:string,2:float|null}>
+	 * @return list<array{0:string,1:string,2:float|null,3?:int}>
 	 */
 	public static function extra_index_values( \WP_Post $post ): array {
 		if ( 'product' !== $post->post_type || ! function_exists( 'wc_get_product' ) ) {
@@ -65,7 +65,161 @@ final class WooFacets {
 		}
 		$out[] = [ 'popularity', (string) (int) $sales, $sales ];
 
+		foreach ( self::variable_index_values( $product ) as $extra ) {
+			$out[] = $extra;
+		}
+
 		return $out;
+	}
+
+	/**
+	 * Attribute slugs and min/max prices from published variations, stored on the parent.
+	 *
+	 * @param object $product WooCommerce product.
+	 * @return list<array{0:string,1:string,2:float|null}>
+	 */
+	public static function variable_index_values( $product ): array {
+		if ( ! is_object( $product ) || ! method_exists( $product, 'is_type' ) || ! $product->is_type( 'variable' ) ) {
+			return [];
+		}
+
+		$out  = [];
+		$seen = [];
+
+		$min = method_exists( $product, 'get_variation_price' ) ? $product->get_variation_price( 'min', false ) : '';
+		$max = method_exists( $product, 'get_variation_price' ) ? $product->get_variation_price( 'max', false ) : '';
+		if ( '' !== $min && is_numeric( $min ) ) {
+			$n                  = (float) $min;
+			$out[]              = [ 'price', (string) $n, $n ];
+			$seen[ 'price|' . $n ] = true;
+		}
+		if ( '' !== $max && is_numeric( $max ) ) {
+			$n    = (float) $max;
+			$mark = 'price|' . $n;
+			if ( ! isset( $seen[ $mark ] ) ) {
+				$out[]        = [ 'price', (string) $n, $n ];
+				$seen[ $mark ] = true;
+			}
+		}
+
+		$children = method_exists( $product, 'get_children' ) ? $product->get_children() : [];
+		$parent_attributes = method_exists( $product, 'get_attributes' ) ? $product->get_attributes() : [];
+		if ( ! is_array( $children ) ) {
+			return $out;
+		}
+
+		foreach ( $children as $variation_id ) {
+			$variation = function_exists( 'wc_get_product' ) ? wc_get_product( (int) $variation_id ) : null;
+			if ( ! $variation ) {
+				continue;
+			}
+			if ( method_exists( $variation, 'get_status' ) && 'publish' !== (string) $variation->get_status() ) {
+				continue;
+			}
+
+			$attrs = method_exists( $variation, 'get_attributes' ) ? $variation->get_attributes() : [];
+			if ( ! is_array( $attrs ) ) {
+				continue;
+			}
+
+			foreach ( self::variation_attribute_index_values( $attrs ) as $extra ) {
+				$mark = (int) $variation_id . '|' . $extra[0] . '|' . $extra[1];
+				if ( isset( $seen[ $mark ] ) ) {
+					continue;
+				}
+				$seen[ $mark ] = true;
+				$out[]         = [ $extra[0], $extra[1], $extra[2], (int) $variation_id ];
+			}
+
+			// An empty variation attribute means “any value”. Expand it to the
+			// parent's configured options so exact variation matching stays correct.
+			if ( is_array( $parent_attributes ) ) {
+				foreach ( $parent_attributes as $raw_key => $attribute ) {
+					$key = self::normalize_variation_attribute_key( (string) $raw_key );
+					$current = $attrs[ $raw_key ] ?? $attrs[ $key ] ?? '';
+					if ( '' !== trim( (string) $current ) && 'any' !== strtolower( trim( (string) $current ) ) ) {
+						continue;
+					}
+					$options = is_object( $attribute ) && method_exists( $attribute, 'get_options' ) ? $attribute->get_options() : [];
+					foreach ( is_array( $options ) ? $options : [] as $option ) {
+						$value = (string) $option;
+						if ( is_numeric( $option ) && taxonomy_exists( $key ) ) {
+							$term = get_term( (int) $option, $key );
+							$value = $term instanceof \WP_Term ? $term->slug : '';
+						}
+						$value = sanitize_title( $value );
+						if ( '' === $value ) {
+							continue;
+						}
+						$mark = (int) $variation_id . '|' . $key . '|' . $value;
+						if ( isset( $seen[ $mark ] ) ) {
+							continue;
+						}
+						$seen[ $mark ] = true;
+						$out[] = [ $key, $value, null, (int) $variation_id ];
+					}
+				}
+			}
+
+			$price = method_exists( $variation, 'get_price' ) ? $variation->get_price( 'edit' ) : '';
+			if ( '' !== $price && is_numeric( $price ) ) {
+				$out[] = [ 'price', (string) (float) $price, (float) $price, (int) $variation_id ];
+			}
+			if ( method_exists( $variation, 'get_stock_status' ) ) {
+				$status = sanitize_key( (string) $variation->get_stock_status() );
+				if ( '' !== $status ) {
+					$out[] = [ '_stock_status', $status, null, (int) $variation_id ];
+				}
+			}
+			if ( method_exists( $variation, 'is_on_sale' ) && $variation->is_on_sale() ) {
+				$out[] = [ 'on_sale', 'yes', 1.0, (int) $variation_id ];
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @param array<string,mixed> $attributes Variation attribute map.
+	 * @return list<array{0:string,1:string,2:float|null}>
+	 */
+	public static function variation_attribute_index_values( array $attributes ): array {
+		$out = [];
+		foreach ( $attributes as $raw_key => $raw_val ) {
+			if ( is_array( $raw_val ) ) {
+				continue;
+			}
+			$value = trim( (string) $raw_val );
+			if ( '' === $value || 'any' === strtolower( $value ) ) {
+				continue;
+			}
+
+			$key = self::normalize_variation_attribute_key( (string) $raw_key );
+			if ( '' === $key ) {
+				continue;
+			}
+
+			$slug = sanitize_title( $value );
+			if ( '' === $slug ) {
+				$slug = sanitize_text_field( $value );
+			}
+			if ( '' === $slug ) {
+				continue;
+			}
+
+			$out[] = [ $key, $slug, null ];
+		}
+
+		return $out;
+	}
+
+	public static function normalize_variation_attribute_key( string $key ): string {
+		$key = strtolower( trim( $key ) );
+		if ( 0 === strpos( $key, 'attribute_' ) ) {
+			$key = substr( $key, 10 );
+		}
+
+		return Indexer::sanitize_facet_key( $key );
 	}
 
 	/**

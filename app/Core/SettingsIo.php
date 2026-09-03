@@ -22,7 +22,7 @@ final class SettingsIo {
 	 * @return string[]
 	 */
 	public static function portable_keys(): array {
-		return [ 'post_types', 'acf_fields', 'auto_sync', 'filter_presets', 'merchandising', 'seo', 'facet_ui', 'search' ];
+		return [ 'post_types', 'acf_fields', 'auto_sync', 'filter_presets', 'merchandising', 'seo', 'facet_ui', 'search', 'analytics', 'help' ];
 	}
 
 	/**

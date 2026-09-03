@@ -19,6 +19,23 @@ final class QueryBuilder {
 	public const SORTS                = [ 'date', 'title', 'price_asc', 'price_desc', 'popularity', 'rating', 'meta' ];
 	public const FACET_LOGICS         = [ 'smart', 'or', 'and' ];
 
+	/**
+	 * Human labels for SORTS (admin + presets).
+	 *
+	 * @return array<string,string> slug => label
+	 */
+	public static function sort_labels(): array {
+		return [
+			'date'       => __( 'Newest', 'omniloop' ),
+			'title'      => __( 'Title A–Z', 'omniloop' ),
+			'price_asc'  => __( 'Price: low to high', 'omniloop' ),
+			'price_desc' => __( 'Price: high to low', 'omniloop' ),
+			'popularity' => __( 'Popularity', 'omniloop' ),
+			'rating'     => __( 'Rating', 'omniloop' ),
+			'meta'       => __( 'Custom meta', 'omniloop' ),
+		];
+	}
+
 	/** @var array<string,bool> */
 	private $has_index = [];
 
@@ -349,23 +366,30 @@ final class QueryBuilder {
 
 		if ( '' !== $search ) {
 			$like = '%' . $wpdb->esc_like( $search ) . '%';
-			if ( self::uses_fuzzy_search() && strlen( $search ) >= 3 ) {
-				$sql     .= ' AND (p.post_title LIKE %s OR p.post_excerpt LIKE %s OR SOUNDEX(p.post_title) = SOUNDEX(%s))';
+			if ( self::uses_fuzzy_search() && strlen( $search ) >= 3 && preg_match( '/[a-z]/i', $search ) ) {
+				$sql     .= " AND (p.post_title LIKE %s OR p.post_excerpt LIKE %s OR p.post_content LIKE %s OR SOUNDEX(p.post_title) = SOUNDEX(%s) OR p.ID IN (SELECT osi.post_id FROM {$table} osi WHERE osi.post_type = %s AND osi.facet_key = '_sku' AND osi.facet_value LIKE %s))";
+				$params[] = $like;
 				$params[] = $like;
 				$params[] = $like;
 				$params[] = $search;
+				$params[] = $post_type;
+				$params[] = $like;
 			} else {
-				$sql     .= ' AND p.post_title LIKE %s';
+				$sql     .= " AND (p.post_title LIKE %s OR p.post_excerpt LIKE %s OR p.post_content LIKE %s OR p.ID IN (SELECT osi.post_id FROM {$table} osi WHERE osi.post_type = %s AND osi.facet_key = '_sku' AND osi.facet_value LIKE %s))";
+				$params[] = $like;
+				$params[] = $like;
+				$params[] = $like;
+				$params[] = $post_type;
 				$params[] = $like;
 			}
 		}
 
 		$price_range = $this->parse_price_range( $price );
 		if ( $has_index && $price_range ) {
-			$sql     .= " AND p.ID IN (SELECT i.post_id FROM {$table} i WHERE i.post_type = %s AND i.facet_key = 'price' AND i.numeric_value BETWEEN %f AND %f)";
+			$sql     .= " AND p.ID IN (SELECT i.post_id FROM {$table} i WHERE i.post_type = %s AND i.facet_key = 'price' AND i.numeric_value IS NOT NULL GROUP BY i.post_id HAVING MIN(i.numeric_value) <= %f AND MAX(i.numeric_value) >= %f)";
 			$params[] = $post_type;
-			$params[] = $price_range[0];
 			$params[] = $price_range[1];
+			$params[] = $price_range[0];
 		}
 
 		$fragment = [
@@ -385,11 +409,132 @@ final class QueryBuilder {
 		$base    = $this->base_post_filter_fragment( $post_type, $facets, $search, $table, $has_index );
 		$sql    .= $base['sql'];
 		$params  = array_merge( $params, $base['params'] );
+		$variant_keys = $this->append_variation_filters( $sql, $params, $post_type, $facets, $table );
+		foreach ( $variant_keys as $variant_key ) {
+			unset( $facets[ $variant_key ] );
+		}
 		I18n::append_post_language( $sql, $params, $post_type );
+		$this->append_woocommerce_visibility( $sql, $params, $post_type, $search );
 
 		unset( $facets['price_range'] );
 		if ( $has_index ) {
 			$this->append_facet_filters( $sql, $params, $post_type, $facets, $facet_logic, $table );
+		}
+	}
+
+	/**
+	 * Keep selected attributes, stock, sale state, and price on one concrete
+	 * variation instead of independently matching rows flattened on the parent.
+	 *
+	 * @param mixed[]            $params
+	 * @param array<string,mixed> $facets
+	 * @return string[] Facet keys handled here.
+	 */
+	private function append_variation_filters( string &$sql, array &$params, string $post_type, array $facets, string $table ): array {
+		if ( 'product' !== $post_type ) {
+			return [];
+		}
+
+		$attribute_keys = [];
+		foreach ( $facets as $key => $values ) {
+			$key = Indexer::sanitize_facet_key( (string) $key );
+			if ( WooFacets::is_attribute_taxonomy( $key ) && $this->normalize_values( $values ) ) {
+				$attribute_keys[] = $key;
+			}
+		}
+		if ( ! $attribute_keys ) {
+			return [];
+		}
+
+		$handled        = $attribute_keys;
+		$variant_sql    = "EXISTS (SELECT 1 FROM {$table} olv WHERE olv.post_id = p.ID AND olv.post_type = %s AND olv.source_id > 0";
+		$variant_params = [ $post_type ];
+		$parent_sql     = '(1=1';
+		$parent_params  = [];
+
+		foreach ( array_merge( $attribute_keys, [ '_stock_status', 'on_sale' ] ) as $key ) {
+			if ( ! array_key_exists( $key, $facets ) ) {
+				continue;
+			}
+			$values = $this->normalize_values( $facets[ $key ] );
+			if ( ! $values ) {
+				continue;
+			}
+			$placeholders = implode( ',', array_fill( 0, count( $values ), '%s' ) );
+			$variant_sql      .= " AND EXISTS (SELECT 1 FROM {$table} olvx WHERE olvx.post_id = olv.post_id AND olvx.source_id = olv.source_id AND olvx.facet_key = %s AND olvx.facet_value IN ({$placeholders}))";
+			$variant_params[]  = $key;
+			$parent_sql       .= " AND EXISTS (SELECT 1 FROM {$table} olpx WHERE olpx.post_id = p.ID AND olpx.post_type = %s AND olpx.source_id = 0 AND olpx.facet_key = %s AND olpx.facet_value IN ({$placeholders}))";
+			$parent_params[]   = $post_type;
+			$parent_params[]   = $key;
+			foreach ( $values as $value ) {
+				$variant_params[] = $value;
+			}
+			foreach ( $values as $value ) {
+				$parent_params[] = $value;
+			}
+			$handled[] = $key;
+		}
+
+		$price = $this->parse_price_range( $facets['price_range'] ?? null );
+		if ( $price ) {
+			$variant_sql     .= " AND EXISTS (SELECT 1 FROM {$table} olvp WHERE olvp.post_id = olv.post_id AND olvp.source_id = olv.source_id AND olvp.facet_key = 'price' AND olvp.numeric_value BETWEEN %f AND %f)";
+			$variant_params[] = $price[0];
+			$variant_params[] = $price[1];
+			$parent_sql      .= " AND EXISTS (SELECT 1 FROM {$table} olpp WHERE olpp.post_id = p.ID AND olpp.post_type = %s AND olpp.source_id = 0 AND olpp.facet_key = 'price' AND olpp.numeric_value BETWEEN %f AND %f)";
+			$parent_params[] = $post_type;
+			$parent_params[] = $price[0];
+			$parent_params[] = $price[1];
+		}
+		$variant_sql .= ' LIMIT 1)';
+		$parent_sql  .= ')';
+		$sql         .= " AND ({$variant_sql} OR {$parent_sql})";
+		$params       = array_merge( $params, $variant_params, $parent_params );
+
+		return array_values( array_unique( $handled ) );
+	}
+
+	/**
+	 * Match WooCommerce's public catalog visibility rules even though this query
+	 * bypasses WC_Product_Query and WP_Query.
+	 *
+	 * @param mixed[] $params
+	 */
+	private function append_woocommerce_visibility( string &$sql, array &$params, string $post_type, string $search ): void {
+		if ( 'product' !== $post_type || ! function_exists( 'wc_get_product_visibility_term_ids' ) ) {
+			return;
+		}
+
+		$terms = wc_get_product_visibility_term_ids();
+		if ( ! is_array( $terms ) ) {
+			return;
+		}
+
+		$excluded = [];
+		foreach ( [ 'exclude-from-catalog' ] as $key ) {
+			if ( ! empty( $terms[ $key ] ) ) {
+				$excluded[] = (int) $terms[ $key ];
+			}
+		}
+		if ( '' !== $search && ! empty( $terms['exclude-from-search'] ) ) {
+			$excluded[] = (int) $terms['exclude-from-search'];
+		}
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items', 'no' ) && ! empty( $terms['outofstock'] ) ) {
+			$excluded[] = (int) $terms['outofstock'];
+		}
+		$excluded = array_values( array_unique( array_filter( $excluded ) ) );
+		if ( ! $excluded ) {
+			return;
+		}
+
+		global $wpdb;
+		$placeholders = implode( ',', array_fill( 0, count( $excluded ), '%d' ) );
+		$sql .= " AND NOT EXISTS (
+			SELECT 1 FROM {$wpdb->term_relationships} oltr
+			INNER JOIN {$wpdb->term_taxonomy} oltt ON oltt.term_taxonomy_id = oltr.term_taxonomy_id
+			WHERE oltr.object_id = p.ID AND oltt.taxonomy = 'product_visibility' AND oltt.term_id IN ({$placeholders})
+		)";
+		foreach ( $excluded as $term_id ) {
+			$params[] = $term_id;
 		}
 	}
 
@@ -476,32 +621,30 @@ final class QueryBuilder {
 
 		global $wpdb;
 
-		$table     = Installer::table_name();
-		$ids       = array_values( array_unique( array_map( 'intval', $ids ) ) );
-		$id_ph     = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		$key_ph    = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
-		$sql       = "SELECT i.facet_key, i.facet_value, COUNT(DISTINCT i.post_id) AS c
-			FROM {$table} i
-			WHERE i.post_type = %s AND i.facet_key IN ({$key_ph}) AND i.post_id IN ({$id_ph})
-			GROUP BY i.facet_key, i.facet_value";
-		$params    = array_merge( [ $post_type ], $keys, $ids );
-		$prepared  = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		if ( ! is_string( $prepared ) ) {
-			return $out;
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-		$rows = $wpdb->get_results( $prepared );
-		if ( ! is_array( $rows ) ) {
-			return $out;
-		}
-
-		foreach ( $rows as $row ) {
-			$key = (string) $row->facet_key;
-			if ( ! isset( $out[ $key ] ) ) {
+		$table  = Installer::table_name();
+		$ids    = array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+		$key_ph = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
+		foreach ( array_chunk( $ids, 400 ) as $chunk ) {
+			$id_ph  = implode( ',', array_fill( 0, count( $chunk ), '%d' ) );
+			$sql    = "SELECT i.facet_key, i.facet_value, COUNT(DISTINCT i.post_id) AS c
+				FROM {$table} i
+				WHERE i.post_type = %s AND i.facet_key IN ({$key_ph}) AND i.post_id IN ({$id_ph})
+				GROUP BY i.facet_key, i.facet_value";
+			$params = array_merge( [ $post_type ], $keys, $chunk );
+			$prepared = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			if ( ! is_string( $prepared ) ) {
 				continue;
 			}
-			$out[ $key ][ (string) $row->facet_value ] = (int) $row->c;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+			$rows = $wpdb->get_results( $prepared );
+			foreach ( is_array( $rows ) ? $rows : [] as $row ) {
+				$key = (string) $row->facet_key;
+				if ( ! isset( $out[ $key ] ) ) {
+					continue;
+				}
+				$value = (string) $row->facet_value;
+				$out[ $key ][ $value ] = ( $out[ $key ][ $value ] ?? 0 ) + (int) $row->c;
+			}
 		}
 
 		foreach ( $out as $key => $map ) {

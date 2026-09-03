@@ -37,6 +37,7 @@ final class SeoUrls {
 		add_filter( 'redirect_canonical', [ self::class, 'disable_canonical' ], 10, 2 );
 		add_filter( 'pre_handle_404', [ self::class, 'prevent_404' ], 10, 2 );
 		add_action( 'template_redirect', [ self::class, 'redirect_legacy' ], 1 );
+		add_action( 'template_redirect', [ self::class, 'reject_unscoped_pretty_url' ], 0 );
 		add_filter( 'get_canonical_url', [ self::class, 'filter_canonical' ], 20, 2 );
 		add_filter( 'wpseo_canonical', [ self::class, 'filter_canonical_url' ] );
 		add_filter( 'rank_math/frontend/canonical', [ self::class, 'filter_canonical_url' ] );
@@ -161,6 +162,9 @@ final class SeoUrls {
 		if ( ! self::has_legacy_query() ) {
 			return;
 		}
+		if ( ! self::is_filter_request() ) {
+			return;
+		}
 
 		$post_type = LoopRenderer::default_post_type();
 		$state     = self::state_for( $post_type );
@@ -172,6 +176,31 @@ final class SeoUrls {
 
 		wp_safe_redirect( $target, 301 );
 		exit;
+	}
+
+	public static function reject_unscoped_pretty_url(): void {
+		$path = self::request_path();
+		if ( false === strpos( $path, '/' . self::MARKER . '/' ) || self::split_request_uri() ) {
+			return;
+		}
+		global $wp_query;
+		if ( $wp_query instanceof \WP_Query ) {
+			$wp_query->set_404();
+		}
+		status_header( 404 );
+		nocache_headers();
+	}
+
+	public static function is_filter_request(): bool {
+		if ( self::split_request_uri() ) {
+			return true;
+		}
+		if ( ! self::has_legacy_query() ) {
+			return false;
+		}
+		$post_id = function_exists( 'get_queried_object_id' ) ? (int) get_queried_object_id() : 0;
+
+		return self::base_supports_filters( $post_id, trim( self::request_path(), '/' ) );
 	}
 
 	/**
@@ -248,7 +277,7 @@ final class SeoUrls {
 			$state['view'] = '';
 		}
 		$state['page']   = max( 1, (int) $state['page'] );
-		$state['search'] = substr( sanitize_text_field( $state['search'] ), 0, 120 );
+		$state['search'] = Indexer::truncate_text( sanitize_text_field( $state['search'] ), 120 );
 
 		return $state;
 	}
@@ -306,13 +335,13 @@ final class SeoUrls {
 		$sort     = (string) ( $state['sort'] ?? 'date' );
 		$view     = (string) ( $state['view'] ?? '' );
 		if ( '' !== $search ) {
-			$query['q'] = $search;
+			$query['ol_q'] = $search;
 		}
 		if ( '' !== $sort && 'date' !== $sort ) {
-			$query['sort'] = $sort;
+			$query['ol_sort'] = $sort;
 		}
 		if ( 'grid' === $view || 'list' === $view ) {
-			$query['view'] = $view;
+			$query['ol_view'] = $view;
 		}
 
 		$url = $base . $path;
@@ -489,20 +518,21 @@ final class SeoUrls {
 	private static function merge_query( array $state, array $aliases ): array {
 		$get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( isset( $get['q'] ) ) {
-			$state['search'] = (string) wp_unslash( $get['q'] );
-		} elseif ( isset( $get['ol_q'] ) ) {
+		$pretty = null !== self::split_request_uri();
+		if ( isset( $get['ol_q'] ) ) {
 			$state['search'] = (string) wp_unslash( $get['ol_q'] );
+		} elseif ( $pretty && isset( $get['q'] ) ) {
+			$state['search'] = (string) wp_unslash( $get['q'] );
 		}
-		if ( isset( $get['sort'] ) ) {
-			$state['sort'] = sanitize_key( (string) wp_unslash( $get['sort'] ) );
-		} elseif ( isset( $get['ol_sort'] ) ) {
+		if ( isset( $get['ol_sort'] ) ) {
 			$state['sort'] = sanitize_key( (string) wp_unslash( $get['ol_sort'] ) );
+		} elseif ( $pretty && isset( $get['sort'] ) ) {
+			$state['sort'] = sanitize_key( (string) wp_unslash( $get['sort'] ) );
 		}
-		if ( isset( $get['view'] ) ) {
-			$state['view'] = sanitize_key( (string) wp_unslash( $get['view'] ) );
-		} elseif ( isset( $get['ol_view'] ) ) {
+		if ( isset( $get['ol_view'] ) ) {
 			$state['view'] = sanitize_key( (string) wp_unslash( $get['ol_view'] ) );
+		} elseif ( $pretty && isset( $get['view'] ) ) {
+			$state['view'] = sanitize_key( (string) wp_unslash( $get['view'] ) );
 		}
 		if ( isset( $get['ol_page'] ) ) {
 			$state['page'] = max( 1, (int) $get['ol_page'] );
@@ -538,6 +568,9 @@ final class SeoUrls {
 		}
 
 		foreach ( $aliases as $alias => $key ) {
+			if ( ! $pretty ) {
+				break;
+			}
 			if ( ! isset( $get[ $alias ] ) ) {
 				continue;
 			}
@@ -625,7 +658,7 @@ final class SeoUrls {
 		foreach ( $parts as $part ) {
 			$item = sanitize_text_field( $part );
 			if ( '' !== $item ) {
-				$out[] = substr( $item, 0, 191 );
+				$out[] = Indexer::truncate_text( $item, 191 );
 			}
 		}
 
@@ -648,11 +681,24 @@ final class SeoUrls {
 
 		$base = trim( (string) $match[1], '/' );
 
-		return [
+		$parts = [
 			'base'    => $base,
 			'seo'     => $seo,
 			'post_id' => self::post_id_from_path( $base ),
 		];
+
+		return self::base_supports_filters( $parts['post_id'], $base ) ? $parts : null;
+	}
+
+	private static function base_supports_filters( int $post_id, string $base ): bool {
+		$supported = false;
+		if ( $post_id > 0 ) {
+			$post      = get_post( $post_id );
+			$content   = $post instanceof \WP_Post ? (string) $post->post_content : '';
+			$supported = false !== strpos( $content, 'omniloop/loop' ) || false !== strpos( $content, '[ol_loop' ) || false !== strpos( $content, 'ol_loop' );
+		}
+
+		return (bool) apply_filters( 'omniloop_is_filter_page', $supported, $post_id, $base );
 	}
 
 	private static function request_path(): string {

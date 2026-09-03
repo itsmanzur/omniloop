@@ -59,6 +59,44 @@ final class QueryBuilderTest extends TestCase {
 		$this->assertSame( 20, QueryBuilder::MAX_VALUES_PER_FACET );
 	}
 
+	public function test_price_range_matches_when_variation_span_overlaps(): void {
+		$wpdb             = $this->catalog_wpdb();
+		$wpdb->index_rows[] = [
+			'post_id'       => 1,
+			'post_type'     => 'product',
+			'facet_key'     => 'price',
+			'facet_value'   => '10',
+			'numeric_value' => 10.0,
+		];
+		$wpdb->index_rows[] = [
+			'post_id'       => 1,
+			'post_type'     => 'product',
+			'facet_key'     => 'price',
+			'facet_value'   => '500',
+			'numeric_value' => 500.0,
+		];
+		$GLOBALS['wpdb'] = $wpdb;
+
+		$builder = new QueryBuilder();
+		$ids     = $this->call(
+			$builder,
+			'matching_ids',
+			[ 'product', [ 'price_range' => [ 200, 300 ] ], '', 'date', 'smart', '' ]
+		);
+
+		$this->assertContains( 1, $ids );
+
+		$sql = '';
+		foreach ( $wpdb->log as $entry ) {
+			if ( false !== stripos( $entry['sql'], 'HAVING MIN' ) ) {
+				$sql = $entry['sql'];
+				break;
+			}
+		}
+		$this->assertNotSame( '', $sql );
+		$this->assertStringContainsString( 'HAVING MIN(i.numeric_value)', $sql );
+	}
+
 	public function test_facet_counts_match_leave_one_facet_out_semantics(): void {
 		$wpdb = $this->catalog_wpdb();
 		$GLOBALS['wpdb'] = $wpdb;
@@ -113,6 +151,31 @@ final class QueryBuilderTest extends TestCase {
 		$this->assertSame( 0, $id_lookups, 'active facet counts must not re-run matching_ids() per facet' );
 		$this->assertSame( 1, $unions, 'active facet counts should be one UNION ALL statement' );
 		$this->assertLessThan( 2 * $active, $wpdb->reads() );
+	}
+
+	public function test_product_attributes_share_one_variation_source(): void {
+		$builder = new QueryBuilder();
+		$sql     = '';
+		$params  = [];
+		$handled = $this->call(
+			$builder,
+			'append_variation_filters',
+			[
+				&$sql,
+				&$params,
+				'product',
+				[ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ], 'price_range' => [ 20, 30 ] ],
+				'wp_omniloop_index',
+			]
+		);
+
+		$this->assertEqualsCanonicalizing( [ 'pa_color', 'pa_size' ], $handled );
+		$this->assertStringContainsString( 'olv.source_id > 0', $sql );
+		$this->assertStringContainsString( 'olvx.source_id = olv.source_id', $sql );
+		$this->assertStringContainsString( 'olvp.source_id = olv.source_id', $sql );
+		$this->assertStringContainsString( ' OR ', $sql );
+		$this->assertStringContainsString( 'olpx.source_id = 0', $sql, 'simple products must retain parent-level attribute matching' );
+		$this->assertStringContainsString( 'olpp.source_id = 0', $sql, 'simple product prices must retain parent-level matching' );
 	}
 
 	/**

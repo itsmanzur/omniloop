@@ -19,6 +19,7 @@ use OmniLoop\Engine\Core\Merchandising;
 use OmniLoop\Engine\Core\MultiCurrency;
 use OmniLoop\Engine\Core\QueryBuilder;
 use OmniLoop\Engine\Core\WooFacets;
+use OmniLoop\Engine\Admin\CatalogLookup;
 use OmniLoop\Engine\Integrations\Divi5\NativeLoop;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,18 +37,10 @@ final class FilterEndpoint {
 			'omniloop/v1',
 			'/query',
 			[
-				[
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => [ self::class, 'handle' ],
-					'permission_callback' => '__return_true',
-					'args'                => self::args_schema(),
-				],
-				[
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ self::class, 'handle' ],
-					'permission_callback' => '__return_true',
-					'args'                => self::args_schema(),
-				],
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => [ self::class, 'handle' ],
+				'permission_callback' => [ self::class, 'allow_public_query' ],
+				'args'                => self::args_schema(),
 			]
 		);
 
@@ -94,6 +87,61 @@ final class FilterEndpoint {
 				'permission_callback' => '__return_true',
 			]
 		);
+
+		register_rest_route(
+			'omniloop/v1',
+			'/admin/search-posts',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ self::class, 'search_posts' ],
+				'permission_callback' => static function () {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
+
+		register_rest_route(
+			'omniloop/v1',
+			'/admin/facet-values',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ self::class, 'facet_values' ],
+				'permission_callback' => static function () {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
+	}
+
+	/**
+	 * @return \WP_REST_Response
+	 */
+	public static function search_posts( \WP_REST_Request $request ) {
+		$ids = Merchandising::parse_ids( $request->get_param( 'ids' ) );
+
+		return rest_ensure_response(
+			[
+				'posts' => CatalogLookup::search_posts(
+					sanitize_key( (string) $request->get_param( 'post_type' ) ),
+					(string) $request->get_param( 'q' ),
+					$ids
+				),
+			]
+		);
+	}
+
+	/**
+	 * @return \WP_REST_Response
+	 */
+	public static function facet_values( \WP_REST_Request $request ) {
+		return rest_ensure_response(
+			[
+				'values' => CatalogLookup::facet_values(
+					sanitize_key( (string) $request->get_param( 'post_type' ) ),
+					(string) $request->get_param( 'key' )
+				),
+			]
+		);
 	}
 
 	/**
@@ -118,6 +166,31 @@ final class FilterEndpoint {
 		CacheManager::set( $cache_key, $payload );
 
 		return rest_ensure_response( $payload );
+	}
+
+	/**
+	 * Bound anonymous query work and transient cardinality. Authenticated editors
+	 * are not throttled while working in the Visual Builder.
+	 *
+	 * @return true|\WP_Error
+	 */
+	public static function allow_public_query() {
+		if ( current_user_can( 'edit_posts' ) ) {
+			return true;
+		}
+		$ip  = sanitize_text_field( (string) ( $_SERVER['REMOTE_ADDR'] ?? 'anonymous' ) );
+		$key = 'ol_qr_' . md5( $ip );
+		$n   = (int) get_transient( $key );
+		if ( $n >= 180 ) {
+			return new \WP_Error(
+				'omniloop_rate_limited',
+				__( 'Too many filter requests. Please wait a moment and try again.', 'omniloop' ),
+				[ 'status' => 429 ]
+			);
+		}
+		set_transient( $key, $n + 1, MINUTE_IN_SECONDS );
+
+		return true;
 	}
 
 	/**
@@ -160,6 +233,7 @@ final class FilterEndpoint {
 				'event_type'   => $request->get_param( 'event_type' ),
 				'facet_key'    => $request->get_param( 'facet_key' ),
 				'facet_value'  => $request->get_param( 'facet_value' ),
+				'post_id'      => $request->get_param( 'post_id' ),
 				'result_count' => $request->get_param( 'result_count' ),
 			]
 		);
@@ -214,7 +288,7 @@ final class FilterEndpoint {
 		}
 		$per_page = min( QueryBuilder::MAX_PER_PAGE, $per_page );
 
-		$page = max( 1, (int) $request->get_param( 'page' ) );
+		$page = min( 1000, max( 1, (int) $request->get_param( 'page' ) ) );
 
 		$sort = sanitize_key( (string) $request->get_param( 'sort_by' ) );
 		if ( ! in_array( $sort, QueryBuilder::SORTS, true ) ) {
@@ -222,7 +296,7 @@ final class FilterEndpoint {
 		}
 
 		$search = sanitize_text_field( (string) $request->get_param( 'search' ) );
-		$search = substr( $search, 0, 120 );
+		$search = Indexer::truncate_text( $search, 120 );
 
 		$facet_logic = QueryBuilder::sanitize_facet_logic( (string) $request->get_param( 'facet_logic' ) );
 		$sort_meta   = Indexer::sanitize_facet_key( (string) $request->get_param( 'sort_meta_key' ) );
@@ -251,7 +325,7 @@ final class FilterEndpoint {
 			'facet_logic'   => $facet_logic,
 			'sort_meta_key' => $sort_meta,
 			'merchandising' => Merchandising::is_enabled( $merch_raw ),
-			'extra_pin_ids' => Merchandising::parse_ids( $request->get_param( 'extra_pin_ids' ) ),
+			'extra_pin_ids' => array_slice( Merchandising::parse_ids( $request->get_param( 'extra_pin_ids' ) ), 0, 50 ),
 		];
 	}
 
@@ -294,7 +368,7 @@ final class FilterEndpoint {
 				}
 				$item = sanitize_text_field( (string) $value );
 				if ( '' !== $item ) {
-					$out[] = substr( $item, 0, 191 );
+					$out[] = Indexer::truncate_text( $item, 191 );
 				}
 			}
 

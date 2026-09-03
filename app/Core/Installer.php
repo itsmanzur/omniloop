@@ -56,6 +56,13 @@ final class Installer {
 			self::create_table();
 			FacetAnalytics::create_table();
 			update_option( 'omniloop_db_version', OMNILOOP_DB_VERSION, false );
+
+			// Schema changes can alter indexed row semantics. Rebuild in the
+			// background so existing installations receive the new data shape.
+			delete_option( 'omniloop_reindex_cursor' );
+			delete_option( 'omniloop_reindex_processed' );
+			wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
+			wp_schedule_single_event( time() + 15, 'omniloop_reindex_batch' );
 		}
 	}
 
@@ -134,12 +141,14 @@ final class Installer {
 		$sql = "CREATE TABLE {$table} (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			post_id BIGINT(20) UNSIGNED NOT NULL,
+			source_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			post_type VARCHAR(20) NOT NULL,
 			facet_key VARCHAR(50) NOT NULL,
 			facet_value VARCHAR(191) NOT NULL,
 			numeric_value DECIMAL(12,4) DEFAULT NULL,
 			PRIMARY KEY  (id),
 			KEY idx_post (post_id),
+			KEY idx_source (post_id, source_id, facet_key),
 			KEY idx_lookup (facet_key, numeric_value),
 			KEY idx_type_key_val (post_type, facet_key, facet_value)
 		) {$charset};";

@@ -1,0 +1,124 @@
+<!-- OmniLoop landing | 04 Live demo -->
+<section class="ol-landing" data-ol-landing="live" id="ol-live">
+	<div class="ol-landing__inner">
+		<p class="ol-kicker">Live catalog</p>
+		<h2 class="ol-h ol-h--sm">Shop it. Filter it. Open a card.</h2>
+		<p class="ol-lead">Sixteen Harbor Goods SKUs. Facet counts update as you click. Active chips write a pretty /ol/ path. List view shows excerpt, SKU, material, and origin. In production this hits OmniLoop's index over AJAX.</p>
+		<p class="ol-url ol-url--live" data-ol-path>/shop/</p>
+		<div class="ol-demo">
+			<aside class="ol-filters" aria-label="Demo filters">
+				<h3>Filters</h3>
+				<label class="ol-facet">
+					<h4>Search</h4>
+					<input class="ol-search" type="search" placeholder="Tote, HG-LAMP, Portugal..." data-ol-q>
+				</label>
+				<div class="ol-facet">
+					<h4>Color</h4>
+					<div class="ol-swatch-row ol-swatch-row--text">
+						<button type="button" class="ol-swatch-btn" data-ol-color="navy"><i class="ol-swatch ol-ph--navy"></i> Navy <b data-ol-n></b></button>
+						<button type="button" class="ol-swatch-btn" data-ol-color="clay"><i class="ol-swatch ol-ph--clay"></i> Clay <b data-ol-n></b></button>
+						<button type="button" class="ol-swatch-btn" data-ol-color="sand"><i class="ol-swatch ol-ph--sand"></i> Sand <b data-ol-n></b></button>
+						<button type="button" class="ol-swatch-btn" data-ol-color="forest"><i class="ol-swatch ol-ph--forest"></i> Forest <b data-ol-n></b></button>
+						<button type="button" class="ol-swatch-btn" data-ol-color="ink"><i class="ol-swatch ol-ph--ink"></i> Ink <b data-ol-n></b></button>
+					</div>
+				</div>
+				<div class="ol-facet">
+					<h4>Category</h4>
+					<div class="ol-pills">
+						<button type="button" class="ol-pill" data-ol-cat="bags">Bags <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-cat="apparel">Apparel <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-cat="home">Home <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-cat="accessories">Accessories <b data-ol-n></b></button>
+					</div>
+				</div>
+				<div class="ol-facet">
+					<h4>Size</h4>
+					<div class="ol-pills">
+						<button type="button" class="ol-pill" data-ol-size="s">S <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-size="m">M <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-size="l">L <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-size="one">One size <b data-ol-n></b></button>
+					</div>
+				</div>
+				<div class="ol-facet">
+					<h4>Material</h4>
+					<div class="ol-pills">
+						<button type="button" class="ol-pill" data-ol-mat="canvas">Canvas <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-mat="linen">Linen <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-mat="wool">Wool <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-mat="ceramic">Ceramic <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-mat="brass">Brass <b data-ol-n></b></button>
+						<button type="button" class="ol-pill" data-ol-mat="leather">Leather <b data-ol-n></b></button>
+					</div>
+				</div>
+				<div class="ol-facet">
+					<h4>Availability</h4>
+					<div class="ol-pills">
+						<button type="button" class="ol-pill" data-ol-flag="inStock">In stock</button>
+						<button type="button" class="ol-pill" data-ol-flag="onSale">On sale</button>
+						<button type="button" class="ol-pill" data-ol-flag="minRating">4.5 stars+</button>
+					</div>
+				</div>
+				<label class="ol-facet">
+					<h4>Max price <span data-ol-max-label>$220</span></h4>
+					<input class="ol-range" type="range" min="24" max="220" value="220" data-ol-max>
+				</label>
+			</aside>
+			<div>
+				<div class="ol-demo__toolbar">
+					<span class="ol-demo__count" data-ol-count>16 products</span>
+					<div class="ol-row">
+						<div class="ol-seg" role="group" aria-label="View">
+							<button type="button" class="is-on" data-ol-view="grid">Grid</button>
+							<button type="button" data-ol-view="list">List</button>
+						</div>
+						<select class="ol-sort" data-ol-sort>
+							<option value="featured">Featured (pins first)</option>
+							<option value="price-asc">Price: low to high</option>
+							<option value="price-desc">Price: high to low</option>
+							<option value="rating">Top rated</option>
+							<option value="newest">Newest</option>
+							<option value="name">Name A-Z</option>
+						</select>
+					</div>
+				</div>
+				<div class="ol-chips" data-ol-chips></div>
+				<div class="ol-grid" data-ol-grid data-view="grid"></div>
+				<div class="ol-pager" data-ol-pager></div>
+			</div>
+		</div>
+		<div class="ol-qv-scrim" data-ol-scrim></div>
+		<div class="ol-qv" data-ol-qv>
+			<button type="button" class="ol-qv__back" data-ol-qv-close>Close</button>
+			<div class="ol-qv__media" data-ol-qv-media></div>
+			<div class="ol-qv__body">
+				<p class="ol-kicker" data-ol-qv-cat></p>
+				<h3 data-ol-qv-title></h3>
+				<p class="ol-qv__rating" data-ol-qv-rating></p>
+				<p class="ol-qv__price" data-ol-qv-price></p>
+				<p class="ol-lead" data-ol-qv-copy></p>
+				<div class="ol-qv__row">
+					<div>
+						<span class="ol-qv__lab">Size</span>
+						<div class="ol-pills" data-ol-qv-sizes></div>
+					</div>
+					<div>
+						<span class="ol-qv__lab">Qty</span>
+						<div class="ol-qty">
+							<button type="button" data-ol-qv-qty="-1">-</button>
+							<span data-ol-qv-qty-n>1</span>
+							<button type="button" data-ol-qv-qty="1">+</button>
+						</div>
+					</div>
+				</div>
+				<dl class="ol-specs" data-ol-qv-specs></dl>
+				<p class="ol-qv__sku" data-ol-qv-sku></p>
+				<div class="ol-row">
+					<button type="button" class="ol-btn" data-ol-qv-cart>Add to cart</button>
+					<button type="button" class="ol-btn ol-btn--ghost" data-ol-qv-wish>Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="ol-toast" data-ol-toast></div>
+</section>

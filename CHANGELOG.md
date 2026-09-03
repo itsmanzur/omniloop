@@ -2,231 +2,51 @@
 
 All notable changes to OmniLoop for Divi are documented here.
 
-## 2.4.0 — 2026-08-24
+## Unreleased
 
 ### Added
-- Attach OmniLoop facet state to native Divi 5 / WordPress loop queries (`omniloop_attach`, `omniloop_attach_native_loop`, Loop Builder query-arg filters)
-- REST `GET /omniloop/v1/facet-keys` and `omniloop_matching_ids()` so Loop Builder conditions can use the custom index
-- Help Guide section comparing the OmniLoop Filter module vs native Loop Builder + OmniLoop facets
-
-## 2.3.0 — 2026-08-24
-
-### Added
-- WPML / Polylang: facet labels follow the current language; queries stay inside that language
-- Settings export / import JSON (presets, merchandising, SEO, facet rules)
-- Multi-currency price facet conversion for WOOMULTI / CURCY-style plugins
-
-## 2.2.0 — 2026-08-24
-
-### Added
-- Typo-tolerant search (title/excerpt + SOUNDEX), toggle on the Facets tab
-- Facet search-within-facet highlight and keyboard navigation
-- Filter analytics table (`omniloop_facet_events`, 30-day prune) plus dashboard widget and Settings → Analytics
+- Variation-aware filtering keeps selected attributes, price, stock, and sale state on the same WooCommerce variation
+- Optional anonymous product-click and add-to-cart intent analytics, with a 30-day product engagement report
+- Index health now reports stale rows; schema upgrades automatically schedule a background reindex
+- Frontend request failures show a localized retry state while Load More failures preserve existing results
 
 ### Changed
-- Dual-handle price slider thumbs are larger and easier to drag
-
-## 2.1.0 — 2026-08-24
-
-### Added
-- Settings → SEO: title, description, and H1 templates for filtered URLs (`{facet_value}`, `{facet_labels}`, `{category}`, …)
-- Robots/noindex for all filtered URLs and automatic noindex on page 2+
-- Optional sitemap of single-facet pretty URLs
-- Hide zero-count values and empty facet groups (Settings → Facets)
-- Conditional facet visibility rules (show/hide Facet B when Facet A is selected)
-
-## 2.0.1 — 2026-08-23
+- Search includes WooCommerce SKU values and avoids ASCII phonetic matching for non-Latin searches
+- Large facet-count queries are processed in bounded chunks
+- Frontend-generated filter URLs use OmniLoop-prefixed query parameters
 
 ### Fixed
-- Product post type can be unchecked in Settings; WooCommerce no longer force-re-enables it on every page load (one-time bootstrap only)
-- Uninstall now deletes leftover options (`last_index_sync`, `asset_version`, `sort_meta_keys`, `rewrite_version`) and `olq_*` query transients
-- Full reindex walks `post_id > last_id` instead of `OFFSET`, so posts are not skipped or duplicated if the catalog changes mid-run
+- WooCommerce catalog/search visibility and hidden out-of-stock settings are respected
+- Simple products remain eligible for attribute filters, and REST-rendered Add to Cart links point to the storefront instead of the REST endpoint
+- Deleted posts, added/deleted metadata, ACF false values, and cache invalidation stay in sync with the index
+- Unrelated pages no longer become filter pages through generic query parameters or an unscoped `/ol/` path
+- Frontend dynamic copy and accessibility labels are translatable; Quick View traps keyboard focus
+
+## 1.0.1 — 2026-08-31
 
 ### Changed
-- Facet count queries memoize matching ID sets within a request to avoid repeating the same SQL for overlapping filters
-- Active facet counts run as one UNION ALL against the index instead of a full matching_ids() query per selected facet
-
-### Added
-- PHPUnit + Brain Monkey scaffold for QueryBuilder, Indexer::sanitize_facet_key, and SeoUrls parsing helpers
-
-## 2.0.0 — 2026-08-19
-
-### Added
-- **Loop Item Builder** — nest **OmniLoop Card Item** children inside the Filter module (Image, Title, Excerpt, Price, Rating, Add to Cart, Quick View). Reorder in the layers panel to change card layout. No children = preset Card Style.
-
-## 1.4.0 — 2026-08-18
-
-### Added
-- **Merchandising rules** in **OmniLoop → Settings**: pin product IDs to the top of matching results, push out-of-stock products last, and attach promo badges from facet JSON
-- **Stock urgency** — cards show “Only X left” when WooCommerce stock is at or below the threshold
-- Module toggles: Merchandising, Extra Pin IDs, Stock Urgency, Promoted Badge
-
-## 1.3.0 — 2026-08-17
-
-### Added
-- **Filter Sync** — Multiple OmniLoop modules on the same page share live filter state when they use the same Sync Group and post type
-- **Saved filter presets** — Define reusable filter combinations in **OmniLoop → Settings**; apply from the module **Saved Filter Preset** dropdown
-- Shareable preset URLs via `?ol_preset=preset-id` (or `?preset=preset-id`)
-
-## 1.2.0 — 2026-08-17
-
-### Added
-- Pagination Style module option: Page numbers, Load More, or Infinite scroll
-- Incremental index auto-sync on post save, term changes, price/stock meta, WooCommerce updates, and ACF saves
-- Admin dashboard stats for indexed posts, last sync time, and auto-sync toggle
-
-## 1.1.39 — 2026-08-17
+- Saved presets and promo badges use filter pickers (no JSON). Pin products by title search. Add or remove preset, promo, and conditional-facet rows
+- Listing and Help Guide copy: WPML/Polylang and multi-currency are described as hook-level support, not full suites
 
 ### Fixed
-- Card and Filters Design tab settings (background, border, spacing, shadow, font) now bind to the correct Divi decoration paths
+- Variable products index variation attributes plus min/max prices on the parent. Price filters match if the variation span overlaps the selected range
+- Sort dropdowns in saved presets use plain-English labels
 
-## 1.1.38 — 2026-08-17
+## 1.0.0 — 2026-08-30
 
-### Fixed
-- Sale Badge Design tab background (and font, border, spacing) now apply in Visual Builder and on the frontend
-
-## 1.1.37 — 2026-08-17
-
-### Fixed
-- Carousel settings group now hides unless Card Style is Carousel (Divi only honors function visibility on group props)
-
-## 1.1.36 — 2026-08-17
-
-### Changed
-- Carousel settings appear only when Card Style is Carousel; Autoplay Speed and Pause on Hover appear when Autoplay is on; Columns hide for List
-
-## 1.1.35 — 2026-08-17
+Initial public release.
 
 ### Added
-- Visual Builder option to show or hide pagination (off = first page of results only)
-
-## 1.1.34 — 2026-08-17
-
-### Changed
-- Compact pagination: previous/next, nearby pages, and ellipsis instead of listing every page
-
-## 1.1.33 — 2026-08-17
-
-### Fixed
-- Carousel dots (and arrows/autoplay) now render in the Visual Builder preview
-
-## 1.1.32 — 2026-08-17
-
-### Fixed
-- Carousel autoplay not starting (data attribute whitespace + stricter flag parsing)
-
-## 1.1.31 — 2026-08-17
-
-### Added
-- Carousel options: Autoplay, Speed, Pause on Hover, Loop, Show Arrows, Show Dots
-
-## 1.1.30 — 2026-08-16
-
-### Added
-- Interactive English Help Guide for non-technical users (OmniLoop → Help Guide)
-
-## 1.1.29 — 2026-08-16
-
-### Changed
-- Redesigned OmniLoop admin settings into a product dashboard (stats, cards, progress)
-
-## 1.1.28 — 2026-08-16
-
-### Added
-- Dual-thumb price range slider (synced with From–To inputs)
-- Within-facet AND/OR logic (smart: categories OR, attributes AND)
-- Sort by popularity, average rating, and optional custom meta key
-- Type-to-filter search inside long facet lists
-- Sticky active bar with result count and filter chips
-
-## 1.1.27 — 2026-08-16
-
-### Added
-
-- Quick view modal on cards (image, title, price, excerpt, Add to cart, View details)
-- Content setting: Quick View Yes/No
-
-## 1.1.26 — 2026-08-16
-
-### Added
-
-- Add to cart on product cards (WooCommerce AJAX for simple products; variable/grouped link to product)
-- Content setting: Add to Cart Yes/No (products only)
-
-## 1.1.25 — 2026-08-16
-
-### Documentation
-
-- Marketplace pack: expanded README, CHANGELOG, and `MARKETPLACE.md` submission checklist
-- Clarified optional WooCommerce / ACF requirements for Divi Marketplace reviewers
-
-## 1.1.24 — 2026-08-16
-
-### Added
-
-- Configurable empty-state template (icon style, title, message, reset button)
-- Empty state works on SSR, AJAX, and Visual Builder preview
-
-## 1.1.23 — 2026-08-16
-
-### Added
-
-- Design tab depth: card gap, filters/results gap, badge position, title lines, image hover zoom
-- Sale Badge and Regular Price Text design groups
-- Filters panel box shadow control
-
-## 1.1.22 — 2026-08-16
-
-### Added
-
-- Chip Only filter layout (Filters button + active chips; drawer on all breakpoints)
-
-## 1.1.21 — 2026-08-16
-
-### Added
-
-- Mega Bar filter layout (full-width multi-column facet panel)
-
-## 1.1.20 — 2026-08-16
-
-### Added
-
-- Skeleton shimmer placeholders during AJAX filter/page changes
-
-## 1.1.19 — 2026-08-16
-
-### Added
-
-- Masonry card style (CSS columns + staggered image ratios)
-
-## 1.1.18 — 2026-08-16
-
-### Added
-
-- Carousel card style (arrows, dots, swipe)
-
-## 1.1.17 — 2026-08-15
-
-### Added
-
-- Attribute image swatches (term image meta; color prefers image when present)
-
-## 1.1.16 — 2026-08-15
-
-### Added
-
-- Price From–To number inputs with SEO path `price/20-100/`
-
-## Earlier 1.1.x
-
-### Added
-
-- Divi 5 OmniLoop Filter module (single module; no Filter/Loop split)
-- Custom index + REST query API
-- WooCommerce facets: categories, attributes, stock, on sale, featured, rating
-- Pretty SEO URLs under `/ol/` with legacy `?ol_f_…` redirects
-- ACF facet opt-in (select, checkbox, radio, button_group, true_false)
-- Filter styles: sidebar, accordion, toolbar, pills
-- Card styles: classic, overlay, list, compact
-- Color / size swatches, list/grid view toggle, sticky filters, mobile drawer
-- Visible Filters picker and Design decoration for card / filters / fonts
+- Divi 5 **OmniLoop Filter** module: live AJAX search, sort, pagination (page numbers, Load More, or infinite scroll), active chips, and a mobile filter drawer
+- Filter layouts: Sidebar, Accordion, Toolbar, Mega Bar, Pills, Chip Only
+- Card layouts: Classic, Overlay, List, Compact, Carousel, Masonry, plus skeleton loading and a customizable empty state
+- **Loop Item Builder** — nest **OmniLoop Card Item** children (Image, Title, Excerpt, Price, Rating, Add to Cart, Quick View) and reorder them in the layers panel
+- **Filter Sync** and **saved filter presets**, including shareable `?ol_preset=` URLs
+- **Merchandising** — pin products, push out-of-stock last, promo badges, and stock-urgency copy
+- WooCommerce facets when Woo is active: categories, tags, attributes (color / image / size swatches), dual-handle price slider, stock, on sale, featured, rating; card add-to-cart and quick view
+- Optional ACF facets (select, checkbox, radio, button group, true/false)
+- Pretty SEO filter URLs (`/ol/…`) with title, description, and H1 templates, robots/noindex, and an optional sitemap of single-facet URLs
+- Native Divi 5 / WordPress loop attach (`omniloop_attach`, `omniloop_attach_native_loop`, Loop Builder query-arg filters) limited to the main query unless opted in
+- Hide zero-count values, hide empty facet groups, and conditional facet visibility rules
+- Typo-tolerant search, within-facet search, WPML/Polylang labels, multi-currency price facets, filter analytics, and settings export/import
+- Custom index with incremental auto-sync, Help Guide, and a clean uninstall (options, index/events tables, `olq_*` and `ol_ev_*` transients)

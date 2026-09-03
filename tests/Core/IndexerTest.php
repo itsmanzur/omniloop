@@ -24,4 +24,10 @@ final class IndexerTest extends TestCase {
 	public function test_sanitize_facet_key_allows_empty_after_strip(): void {
 		$this->assertSame( '', Indexer::sanitize_facet_key( '!!!' ) );
 	}
+
+	public function test_truncate_text_keeps_utf8_valid(): void {
+		$value = Indexer::truncate_text( 'বাংলাদেশ', 4 );
+		$this->assertSame( 'বাংল', $value );
+		$this->assertSame( 1, preg_match( '//u', $value ) );
+	}
 }

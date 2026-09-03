@@ -182,7 +182,7 @@ final class Merchandising {
 			}
 
 			$post_type = sanitize_key( (string) ( $row['post_type'] ?? 'product' ) );
-			if ( ! post_type_exists( $post_type ) ) {
+			if ( '' === $post_type || ( function_exists( 'post_type_exists' ) && ! post_type_exists( $post_type ) ) ) {
 				$post_type = 'product';
 			}
 

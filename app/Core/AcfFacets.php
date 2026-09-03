@@ -259,7 +259,7 @@ final class AcfFacets {
 
 		if ( 'true_false' === $type ) {
 			$truthy = (bool) $raw || '1' === (string) $raw || 'true' === strtolower( (string) $raw );
-			return $truthy ? [ '1' ] : [];
+			return $truthy ? [ '1' ] : [ '0' ];
 		}
 
 		if ( is_array( $raw ) ) {
@@ -302,7 +302,7 @@ final class AcfFacets {
 			return '';
 		}
 
-		return substr( $clean, 0, 191 );
+		return Indexer::truncate_text( $clean, 191 );
 	}
 
 	/**

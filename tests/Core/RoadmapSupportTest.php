@@ -26,6 +26,10 @@ final class RoadmapSupportTest extends TestCase {
 		$this->assertIsArray( $ok );
 		$this->assertSame( 'click', $ok['event_type'] );
 		$this->assertSame( 'pa_color', $ok['facet_key'] );
+		$this->assertSame( 0, $ok['post_id'] );
+
+		$conversion = FacetAnalytics::sanitize_event( [ 'event_type' => 'add_to_cart', 'post_id' => 42 ] );
+		$this->assertSame( 42, $conversion['post_id'] );
 
 		$this->assertNull(
 			FacetAnalytics::sanitize_event(
@@ -72,5 +76,7 @@ final class RoadmapSupportTest extends TestCase {
 		$this->assertContains( 'merchandising', $keys );
 		$this->assertContains( 'seo', $keys );
 		$this->assertContains( 'facet_ui', $keys );
+		$this->assertContains( 'analytics', $keys );
+		$this->assertContains( 'help', $keys );
 	}
 }

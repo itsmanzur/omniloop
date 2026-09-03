@@ -37,7 +37,7 @@ Insert one module — **OmniLoop Filter** — and get:
 - Optional ACF facets from Settings  
 - Pretty SEO filter URLs with title/description/H1 templates, noindex, and sitemap options  
 - Native Divi 5 Loop Builder attach (use OmniLoop’s index inside Divi’s own loop)  
-- Settings export/import, WPML/Polylang labels, and multi-currency price facets  
+- Settings export/import. WPML/Polylang language-aware labels when those plugins are active. Price slider follows WooCommerce Multi-Currency / WPML conversion hooks when present.
 - Skeleton loading and a customizable empty state  
 - Native Divi Design controls for cards, filters, typography, and sale badges  
 
@@ -101,10 +101,10 @@ Recommended size: Marketplace listing ratio (typically wide hero + square thumbs
 From the plugin root on Windows / PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\build-marketplace-zip.ps1 -Version 2.0.0
+powershell -ExecutionPolicy Bypass -File .\scripts\build-marketplace-zip.ps1 -Version 1.0.1
 ```
 
-Output ZIP: `dist/omniloop-marketplace-2.0.0.zip`
+Output ZIP: `dist/omniloop-marketplace-1.0.1.zip`
 
 ### Pre-flight
 
@@ -115,7 +115,8 @@ Output ZIP: `dist/omniloop-marketplace-2.0.0.zip`
 - [ ] Version in `omniloop.php` matches `CHANGELOG.md`  
 - [ ] Listing copy reflects Filter Sync, Saved Presets, Merchandising, and Loop Item Builder  
 - [ ] Plugin header `Plugin URI` points to Marketplace listing (or is blank) before release ZIP  
-- [ ] `languages/omniloop.pot` included if shipping translation-ready package  
+- [ ] `languages/omniloop.pot` is regenerated automatically by `build-marketplace-zip.ps1` — no separate `export-pot.ps1` step
+
 - [ ] Fresh install → Rebuild index → insert module → front-end filter works  
 - [ ] No console/PHP fatals with Woo active and inactive  
 

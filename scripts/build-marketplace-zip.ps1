@@ -1,13 +1,23 @@
 param(
-	[string]$Version = "2.4.0"
+	[string]$Version = ""
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-
 $pluginRoot = Split-Path -Parent $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($Version)) {
+	$header = Get-Content -LiteralPath (Join-Path $pluginRoot "omniloop.php") -Raw
+	$detected = [regex]::Match($header, "Version:\s*([\d.]+)")
+	if (-not $detected.Success) {
+		throw "Could not detect Version from omniloop.php"
+	}
+	$Version = $detected.Groups[1].Value
+}
+
+& (Join-Path $PSScriptRoot "export-pot.ps1") -Version $Version
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 $pluginSlug = "omniloop"
 $stageRoot = Join-Path $pluginRoot "dist"
 $tempRoot = Join-Path $stageRoot "_package"
@@ -19,6 +29,7 @@ $excludeTopLevel = @(
 	".git",
 	".gitignore",
 	"docs-assets",
+	"demo-landing",
 	"dist",
 	"node_modules",
 	"vendor",

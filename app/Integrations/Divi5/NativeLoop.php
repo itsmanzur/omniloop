@@ -118,7 +118,8 @@ final class NativeLoop {
 		$state  = SeoUrls::frontend_enabled() ? SeoUrls::state_for( $post_type ) : null;
 		$filtered = is_array( $state ) && SeoUrls::state_is_filtered( $state );
 
-		$attach = $forced || ( $filtered && self::is_listing_query( $query, $post_type ) );
+		$is_main = $query->is_main_query();
+		$attach  = $forced || ( $filtered && $is_main && self::is_listing_query( $query, $post_type ) );
 		/**
 		 * Whether this WP_Query should be restricted to OmniLoop matching IDs.
 		 *
@@ -200,6 +201,15 @@ final class NativeLoop {
 		}
 	}
 
+	/**
+	 * Whether this query looks like a listing (archive/home/post type), not a singular request.
+	 *
+	 * Main-query gating lives in attach_query(), not here: WordPress parse_query() sets
+	 * is_post_type_archive() (and sometimes is_home()) on secondary WP_Query objects too
+	 * when post_type has an archive. Restricting those to OmniLoop's post__in would leak
+	 * facet filters into related-product / widget loops. Explicit omniloop_attach and the
+	 * omniloop_attach_native_loop filter remain the override for intentional secondary attach.
+	 */
 	private static function is_listing_query( \WP_Query $query, string $post_type ): bool {
 		if ( $query->is_singular() ) {
 			return false;

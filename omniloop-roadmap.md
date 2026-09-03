@@ -1,6 +1,6 @@
 # OmniLoop for Divi — প্রোডাক্ট রোডম্যাপ
 
-**বর্তমান ভার্সন:** 2.4.0
+**বর্তমান ভার্সন:** 1.0.0 (প্রথম পাবলিক রিলিজ; নিচের v2.x নম্বরগুলো প্রি-রিলিজ প্ল্যানিং)
 **তৈরির তারিখ:** ২৩ আগস্ট, ২০২৬
 **ভিত্তি:** প্রতিযোগী বিশ্লেষণ (Divi Ajax Filter, Divi Loop Extender, JetSmartFilters, FacetWP, BeRocket, Premmerce, YITH, Barn2) + Divi 5-এর নিজস্ব built-in Loop/Filter সিস্টেম
 

@@ -7,6 +7,8 @@
 
 namespace OmniLoop\Engine\Admin;
 
+use OmniLoop\Engine\Core\HelpVideo;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -57,14 +59,22 @@ final class DocsPage {
 
 		$settings_url = admin_url( 'admin.php?page=omniloop' );
 		$pages_url    = admin_url( 'edit.php?post_type=page' );
+		$intro_video  = HelpVideo::markup( __( 'OmniLoop intro', 'omniloop' ) );
 		?>
 		<div class="wrap omniloop-docs" id="omniloop-docs-app">
-			<header class="omniloop-docs-hero">
-				<p class="omniloop-docs-hero__eyebrow"><?php esc_html_e( 'Help Guide', 'omniloop' ); ?></p>
-				<h1><?php esc_html_e( 'Welcome to OmniLoop', 'omniloop' ); ?></h1>
-				<p>
-					<?php esc_html_e( 'This short guide explains what OmniLoop does and how to use it — in plain English. No coding needed.', 'omniloop' ); ?>
-				</p>
+			<header class="omniloop-docs-hero<?php echo $intro_video ? ' omniloop-docs-hero--video' : ''; ?>">
+				<div class="omniloop-docs-hero__copy">
+					<p class="omniloop-docs-hero__eyebrow"><?php esc_html_e( 'Help Guide', 'omniloop' ); ?></p>
+					<h1><?php esc_html_e( 'Welcome to OmniLoop', 'omniloop' ); ?></h1>
+					<p>
+						<?php esc_html_e( 'This short guide explains what OmniLoop does and how to use it — in plain English. No coding needed.', 'omniloop' ); ?>
+					</p>
+				</div>
+				<?php
+				if ( $intro_video ) {
+					echo $intro_video; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup() returns escaped embed HTML
+				}
+				?>
 			</header>
 
 			<div class="omniloop-docs-shell">
@@ -83,16 +93,58 @@ final class DocsPage {
 				<div class="omniloop-docs-main">
 					<p class="omniloop-docs-empty" id="omniloop-docs-empty"><?php esc_html_e( 'No sections match your search. Try another word.', 'omniloop' ); ?></p>
 
-					<section class="omniloop-docs-section is-active" data-section="welcome" data-title="<?php esc_attr_e( 'What is OmniLoop?', 'omniloop' ); ?>" data-keywords="intro overview what is plugin product filter shop loop divi">
+					<section class="omniloop-docs-section is-active" data-section="welcome" data-title="<?php esc_attr_e( 'What is OmniLoop?', 'omniloop' ); ?>" data-keywords="intro overview video watch tutorial what is plugin product filter shop loop divi unique selling">
 						<span class="omniloop-docs-kicker"><?php esc_html_e( 'Start here', 'omniloop' ); ?></span>
 						<h2><?php esc_html_e( 'What is OmniLoop?', 'omniloop' ); ?></h2>
-						<p><?php esc_html_e( 'OmniLoop is a Divi 5 tool that builds a smart product or post grid with filters on the side (or above the grid). Visitors can search, sort, and narrow results instantly — without reloading the whole page.', 'omniloop' ); ?></p>
+						<p><?php esc_html_e( 'OmniLoop is the shop layer for Divi 5: a fast catalog with live filters, cards you design, merchandising, and pretty SEO URLs. Visitors search, sort, and narrow results instantly — without reloading the page.', 'omniloop' ); ?></p>
+						<ul class="omniloop-docs-pills">
+							<li><?php esc_html_e( 'One Visual Builder module', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'Own index table', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'WooCommerce optional', 'omniloop' ); ?></li>
+							<li><?php esc_html_e( 'Pretty /ol/ SEO URLs', 'omniloop' ); ?></li>
+						</ul>
 						<p><?php esc_html_e( 'Think of it like a modern online shop catalog: pick a category, choose a color, set a price range, and the list updates right away.', 'omniloop' ); ?></p>
 						<div class="omniloop-docs-callout">
 							<strong><?php esc_html_e( 'One module, one job', 'omniloop' ); ?></strong>
-							<p><?php esc_html_e( 'You only need one Divi module: “OmniLoop Filter”. Place it on a page, choose what to show, and you are done.', 'omniloop' ); ?></p>
+							<p><?php esc_html_e( 'You only need one Divi module: “OmniLoop Filter”. Nested Card Item children reorder image, title, price, and buttons. Place it on a page, choose what to show, and you are done.', 'omniloop' ); ?></p>
 						</div>
 						<p><?php esc_html_e( 'WooCommerce is optional. Without it, OmniLoop still works for blog posts and other content types. With WooCommerce, you unlock product price, stock, sale, ratings, and attribute filters.', 'omniloop' ); ?></p>
+					</section>
+
+					<section class="omniloop-docs-section" data-section="why" data-title="<?php esc_attr_e( 'Why OmniLoop', 'omniloop' ); ?>" data-keywords="why unique selling points different vs divi post filter facetwp ajax index merchandising seo loop builder woo optional">
+						<span class="omniloop-docs-kicker"><?php esc_html_e( 'Selling points', 'omniloop' ); ?></span>
+						<h2><?php esc_html_e( 'Why shops pick OmniLoop', 'omniloop' ); ?></h2>
+						<p><?php esc_html_e( 'Divi 5 already ships a free Post Filter. OmniLoop is not that module with extra checkboxes. It is the catalog layer on top: speed, merchandising, SEO, and cards you design — still inside the Visual Builder.', 'omniloop' ); ?></p>
+						<ul class="omniloop-docs-sell">
+							<li>
+								<strong><?php esc_html_e( 'One module, the whole shop', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Filters, grid, chips, sort, and pagination live in OmniLoop Filter. Loop Item Builder lets you nest and reorder card pieces in the layers panel. No separate Filter + Loop pair.', 'omniloop' ); ?></span>
+							</li>
+							<li>
+								<strong><?php esc_html_e( 'Own index, not meta joins', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Facet queries hit OmniLoop’s table. Saving a product, term, or ACF field updates that row. Rebuild once when you change post types so large catalogs stay snappy.', 'omniloop' ); ?></span>
+							</li>
+							<li>
+								<strong><?php esc_html_e( 'WooCommerce optional', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Posts and any public post type work on Divi + WordPress alone. Woo unlocks swatches, price slider, stock, sale, rating, cart, and quick view. ACF is a separate opt-in.', 'omniloop' ); ?></span>
+							</li>
+							<li>
+								<strong><?php esc_html_e( 'Pretty /ol/ SEO URLs', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Filtered pages can look like /ol/color/navy/category/shoes/. Title, description, and H1 templates, noindex for page 2+, optional sitemap, and shareable ?ol_preset= links.', 'omniloop' ); ?></span>
+							</li>
+							<li>
+								<strong><?php esc_html_e( 'Merchandising in the same index', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Pin products, push out-of-stock last, promo badges, and “Only X left.” Filter Sync keeps two modules on one page. This is shop control, not only a checkbox list.', 'omniloop' ); ?></span>
+							</li>
+							<li>
+								<strong><?php esc_html_e( 'Divi’s Loop, OmniLoop’s speed', 'omniloop' ); ?></strong>
+								<span><?php esc_html_e( 'Already using Loop Builder? Native Loop attach hands matching IDs to Divi’s loop (main query only unless you opt in), so other loops on the page stay clean.', 'omniloop' ); ?></span>
+							</li>
+						</ul>
+						<div class="omniloop-docs-callout">
+							<strong><?php esc_html_e( 'What it is not', 'omniloop' ); ?></strong>
+							<p><?php esc_html_e( 'Not a Gutenberg block. Not a Woo-only plugin. Not Divi’s free Post Filter with a new skin. It is a Divi 5 Visual Builder extension with its own index.', 'omniloop' ); ?></p>
+						</div>
 					</section>
 
 					<section class="omniloop-docs-section" data-section="setup" data-title="<?php esc_attr_e( 'First-time setup', 'omniloop' ); ?>" data-keywords="setup install activate rebuild index settings start quick begin">
@@ -200,7 +252,7 @@ final class DocsPage {
 							<li><strong><?php esc_html_e( 'Quick View', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Lets shoppers peek at an item in a popup without leaving the list.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Show Pagination', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Shows page numbers under the loop. Turn off to display only the first page of results.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Within-facet match', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Advanced. Smart mode usually means “any category” but “all selected attributes”. Most shops can leave this on Smart.', 'omniloop' ); ?></li>
-							<li><strong><?php esc_html_e( 'Merchandising', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Uses rules from OmniLoop → Settings: pin products, push out-of-stock last, promo badges, and “Only X left”. Extra Pin IDs apply only to this module.', 'omniloop' ); ?></li>
+							<li><strong><?php esc_html_e( 'Merchandising', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Uses rules from OmniLoop → Settings: search to pin products, push out-of-stock last, promo badges, and “Only X left”. Extra Pin IDs apply only to this module.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Card builder', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Inside OmniLoop Filter, add OmniLoop Card Item children. Each item is Image, Title, Excerpt, Price, Rating, Add to Cart, or Quick View. Drag to reorder. If you add none, Card Style presets are used.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Empty state', 'omniloop' ); ?></strong> — <?php esc_html_e( 'The friendly message when no items match the current filters.', 'omniloop' ); ?></li>
 						</ul>
@@ -306,7 +358,7 @@ final class DocsPage {
 						</ul>
 					</section>
 
-					<section class="omniloop-docs-section" data-section="settings" data-title="<?php esc_attr_e( 'Admin settings', 'omniloop' ); ?>" data-keywords="admin settings rebuild index acf post types dashboard seo analytics export import tabs">
+					<section class="omniloop-docs-section" data-section="settings" data-title="<?php esc_attr_e( 'Admin settings', 'omniloop' ); ?>" data-keywords="admin settings rebuild index acf post types dashboard seo analytics export import tabs video intro help">
 						<h2><?php esc_html_e( 'Admin settings', 'omniloop' ); ?></h2>
 						<p>
 							<?php
@@ -321,11 +373,11 @@ final class DocsPage {
 							?>
 						</p>
 						<ul>
-							<li><strong><?php esc_html_e( 'Index', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Choose what to filter (Products, Posts, and so on). Rebuild after catalog changes. “Ready” means filters can run fast.', 'omniloop' ); ?></li>
+							<li><strong><?php esc_html_e( 'Index', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Choose what to filter (Products, Posts, and so on). Rebuild after catalog changes. “Ready” means filters can run fast. Same tab: saved presets (pick filters, no JSON) and pin products by searching the title.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'SEO', 'omniloop' ); ?></strong> — <?php esc_html_e( 'How filter pages look in Google (title, description, heading).', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Facets', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Hide empty choices, hide a whole filter until another is picked, and allow small typos in Search.', 'omniloop' ); ?></li>
 							<li><strong><?php esc_html_e( 'Analytics', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Which filters people click, and which mixes find nothing. Last 30 days only.', 'omniloop' ); ?></li>
-							<li><strong><?php esc_html_e( 'Tools', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Download your setup, or upload it on another site. Then rebuild the index there.', 'omniloop' ); ?></li>
+							<li><strong><?php esc_html_e( 'Tools', 'omniloop' ); ?></strong> — <?php esc_html_e( 'Add a Help Guide intro video, download your setup, or upload it on another site. Then rebuild the index there.', 'omniloop' ); ?></li>
 						</ul>
 						<div class="omniloop-docs-callout">
 							<strong><?php esc_html_e( 'ACF', 'omniloop' ); ?></strong>
@@ -384,8 +436,8 @@ final class DocsPage {
 
 					<section class="omniloop-docs-section" data-section="i18n" data-title="<?php esc_attr_e( 'Other languages and money', 'omniloop' ); ?>" data-keywords="wpml polylang language translation multi currency woomulti price money english bangla">
 						<h2><?php esc_html_e( 'Other languages and money', 'omniloop' ); ?></h2>
-						<p><?php esc_html_e( 'If the site has more than one language (WPML or Polylang), filter names follow the language the visitor is viewing. Products from the other language stay out of the list.', 'omniloop' ); ?></p>
-						<p><?php esc_html_e( 'If the shop can switch currency, the price bar follows the currency the visitor sees. You do not type a second price range.', 'omniloop' ); ?></p>
+						<p><?php esc_html_e( 'If the site uses WPML or Polylang, OmniLoop shows filter names in the current language and keeps other-language products out of the list. That is hook-level support — not a full multilingual editor.', 'omniloop' ); ?></p>
+						<p><?php esc_html_e( 'If a multi-currency plugin is active (WooCommerce Multi-Currency or WPML WooCommerce), the price bar follows the shopper currency when those plugins expose conversion functions. Otherwise the store’s base currency is used.', 'omniloop' ); ?></p>
 					</section>
 
 					<section class="omniloop-docs-section" data-section="copy-setup" data-title="<?php esc_attr_e( 'Copy setup to another site', 'omniloop' ); ?>" data-keywords="export import json agency tools copy settings client">

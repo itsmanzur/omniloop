@@ -136,18 +136,30 @@ final class FilterPresets {
 				continue;
 			}
 
-			$id = sanitize_key( (string) ( $row['id'] ?? '' ) );
-			if ( '' === $id || isset( $seen[ $id ] ) ) {
+			$label = sanitize_text_field( (string) ( $row['label'] ?? '' ) );
+			$id    = sanitize_key( (string) ( $row['id'] ?? '' ) );
+			if ( '' === $id && '' !== $label ) {
+				$slug = strtolower( $label );
+				$slug = preg_replace( '/[\s_]+/', '-', $slug ) ?? $slug;
+				$id   = sanitize_key( $slug );
+			}
+			if ( '' === $id ) {
 				continue;
 			}
-
-			$label = sanitize_text_field( (string) ( $row['label'] ?? $id ) );
+			if ( isset( $seen[ $id ] ) ) {
+				$base = $id;
+				$n    = 2;
+				while ( isset( $seen[ $id ] ) ) {
+					$id = sanitize_key( $base . '-' . (string) $n );
+					++$n;
+				}
+			}
 			if ( '' === $label ) {
 				$label = $id;
 			}
 
 			$post_type = sanitize_key( (string) ( $row['post_type'] ?? 'post' ) );
-			if ( ! post_type_exists( $post_type ) ) {
+			if ( '' === $post_type || ( function_exists( 'post_type_exists' ) && ! post_type_exists( $post_type ) ) ) {
 				$post_type = 'post';
 			}
 
@@ -177,7 +189,7 @@ final class FilterPresets {
 	 * @param mixed $raw
 	 * @return array<string,mixed>
 	 */
-	private static function sanitize_facets( $raw ): array {
+	public static function sanitize_facets( $raw ): array {
 		if ( is_string( $raw ) ) {
 			$decoded = json_decode( $raw, true );
 			$raw     = is_array( $decoded ) ? $decoded : [];

@@ -1,17 +1,44 @@
+param(
+	[string]$Version = ""
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $pluginRoot = Split-Path -Parent $PSScriptRoot
+$pluginFile = Join-Path $pluginRoot "omniloop.php"
 $outDir = Join-Path $pluginRoot "languages"
 $outFile = Join-Path $outDir "omniloop.pot"
+
+if ([string]::IsNullOrWhiteSpace($Version)) {
+	$header = Get-Content -LiteralPath $pluginFile -Raw
+	$detected = [regex]::Match($header, "Version:\s*([\d.]+)")
+	if (-not $detected.Success) {
+		throw "Could not detect Version from omniloop.php"
+	}
+	$Version = $detected.Groups[1].Value
+}
+
+$excludePrefixes = @(
+	"dist/",
+	".git/",
+	"vendor/",
+	"tests/",
+	"node_modules/"
+)
 
 $pattern = "(?<func>__|_e|esc_html__|esc_html_e|esc_attr__|esc_attr_e)\(\s*'(?<msg>(?:\\'|[^'])*)'\s*,\s*'omniloop'"
 $phpFiles = Get-ChildItem -Path $pluginRoot -Recurse -Filter *.php -File | Where-Object {
 	$relative = $_.FullName.Substring($pluginRoot.Length + 1).Replace("\", "/")
-	return -not (
-		$relative.StartsWith("dist/") -or
-		$relative.StartsWith(".git/")
-	)
+	foreach ($prefix in $excludePrefixes) {
+		if ($relative.StartsWith($prefix)) {
+			return $false
+		}
+	}
+	if ($relative -match "(^|/)(dist|vendor|tests|node_modules|\.git)(/|$)") {
+		return $false
+	}
+	return $true
 }
 $entries = [System.Collections.Generic.Dictionary[string, System.Collections.Generic.List[string]]]::new()
 
@@ -37,7 +64,7 @@ New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 $header = @(
 	'msgid ""',
 	'msgstr ""',
-	'"Project-Id-Version: OmniLoop for Divi 2.0.0\n"',
+	('"Project-Id-Version: OmniLoop for Divi {0}\n"' -f $Version),
 	'"Report-Msgid-Bugs-To: \n"',
 	('"POT-Creation-Date: {0}\n"' -f (Get-Date -Format "yyyy-MM-dd HH:mmK")),
 	'"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"',
@@ -60,4 +87,4 @@ $body = foreach ($msg in ($entries.Keys | Sort-Object)) {
 
 ($header + $body) | Set-Content -LiteralPath $outFile -Encoding UTF8
 
-Write-Host ("Exported POT: {0}" -f $outFile)
+Write-Host ("Exported POT: {0} (version {1})" -f $outFile, $Version)

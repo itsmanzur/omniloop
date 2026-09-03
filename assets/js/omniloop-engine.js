@@ -27,6 +27,11 @@
 		}
 	}
 
+	function text(root, key, fallback) {
+		var cfg = readConfig(root) || {};
+		return cfg.i18n && typeof cfg.i18n[key] === "string" ? cfg.i18n[key] : fallback;
+	}
+
 	function selectedFacets(root) {
 		var facets = {};
 		qsa(root, "input[data-facet]:checked").forEach(function (input) {
@@ -67,15 +72,15 @@
 	function setCount(root, total) {
 		var el = qs(root, ".omniloop-count");
 		if (!el) return;
-		el.textContent = total === 1 ? "1 result" : String(total) + " results";
+		el.textContent = String(total) + " " + (total === 1 ? text(root, "result", "result") : text(root, "results", "results"));
 	}
 
-	function saleBadge(item) {
+	function saleBadge(item, root) {
 		if (!item || !item.onSale) return null;
 		var badge = document.createElement("span");
 		badge.className = "omniloop-card__badge";
 		var pct = Number(item.salePercent) || 0;
-		badge.textContent = pct > 0 ? ("-" + pct + "%") : "Sale";
+		badge.textContent = pct > 0 ? ("-" + pct + "%") : text(root, "sale", "Sale");
 		return badge;
 	}
 
@@ -91,7 +96,7 @@
 			wrap.appendChild(promo);
 			count += 1;
 		}
-		var sale = saleBadge(item);
+		var sale = saleBadge(item, root);
 		if (sale) {
 			wrap.appendChild(sale);
 			count += 1;
@@ -440,13 +445,13 @@
 		return Array.isArray(cfg.cardParts) ? cfg.cardParts : [];
 	}
 
-	function appendRating(body, item) {
+	function appendRating(body, item, root) {
 		var rating = Number(item.rating) || 0;
 		if (rating <= 0) return;
 		var stars = Math.max(1, Math.min(5, Math.round(rating)));
 		var p = document.createElement("p");
 		p.className = "omniloop-card__rating";
-		p.setAttribute("aria-label", "Rated " + rating.toFixed(1) + " out of 5");
+		p.setAttribute("aria-label", text(root, "rated", "Rated") + " " + rating.toFixed(1) + " " + text(root, "outOfFive", "out of 5"));
 		var mark = document.createElement("span");
 		mark.setAttribute("aria-hidden", "true");
 		mark.textContent = "★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars);
@@ -539,7 +544,7 @@
 			}
 			if (part === "rating") {
 				var beforeR = body.childNodes.length;
-				appendRating(body, item);
+				appendRating(body, item, root);
 				if (body.childNodes.length > beforeR) hasBody = true;
 			}
 		});
@@ -581,8 +586,8 @@
 			qv.className = "omniloop-card__qv";
 			qv.setAttribute("data-omniloop-qv", "1");
 			qv.setAttribute("aria-haspopup", "dialog");
-			qv.setAttribute("aria-label", "Quick view");
-			qv.textContent = "Quick view";
+			qv.setAttribute("aria-label", text(root, "quickView", "Quick view"));
+			qv.textContent = text(root, "quickView", "Quick view");
 			wrap.appendChild(qv);
 		}
 
@@ -590,7 +595,7 @@
 			var meta = item.addToCart;
 			var id = Number(meta.id) || 0;
 			var url = typeof meta.url === "string" ? meta.url : "";
-			var label = typeof meta.label === "string" ? meta.label : "Add to cart";
+			var label = typeof meta.label === "string" ? meta.label : text(root, "addToCart", "Add to cart");
 			var type = typeof meta.type === "string" && meta.type ? meta.type : "simple";
 			var sku = typeof meta.sku === "string" ? meta.sku : "";
 			if (id && url) {
@@ -629,6 +634,8 @@
 			'<div class="omniloop-qv__actions"></div>' +
 			"</div></div>";
 		root.appendChild(shell);
+		var close = qs(shell, ".omniloop-qv__close");
+		if (close) close.setAttribute("aria-label", text(root, "close", "Close"));
 		return shell;
 	}
 
@@ -709,11 +716,12 @@
 			var more = document.createElement("a");
 			more.href = item.permalink;
 			more.className = "omniloop-qv__more";
-			more.textContent = "View details";
+			more.textContent = text(root, "viewDetails", "View details");
 			actions.appendChild(more);
 		}
 
 		root._olQvOpener = opener || null;
+		shell.setAttribute("data-id", String(item.id || ""));
 		shell.hidden = false;
 		document.body.classList.add("omniloop-qv-open");
 		if (dialog && dialog.focus) dialog.focus();
@@ -777,7 +785,26 @@
 			openQuickView(root, itemFromCard(card), btn);
 		});
 		document.addEventListener("keydown", function (e) {
-			if (e.key === "Escape") closeQuickView(root);
+			var shell = qs(root, ".omniloop-qv");
+			if (!shell || shell.hidden) return;
+			if (e.key === "Escape") {
+				closeQuickView(root);
+				return;
+			}
+			if (e.key !== "Tab") return;
+			var focusable = qsa(shell, 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])').filter(function (node) {
+				return !node.hidden;
+			});
+			if (!focusable.length) return;
+			var first = focusable[0];
+			var last = focusable[focusable.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
 		});
 	}
 
@@ -1039,7 +1066,7 @@
 		if (page < 1) page = 1;
 		if (page > pages) page = pages;
 		nav.hidden = false;
-		nav.setAttribute("aria-label", "Pagination");
+		nav.setAttribute("aria-label", text(root, "pagination", "Pagination"));
 
 		function addBtn(label, target, extraClass, disabled, aria) {
 			var btn = document.createElement("button");
@@ -1059,7 +1086,7 @@
 			return btn;
 		}
 
-		addBtn("‹", page - 1, "omniloop-page--nav", page <= 1, "Previous page");
+		addBtn("‹", page - 1, "omniloop-page--nav", page <= 1, text(root, "previousPage", "Previous page"));
 
 		pagerItems(page, pages).forEach(function (item) {
 			if (item === "…") {
@@ -1070,11 +1097,11 @@
 				nav.appendChild(gap);
 				return;
 			}
-			var btn = addBtn(String(item), item, item === page ? "is-active" : "", false, "Page " + item);
+			var btn = addBtn(String(item), item, item === page ? "is-active" : "", false, text(root, "page", "Page") + " " + item);
 			if (item === page) btn.setAttribute("aria-current", "page");
 		});
 
-		addBtn("›", page + 1, "omniloop-page--nav", page >= pages, "Next page");
+		addBtn("›", page + 1, "omniloop-page--nav", page >= pages, text(root, "nextPage", "Next page"));
 	}
 
 	function priceWrap(root) {
@@ -1326,6 +1353,7 @@
 			event_type: extra.event_type || "click",
 			facet_key: extra.facet_key || "",
 			facet_value: extra.facet_value || "",
+			post_id: Number(extra.post_id) || 0,
 			result_count: extra.result_count || 0
 		};
 		try {
@@ -1455,7 +1483,7 @@
 			var perPage = Number(cfg.perPage) || 12;
 			var total = Number(data.total_posts) || 0;
 			var shown = Math.min(page * perPage, total);
-			status.textContent = "Showing " + shown + " of " + total;
+			status.textContent = text(root, "showing", "Showing") + " " + shown + " " + text(root, "of", "of") + " " + total;
 			status.hidden = false;
 		}
 	}
@@ -1569,6 +1597,27 @@
 		syncCarousel(root);
 	}
 
+	function renderRequestError(root, config, retry) {
+		var grid = qs(root, ".omniloop-grid");
+		if (!grid) return;
+		while (grid.firstChild) grid.removeChild(grid.firstChild);
+		var wrap = document.createElement("div");
+		wrap.className = "omniloop-empty omniloop-empty--box omniloop-request-error";
+		wrap.setAttribute("role", "alert");
+		var message = document.createElement("p");
+		message.className = "omniloop-empty__message";
+		message.textContent = text(root, "requestError", "Could not load results. Check your connection and try again.");
+		var button = document.createElement("button");
+		button.type = "button";
+		button.className = "omniloop-empty__reset omniloop-request-error__retry";
+		button.textContent = text(root, "retry", "Retry");
+		button.addEventListener("click", retry);
+		wrap.appendChild(message);
+		wrap.appendChild(button);
+		grid.appendChild(wrap);
+		syncCarousel(root);
+	}
+
 	function chipFacetLabel(input) {
 		var facet = input.closest ? input.closest(".omniloop-facet") : null;
 		var title = facet ? qs(facet, ".omniloop-facet__title") : null;
@@ -1587,17 +1636,17 @@
 		return input.getAttribute("data-value") || "";
 	}
 
-	function addChip(row, attrs, text) {
+	function addChip(row, attrs, labelText) {
 		var btn = document.createElement("button");
 		btn.type = "button";
 		btn.className = "omniloop-chip";
 		Object.keys(attrs).forEach(function (key) {
 			btn.setAttribute(key, attrs[key]);
 		});
-		btn.setAttribute("aria-label", "Remove " + text);
+		btn.setAttribute("aria-label", text(row.closest(".omniloop-app"), "remove", "Remove") + " " + labelText);
 		var label = document.createElement("span");
 		label.className = "omniloop-chip__label";
-		label.textContent = text;
+		label.textContent = labelText;
 		var close = document.createElement("span");
 		close.className = "omniloop-chip__remove";
 		close.setAttribute("aria-hidden", "true");
@@ -1624,19 +1673,19 @@
 		var search = qs(root, ".omniloop-search__input");
 		var q = search ? String(search.value || "").trim() : "";
 		if (q) {
-			addChip(row, { "data-kind": "search" }, "Search: " + q);
+			addChip(row, { "data-kind": "search" }, text(root, "search", "Search") + ": " + q);
 		}
 
 		var price = priceRangeOf(root);
 		if (price) {
-			addChip(row, { "data-kind": "price" }, "Price: " + formatPriceChip(root, price));
+			addChip(row, { "data-kind": "price" }, text(root, "price", "Price") + ": " + formatPriceChip(root, price));
 		}
 
 		if (row.childNodes.length > 1) {
 			var clear = document.createElement("button");
 			clear.type = "button";
 			clear.className = "omniloop-chip omniloop-chip--clear";
-			clear.textContent = "Clear all";
+			clear.textContent = text(root, "clearAll", "Clear all");
 			row.appendChild(clear);
 		}
 
@@ -1968,10 +2017,10 @@
 			});
 			path += "ol/" + segs.join("/") + "/";
 		}
-		if (body.search) url.searchParams.set("q", body.search);
-		if (body.sort_by && body.sort_by !== "date") url.searchParams.set("sort", body.sort_by);
+		if (body.search) url.searchParams.set("ol_q", body.search);
+		if (body.sort_by && body.sort_by !== "date") url.searchParams.set("ol_sort", body.sort_by);
 		if (viewOf(root) !== defaultViewOf(root)) {
-			url.searchParams.set("view", viewOf(root));
+			url.searchParams.set("ol_view", viewOf(root));
 		}
 		window.history.replaceState(null, "", path + url.search + url.hash);
 	}
@@ -2087,6 +2136,17 @@
 				root.classList.remove("omniloop-app--loading");
 				root._olLoadingMore = false;
 				setLoadMoreLoading(root, false);
+				if (append) {
+					var status = qs(root, ".omniloop-loadmore__status");
+					if (status) {
+						status.textContent = text(root, "requestError", "Could not load results. Check your connection and try again.");
+						status.hidden = false;
+					}
+				} else {
+					renderRequestError(root, config, function () {
+						query(root, config, page, opts);
+					});
+				}
 			})
 			.then(function () {
 				if (grid && root._olAbort === ac) grid.removeAttribute("aria-busy");
@@ -2116,8 +2176,28 @@
 		root.addEventListener("click", function (e) {
 			var target = e.target;
 			if (!target || !target.closest) return;
+			var card = target.closest(".omniloop-card[data-id]");
+			if (card && root.contains(card)) {
+				var postId = Number(card.getAttribute("data-id")) || 0;
+				if (target.closest(".add_to_cart_button")) {
+					trackEvent(root, { event_type: "add_to_cart", post_id: postId });
+				} else if (target.closest(".omniloop-card__link, .omniloop-qv__more")) {
+					trackEvent(root, { event_type: "product_click", post_id: postId });
+				}
+			} else {
+				var quickView = target.closest(".omniloop-qv[data-id]");
+				if (quickView && root.contains(quickView)) {
+					var quickViewId = Number(quickView.getAttribute("data-id")) || 0;
+					if (target.closest(".add_to_cart_button")) {
+						trackEvent(root, { event_type: "add_to_cart", post_id: quickViewId });
+					} else if (target.closest(".omniloop-qv__more")) {
+						trackEvent(root, { event_type: "product_click", post_id: quickViewId });
+					}
+				}
+			}
 			var emptyReset = target.closest(".omniloop-empty__reset");
 			if (!emptyReset || !root.contains(emptyReset)) return;
+			if (emptyReset.classList.contains("omniloop-request-error__retry")) return;
 			var resetBtn = qs(root, ".omniloop-reset");
 			if (resetBtn) resetBtn.click();
 		});

@@ -12,12 +12,15 @@ use OmniLoop\Engine\Core\CacheManager;
 use OmniLoop\Engine\Core\FacetAnalytics;
 use OmniLoop\Engine\Core\FacetUi;
 use OmniLoop\Engine\Core\FilterPresets;
+use OmniLoop\Engine\Core\HelpVideo;
 use OmniLoop\Engine\Core\I18n;
 use OmniLoop\Engine\Core\Installer;
 use OmniLoop\Engine\Core\Merchandising;
 use OmniLoop\Engine\Core\QueryBuilder;
 use OmniLoop\Engine\Core\SeoMeta;
 use OmniLoop\Engine\Core\SettingsIo;
+use OmniLoop\Engine\Admin\SettingsFields;
+use OmniLoop\Engine\Admin\CatalogLookup;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -73,6 +76,8 @@ final class SettingsPage {
 					'seo'            => SeoMeta::sanitize( [] ),
 					'facet_ui'       => FacetUi::sanitize( [] ),
 					'search'         => [ 'fuzzy' => 'on' ],
+					'analytics'      => [ 'enabled' => 'off' ],
+					'help'           => [ 'intro_video' => '' ],
 				],
 			]
 		);
@@ -126,6 +131,18 @@ final class SettingsPage {
 			'search'         => [
 				'fuzzy' => ( is_array( $raw ) && isset( $raw['search']['fuzzy'] ) && 'off' === $raw['search']['fuzzy'] ) ? 'off' : 'on',
 			],
+			'analytics'      => [
+				'enabled' => (
+					is_array( $raw )
+					&& isset( $raw['analytics'] )
+					&& is_array( $raw['analytics'] )
+					&& isset( $raw['analytics']['enabled'] )
+					&& 'on' === $raw['analytics']['enabled']
+				) ? 'on' : 'off',
+			],
+			'help'           => [
+				'intro_video' => HelpVideo::sanitize_url( is_array( $raw ) && isset( $raw['help']['intro_video'] ) ? $raw['help']['intro_video'] : '' ),
+			],
 		];
 		CacheManager::bump();
 
@@ -176,6 +193,8 @@ final class SettingsPage {
 			return;
 		}
 
+		wp_enqueue_media();
+
 		wp_enqueue_style(
 			'omniloop-admin',
 			OMNILOOP_URL . 'assets/css/omniloop-admin.css',
@@ -186,7 +205,7 @@ final class SettingsPage {
 		wp_enqueue_script(
 			'omniloop-admin',
 			OMNILOOP_URL . 'assets/js/omniloop-admin.js',
-			[],
+			[ 'jquery' ],
 			OMNILOOP_VERSION,
 			true
 		);
@@ -195,12 +214,21 @@ final class SettingsPage {
 			'omniloop-admin',
 			'omniloopAdmin',
 			[
-				'restUrl' => esc_url_raw( rest_url( 'omniloop/v1/reindex' ) ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-				'i18n'    => [
+				'restUrl'        => esc_url_raw( rest_url( 'omniloop/v1/reindex' ) ),
+				'searchUrl'      => esc_url_raw( rest_url( 'omniloop/v1/admin/search-posts' ) ),
+				'facetValuesUrl' => esc_url_raw( rest_url( 'omniloop/v1/admin/facet-values' ) ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'i18n'           => [
 					'done'       => __( 'Index rebuild complete.', 'omniloop' ),
 					'error'      => __( 'Index rebuild failed.', 'omniloop' ),
 					'rebuilding' => __( 'Rebuilding…', 'omniloop' ),
+					'videoTitle' => __( 'Select intro video', 'omniloop' ),
+					'videoUse'   => __( 'Use this video', 'omniloop' ),
+					'noResults'  => __( 'No matches', 'omniloop' ),
+					'unpin'      => __( 'Unpin', 'omniloop' ),
+					'from'       => __( 'From', 'omniloop' ),
+					'to'         => __( 'To', 'omniloop' ),
+					'loading'    => __( 'Loading…', 'omniloop' ),
 				],
 			]
 		);
@@ -284,10 +312,12 @@ final class SettingsPage {
 		$seo          = SeoMeta::settings();
 		$facet_ui     = FacetUi::settings();
 		$fuzzy_on     = QueryBuilder::uses_fuzzy_search();
+		$help_video   = HelpVideo::stored_url();
 		$facet_choices = \OmniLoop\Engine\Rest\FilterEndpoint::selectable_facets();
 		$analytics_clicks = FacetAnalytics::top_clicks( 8 );
 		$analytics_empty  = FacetAnalytics::empty_count();
-		$sort_options = [ 'date', 'title', 'price_asc', 'price_desc', 'popularity', 'rating', 'meta' ];
+		$analytics_products = FacetAnalytics::top_products( 8 );
+		$analytics_enabled  = FacetAnalytics::enabled();
 
 		$public = get_post_types( [ 'public' => true ], 'objects' );
 		$types  = [];
@@ -297,6 +327,9 @@ final class SettingsPage {
 			}
 			$types[] = $type;
 		}
+
+		$default_type = in_array( 'product', $selected, true ) ? 'product' : ( $selected[0] ?? 'post' );
+		$pin_posts    = CatalogLookup::search_posts( $default_type, '', $merch['pin_ids'] );
 
 		$selected_count = count(
 			array_filter(
@@ -369,10 +402,15 @@ final class SettingsPage {
 						);
 						?>
 					</p>
+					<?php if ( ! empty( $status['stale_rows'] ) ) : ?>
+						<span class="omniloop-admin-stat__pill omniloop-admin-stat__pill--warn">
+							<?php echo esc_html( sprintf( __( '%d stale rows', 'omniloop' ), (int) $status['stale_rows'] ) ); ?>
+						</span>
+					<?php endif; ?>
 				</article>
 				<article class="omniloop-admin-stat">
 					<p class="omniloop-admin-stat__label"><?php esc_html_e( 'Last sync', 'omniloop' ); ?></p>
-					<p class="omniloop-admin-stat__value" id="omniloop-last-sync" style="font-size:1.05rem;">
+					<p class="omniloop-admin-stat__value omniloop-admin-stat__value--sm" id="omniloop-last-sync">
 						<?php
 						if ( (int) $status['last_sync'] > 0 ) {
 							echo esc_html(
@@ -410,7 +448,7 @@ final class SettingsPage {
 				</article>
 				<article class="omniloop-admin-stat">
 					<p class="omniloop-admin-stat__label"><?php esc_html_e( 'Integrations', 'omniloop' ); ?></p>
-					<p class="omniloop-admin-stat__value" style="font-size:1.15rem;letter-spacing:-0.01em;">
+					<p class="omniloop-admin-stat__value omniloop-admin-stat__value--sm<?php echo $divi_ok ? '' : ' is-warn'; ?>">
 						<?php echo $divi_ok ? esc_html__( 'Divi 5', 'omniloop' ) : esc_html__( 'Divi missing', 'omniloop' ); ?>
 					</p>
 					<?php if ( $acf_active ) : ?>
@@ -431,18 +469,18 @@ final class SettingsPage {
 				</article>
 			</section>
 
-			<form method="post" action="options.php" class="omniloop-admin-form">
+			<form method="post" action="options.php" class="omniloop-admin-form" id="omniloop-settings-form">
 				<?php settings_fields( 'omniloop' ); ?>
 
-				<nav class="omniloop-admin-tabs" aria-label="<?php esc_attr_e( 'Settings sections', 'omniloop' ); ?>">
-					<button type="button" class="omniloop-admin-tab is-active" data-tab="index"><?php esc_html_e( 'Index', 'omniloop' ); ?></button>
-					<button type="button" class="omniloop-admin-tab" data-tab="seo"><?php esc_html_e( 'SEO', 'omniloop' ); ?></button>
-					<button type="button" class="omniloop-admin-tab" data-tab="facets"><?php esc_html_e( 'Facets', 'omniloop' ); ?></button>
-					<button type="button" class="omniloop-admin-tab" data-tab="analytics"><?php esc_html_e( 'Analytics', 'omniloop' ); ?></button>
-					<button type="button" class="omniloop-admin-tab" data-tab="tools"><?php esc_html_e( 'Tools', 'omniloop' ); ?></button>
+				<nav class="omniloop-admin-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Settings sections', 'omniloop' ); ?>">
+					<button type="button" class="omniloop-admin-tab is-active" role="tab" id="omniloop-tab-index" data-tab="index" aria-selected="true" aria-controls="omniloop-panel-index"><?php esc_html_e( 'Index', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" role="tab" id="omniloop-tab-seo" data-tab="seo" aria-selected="false" aria-controls="omniloop-panel-seo"><?php esc_html_e( 'SEO', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" role="tab" id="omniloop-tab-facets" data-tab="facets" aria-selected="false" aria-controls="omniloop-panel-facets"><?php esc_html_e( 'Facets', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" role="tab" id="omniloop-tab-analytics" data-tab="analytics" aria-selected="false" aria-controls="omniloop-panel-analytics"><?php esc_html_e( 'Analytics', 'omniloop' ); ?></button>
+					<button type="button" class="omniloop-admin-tab" role="tab" id="omniloop-tab-tools" data-tab="tools" aria-selected="false" aria-controls="omniloop-panel-tools"><?php esc_html_e( 'Tools', 'omniloop' ); ?></button>
 				</nav>
 
-				<div class="omniloop-admin-grid is-active" data-tab-panel="index">
+				<div class="omniloop-admin-grid is-active" data-tab-panel="index" id="omniloop-panel-index" role="tabpanel" aria-labelledby="omniloop-tab-index">
 					<section class="omniloop-admin-card">
 						<div class="omniloop-admin-card__head">
 							<div>
@@ -451,7 +489,7 @@ final class SettingsPage {
 							</div>
 						</div>
 						<div class="omniloop-admin-card__body">
-							<ul class="omniloop-admin-checks">
+							<ul class="omniloop-admin-checks omniloop-admin-checks--solo">
 								<li class="omniloop-admin-check">
 									<label>
 										<input type="hidden" name="omniloop_settings[auto_sync]" value="off">
@@ -515,11 +553,11 @@ final class SettingsPage {
 						<div class="omniloop-admin-card__head">
 							<div>
 								<h2><?php esc_html_e( 'Saved filter presets', 'omniloop' ); ?></h2>
-								<p><?php esc_html_e( 'Create reusable filter combinations for modules. Share a preset with ?ol_preset=preset-id on any page.', 'omniloop' ); ?></p>
+								<p><?php esc_html_e( 'Reusable filter sets for modules. Share with ?ol_preset=link-id on any page.', 'omniloop' ); ?></p>
 							</div>
 						</div>
 						<div class="omniloop-admin-card__body">
-							<div id="omniloop-presets-list" class="omniloop-admin-presets">
+							<div id="omniloop-presets-list" class="omniloop-admin-presets" data-repeat="preset">
 								<?php
 								$preset_rows = $presets;
 								if ( empty( $preset_rows ) ) {
@@ -527,57 +565,20 @@ final class SettingsPage {
 										[
 											'id'        => '',
 											'label'     => '',
-											'post_type' => in_array( 'product', $selected, true ) ? 'product' : ( $selected[0] ?? 'post' ),
+											'post_type' => $default_type,
 											'search'    => '',
 											'sort_by'   => 'date',
 											'facets'    => [],
 										],
 									];
 								}
-								foreach ( $preset_rows as $index => $preset ) :
-									$facets_json = wp_json_encode( $preset['facets'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-									?>
-									<div class="omniloop-admin-preset" data-index="<?php echo esc_attr( (string) $index ); ?>">
-										<div class="omniloop-admin-preset__grid">
-											<label>
-												<span><?php esc_html_e( 'Label', 'omniloop' ); ?></span>
-												<input type="text" name="omniloop_settings[filter_presets][<?php echo esc_attr( (string) $index ); ?>][label]" value="<?php echo esc_attr( $preset['label'] ); ?>" placeholder="<?php esc_attr_e( 'Summer Sale', 'omniloop' ); ?>">
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Preset ID', 'omniloop' ); ?></span>
-												<input type="text" name="omniloop_settings[filter_presets][<?php echo esc_attr( (string) $index ); ?>][id]" value="<?php echo esc_attr( $preset['id'] ); ?>" placeholder="<?php esc_attr_e( 'summer-sale', 'omniloop' ); ?>">
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Post type', 'omniloop' ); ?></span>
-												<select name="omniloop_settings[filter_presets][<?php echo esc_attr( (string) $index ); ?>][post_type]">
-													<?php foreach ( $types as $type ) : ?>
-														<option value="<?php echo esc_attr( $type->name ); ?>" <?php selected( $preset['post_type'], $type->name ); ?>><?php echo esc_html( $type->labels->singular_name ); ?></option>
-													<?php endforeach; ?>
-												</select>
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Sort', 'omniloop' ); ?></span>
-												<select name="omniloop_settings[filter_presets][<?php echo esc_attr( (string) $index ); ?>][sort_by]">
-													<?php foreach ( $sort_options as $sort_key ) : ?>
-														<option value="<?php echo esc_attr( $sort_key ); ?>" <?php selected( $preset['sort_by'], $sort_key ); ?>><?php echo esc_html( $sort_key ); ?></option>
-													<?php endforeach; ?>
-												</select>
-											</label>
-											<label class="omniloop-admin-preset__wide">
-												<span><?php esc_html_e( 'Search', 'omniloop' ); ?></span>
-												<input type="text" name="omniloop_settings[filter_presets][<?php echo esc_attr( (string) $index ); ?>][search]" value="<?php echo esc_attr( $preset['search'] ); ?>">
-											</label>
-											<label class="omniloop-admin-preset__wide">
-												<span><?php esc_html_e( 'Facets JSON', 'omniloop' ); ?></span>
-												<textarea name="omniloop_settings[filter_presets][<?php echo esc_attr( (string) $index ); ?>][facets]" rows="4" placeholder='{"on_sale":["1"],"product_cat":["shoes"]}'><?php echo esc_textarea( is_string( $facets_json ) ? $facets_json : '{}' ); ?></textarea>
-											</label>
-										</div>
-									</div>
-								<?php endforeach; ?>
+								foreach ( $preset_rows as $index => $preset ) {
+									SettingsFields::preset_card( (int) $index, $preset, $types, $facet_choices );
+								}
+								?>
 							</div>
-							<p class="omniloop-admin-status">
-								<?php esc_html_e( 'Example facets JSON: {"on_sale":["1"],"product_cat":["shoes"],"price_range":[10,120]}', 'omniloop' ); ?>
-							</p>
+							<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost omniloop-admin-btn--small" data-repeat-add="preset"><?php esc_html_e( 'Add preset', 'omniloop' ); ?></button>
+							<p class="omniloop-admin-hint"><?php esc_html_e( 'Leave the link ID blank to generate it from the name. Pick filters below — no JSON required.', 'omniloop' ); ?></p>
 						</div>
 					</section>
 
@@ -589,11 +590,9 @@ final class SettingsPage {
 							</div>
 						</div>
 						<div class="omniloop-admin-card__body">
+							<p class="omniloop-admin-subhead"><?php esc_html_e( 'Pinned items', 'omniloop' ); ?></p>
+							<?php SettingsFields::pin_picker( $merch['pin_ids'], $pin_posts, $default_type ); ?>
 							<div class="omniloop-admin-preset__grid">
-								<label class="omniloop-admin-preset__wide">
-									<span><?php esc_html_e( 'Pinned product IDs', 'omniloop' ); ?></span>
-									<input type="text" name="omniloop_settings[merchandising][pin_ids]" value="<?php echo esc_attr( implode( ', ', $merch['pin_ids'] ) ); ?>" placeholder="12, 45, 90">
-								</label>
 								<label>
 									<span><?php esc_html_e( 'Out of stock last', 'omniloop' ); ?></span>
 									<select name="omniloop_settings[merchandising][oos_last]">
@@ -606,8 +605,9 @@ final class SettingsPage {
 									<input type="number" min="0" max="99" name="omniloop_settings[merchandising][urgency_threshold]" value="<?php echo esc_attr( (string) $merch['urgency_threshold'] ); ?>">
 								</label>
 							</div>
-							<p class="omniloop-admin-status"><?php esc_html_e( 'Pinned IDs stay at the top only when they still match the current filters. Set the threshold to 0 to hide “Only X left”.', 'omniloop' ); ?></p>
-							<div class="omniloop-admin-presets" style="margin-top:1rem">
+							<p class="omniloop-admin-hint"><?php esc_html_e( 'Set the threshold to 0 to hide “Only X left”.', 'omniloop' ); ?></p>
+							<p class="omniloop-admin-subhead"><?php esc_html_e( 'Promo badges', 'omniloop' ); ?></p>
+							<div class="omniloop-admin-presets" data-repeat="promo">
 								<?php
 								$promo_rows = $merch['promotions'];
 								if ( empty( $promo_rows ) ) {
@@ -615,41 +615,18 @@ final class SettingsPage {
 										[
 											'id'        => '',
 											'badge'     => '',
-											'post_type' => in_array( 'product', $selected, true ) ? 'product' : ( $selected[0] ?? 'post' ),
+											'post_type' => $default_type,
 											'facets'    => [],
 										],
 									];
 								}
-								foreach ( $promo_rows as $index => $promo ) :
-									$promo_facets = wp_json_encode( $promo['facets'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-									?>
-									<div class="omniloop-admin-preset">
-										<div class="omniloop-admin-preset__grid">
-											<label>
-												<span><?php esc_html_e( 'Promo badge', 'omniloop' ); ?></span>
-												<input type="text" name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][badge]" value="<?php echo esc_attr( $promo['badge'] ); ?>" placeholder="<?php esc_attr_e( 'Staff pick', 'omniloop' ); ?>">
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Rule ID', 'omniloop' ); ?></span>
-												<input type="text" name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][id]" value="<?php echo esc_attr( $promo['id'] ); ?>" placeholder="<?php esc_attr_e( 'staff-pick', 'omniloop' ); ?>">
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Post type', 'omniloop' ); ?></span>
-												<select name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][post_type]">
-													<?php foreach ( $types as $type ) : ?>
-														<option value="<?php echo esc_attr( $type->name ); ?>" <?php selected( $promo['post_type'], $type->name ); ?>><?php echo esc_html( $type->labels->singular_name ); ?></option>
-													<?php endforeach; ?>
-												</select>
-											</label>
-											<label class="omniloop-admin-preset__wide">
-												<span><?php esc_html_e( 'Match facets JSON', 'omniloop' ); ?></span>
-												<textarea name="omniloop_settings[merchandising][promotions][<?php echo esc_attr( (string) $index ); ?>][facets]" rows="3" placeholder='{"product_cat":["shoes"]}'><?php echo esc_textarea( is_string( $promo_facets ) ? $promo_facets : '{}' ); ?></textarea>
-											</label>
-										</div>
-									</div>
-								<?php endforeach; ?>
+								foreach ( $promo_rows as $index => $promo ) {
+									SettingsFields::promo_card( (int) $index, $promo, $types, $facet_choices );
+								}
+								?>
 							</div>
-							<p class="omniloop-admin-status"><?php esc_html_e( 'Products that have those facet values get the promo badge. Example: {"product_cat":["shoes"]}', 'omniloop' ); ?></p>
+							<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost omniloop-admin-btn--small" data-repeat-add="promo"><?php esc_html_e( 'Add promo badge', 'omniloop' ); ?></button>
+							<p class="omniloop-admin-hint"><?php esc_html_e( 'Items that match the filters below get the badge.', 'omniloop' ); ?></p>
 						</div>
 					</section>
 
@@ -696,7 +673,7 @@ final class SettingsPage {
 					</section>
 				</div>
 
-				<div class="omniloop-admin-grid" data-tab-panel="seo" hidden>
+				<div class="omniloop-admin-grid" data-tab-panel="seo" id="omniloop-panel-seo" role="tabpanel" aria-labelledby="omniloop-tab-seo" hidden>
 					<section class="omniloop-admin-card omniloop-admin-card--wide">
 						<div class="omniloop-admin-card__head">
 							<div>
@@ -732,7 +709,7 @@ final class SettingsPage {
 									<input type="number" min="10" max="1000" name="omniloop_settings[seo][sitemap_max]" value="<?php echo esc_attr( (string) $seo['sitemap_max'] ); ?>">
 								</label>
 							</div>
-							<ul class="omniloop-admin-checks" style="margin-top:1rem">
+							<ul class="omniloop-admin-checks omniloop-admin-checks--stack">
 								<li class="omniloop-admin-check">
 									<label>
 										<input type="hidden" name="omniloop_settings[seo][noindex_filtered]" value="off">
@@ -774,7 +751,7 @@ final class SettingsPage {
 								</li>
 							</ul>
 							<?php if ( $facet_choices ) : ?>
-								<p class="omniloop-admin-status" style="margin-top:1rem"><?php esc_html_e( 'Sitemap facet keys', 'omniloop' ); ?></p>
+								<p class="omniloop-admin-subhead"><?php esc_html_e( 'Sitemap facet keys', 'omniloop' ); ?></p>
 								<ul class="omniloop-admin-checks">
 									<?php foreach ( $facet_choices as $facet_key => $facet_label ) : ?>
 										<li class="omniloop-admin-check">
@@ -796,7 +773,7 @@ final class SettingsPage {
 					</section>
 				</div>
 
-				<div class="omniloop-admin-grid" data-tab-panel="facets" hidden>
+				<div class="omniloop-admin-grid" data-tab-panel="facets" id="omniloop-panel-facets" role="tabpanel" aria-labelledby="omniloop-tab-facets" hidden>
 					<section class="omniloop-admin-card">
 						<div class="omniloop-admin-card__head">
 							<div>
@@ -805,7 +782,7 @@ final class SettingsPage {
 							</div>
 						</div>
 						<div class="omniloop-admin-card__body">
-							<ul class="omniloop-admin-checks">
+							<ul class="omniloop-admin-checks omniloop-admin-checks--stack">
 								<li class="omniloop-admin-check">
 									<label>
 										<input type="hidden" name="omniloop_settings[facet_ui][hide_zero_count]" value="off">
@@ -856,7 +833,7 @@ final class SettingsPage {
 							</div>
 						</div>
 						<div class="omniloop-admin-card__body">
-							<div class="omniloop-admin-presets">
+							<div class="omniloop-admin-presets" data-repeat="rule">
 								<?php
 								$rule_rows = $facet_ui['rules'];
 								if ( empty( $rule_rows ) ) {
@@ -870,50 +847,17 @@ final class SettingsPage {
 										],
 									];
 								}
-								foreach ( $rule_rows as $index => $rule ) :
-									$rule_values = implode( ', ', $rule['source_values'] );
-									?>
-									<div class="omniloop-admin-preset">
-										<div class="omniloop-admin-preset__grid">
-											<label>
-												<span><?php esc_html_e( 'When facet', 'omniloop' ); ?></span>
-												<select name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][source_facet]">
-													<option value=""><?php esc_html_e( '—', 'omniloop' ); ?></option>
-													<?php foreach ( $facet_choices as $facet_key => $facet_label ) : ?>
-														<option value="<?php echo esc_attr( $facet_key ); ?>" <?php selected( $rule['source_facet'], $facet_key ); ?>><?php echo esc_html( $facet_label ); ?></option>
-													<?php endforeach; ?>
-												</select>
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Has values (optional)', 'omniloop' ); ?></span>
-												<input type="text" name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][source_values]" value="<?php echo esc_attr( $rule_values ); ?>" placeholder="<?php esc_attr_e( 'red, navy — empty = any', 'omniloop' ); ?>">
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Then', 'omniloop' ); ?></span>
-												<select name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][action]">
-													<option value="show" <?php selected( $rule['action'], 'show' ); ?>><?php esc_html_e( 'Show', 'omniloop' ); ?></option>
-													<option value="hide" <?php selected( $rule['action'], 'hide' ); ?>><?php esc_html_e( 'Hide', 'omniloop' ); ?></option>
-												</select>
-											</label>
-											<label>
-												<span><?php esc_html_e( 'Target facet', 'omniloop' ); ?></span>
-												<select name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][target_facet]">
-													<option value=""><?php esc_html_e( '—', 'omniloop' ); ?></option>
-													<?php foreach ( $facet_choices as $facet_key => $facet_label ) : ?>
-														<option value="<?php echo esc_attr( $facet_key ); ?>" <?php selected( $rule['target_facet'], $facet_key ); ?>><?php echo esc_html( $facet_label ); ?></option>
-													<?php endforeach; ?>
-												</select>
-											</label>
-											<input type="hidden" name="omniloop_settings[facet_ui][rules][<?php echo esc_attr( (string) $index ); ?>][id]" value="<?php echo esc_attr( $rule['id'] ); ?>">
-										</div>
-									</div>
-								<?php endforeach; ?>
+								foreach ( $rule_rows as $index => $rule ) {
+									SettingsFields::rule_card( (int) $index, $rule, $facet_choices );
+								}
+								?>
 							</div>
+							<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost omniloop-admin-btn--small" data-repeat-add="rule"><?php esc_html_e( 'Add rule', 'omniloop' ); ?></button>
 						</div>
 					</section>
 				</div>
 
-				<div class="omniloop-admin-grid" data-tab-panel="analytics" hidden>
+				<div class="omniloop-admin-grid" data-tab-panel="analytics" id="omniloop-panel-analytics" role="tabpanel" aria-labelledby="omniloop-tab-analytics" hidden>
 					<section class="omniloop-admin-card omniloop-admin-card--wide">
 						<div class="omniloop-admin-card__head">
 							<div>
@@ -922,7 +866,12 @@ final class SettingsPage {
 							</div>
 						</div>
 						<div class="omniloop-admin-card__body">
-							<p class="omniloop-admin-status">
+							<label class="omniloop-admin-check">
+								<input type="hidden" name="omniloop_settings[analytics][enabled]" value="off">
+								<input type="checkbox" name="omniloop_settings[analytics][enabled]" value="on" <?php checked( $analytics_enabled ); ?>>
+								<span class="omniloop-admin-check__ui"><span class="omniloop-admin-check__text"><span class="omniloop-admin-check__label"><?php esc_html_e( 'Enable anonymous conversion analytics', 'omniloop' ); ?></span><span class="omniloop-admin-check__slug"><?php esc_html_e( 'Records filter interactions, product clicks, and add-to-cart intent for 30 days. No IP address is stored.', 'omniloop' ); ?></span></span></span>
+							</label>
+							<p class="omniloop-admin-hint">
 								<?php
 								echo esc_html(
 									sprintf(
@@ -934,7 +883,8 @@ final class SettingsPage {
 								?>
 							</p>
 							<?php if ( $analytics_clicks ) : ?>
-								<table class="widefat striped">
+								<div class="omniloop-admin-table-wrap">
+								<table class="omniloop-admin-table">
 									<thead>
 										<tr>
 											<th><?php esc_html_e( 'Facet', 'omniloop' ); ?></th>
@@ -952,14 +902,72 @@ final class SettingsPage {
 										<?php endforeach; ?>
 									</tbody>
 								</table>
+								</div>
 							<?php else : ?>
 								<p class="omniloop-admin-empty"><?php esc_html_e( 'No clicks recorded yet. They appear as shoppers use filters on the front end.', 'omniloop' ); ?></p>
+							<?php endif; ?>
+							<?php if ( $analytics_products ) : ?>
+								<p class="omniloop-admin-subhead"><?php esc_html_e( 'Product engagement', 'omniloop' ); ?></p>
+								<div class="omniloop-admin-table-wrap">
+								<table class="omniloop-admin-table">
+									<thead><tr>
+										<th><?php esc_html_e( 'Product', 'omniloop' ); ?></th>
+										<th><?php esc_html_e( 'Clicks', 'omniloop' ); ?></th>
+										<th><?php esc_html_e( 'Add to carts', 'omniloop' ); ?></th>
+										<th><?php esc_html_e( 'Intent rate', 'omniloop' ); ?></th>
+									</tr></thead><tbody>
+									<?php foreach ( $analytics_products as $row ) : ?>
+										<?php $rate = $row['product_clicks'] > 0 ? round( 100 * $row['add_to_carts'] / $row['product_clicks'], 1 ) : 0; ?>
+										<tr>
+											<td><?php echo esc_html( get_the_title( $row['post_id'] ) ?: '#' . $row['post_id'] ); ?></td>
+											<td><?php echo esc_html( (string) $row['product_clicks'] ); ?></td>
+											<td><?php echo esc_html( (string) $row['add_to_carts'] ); ?></td>
+											<td><?php echo esc_html( (string) $rate . '%' ); ?></td>
+										</tr>
+									<?php endforeach; ?>
+									</tbody>
+								</table>
+								</div>
 							<?php endif; ?>
 						</div>
 					</section>
 				</div>
 
-				<div class="omniloop-admin-grid" data-tab-panel="tools" hidden>
+				<div class="omniloop-admin-grid" data-tab-panel="tools" id="omniloop-panel-tools" role="tabpanel" aria-labelledby="omniloop-tab-tools" hidden>
+					<section class="omniloop-admin-card omniloop-admin-card--wide">
+						<div class="omniloop-admin-card__head">
+							<div>
+								<h2><?php esc_html_e( 'Help Guide intro video', 'omniloop' ); ?></h2>
+								<p><?php esc_html_e( 'Paste a YouTube, Vimeo, or MP4 link. It appears at the top of OmniLoop → Help Guide. Leave blank to hide it.', 'omniloop' ); ?></p>
+							</div>
+						</div>
+						<div class="omniloop-admin-card__body">
+							<div class="omniloop-admin-preset__grid">
+								<label class="omniloop-admin-preset__wide">
+									<span><?php esc_html_e( 'Video URL', 'omniloop' ); ?></span>
+									<input
+										type="url"
+										id="omniloop-intro-video"
+										name="omniloop_settings[help][intro_video]"
+										value="<?php echo esc_attr( $help_video ); ?>"
+										placeholder="https://www.youtube.com/watch?v=…"
+									>
+								</label>
+							</div>
+							<div class="omniloop-admin-file-row">
+								<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost" id="omniloop-intro-video-pick">
+									<?php esc_html_e( 'Choose from Media Library', 'omniloop' ); ?>
+								</button>
+								<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost" id="omniloop-intro-video-clear">
+									<?php esc_html_e( 'Clear', 'omniloop' ); ?>
+								</button>
+								<a class="omniloop-admin-btn omniloop-admin-btn--ghost" href="<?php echo esc_url( admin_url( 'admin.php?page=omniloop-docs' ) ); ?>">
+									<?php esc_html_e( 'Open Help Guide', 'omniloop' ); ?>
+								</a>
+							</div>
+							<p class="omniloop-admin-hint"><?php esc_html_e( 'YouTube and Vimeo links are embedded privately (no-cookie where possible). Uploaded videos play from your Media Library.', 'omniloop' ); ?></p>
+						</div>
+					</section>
 					<section class="omniloop-admin-card omniloop-admin-card--wide">
 						<div class="omniloop-admin-card__head">
 							<div>
@@ -976,48 +984,57 @@ final class SettingsPage {
 						</div>
 					</section>
 				</div>
-
-				<div class="omniloop-admin-tip">
-					<span class="omniloop-admin-tip__icon" aria-hidden="true">
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-							<path d="M8 1.6a6.4 6.4 0 100 12.8A6.4 6.4 0 008 1.6z" stroke="currentColor" stroke-width="1.5"/>
-							<path d="M8 7v3.2M8 4.8h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-						</svg>
-					</span>
-					<div>
-						<strong><?php esc_html_e( 'After saving', 'omniloop' ); ?></strong>
-						<p><?php esc_html_e( 'Rebuild the index whenever you change post types or ACF facets, then insert OmniLoop Filter in the Divi 5 Visual Builder.', 'omniloop' ); ?></p>
-					</div>
-				</div>
-
-				<footer class="omniloop-admin-foot">
-					<div class="omniloop-admin-foot__actions">
-						<button type="submit" class="omniloop-admin-btn omniloop-admin-btn--primary">
-							<?php esc_html_e( 'Save changes', 'omniloop' ); ?>
-						</button>
-						<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost" id="omniloop-reindex-secondary">
-							<?php esc_html_e( 'Rebuild index', 'omniloop' ); ?>
-						</button>
-					</div>
-					<div>
-						<div class="omniloop-admin-progress" id="omniloop-reindex-progress" aria-hidden="true">
-							<div class="omniloop-admin-progress__bar" id="omniloop-reindex-bar"></div>
-						</div>
-						<p class="omniloop-admin-status" id="omniloop-reindex-status" aria-live="polite"></p>
-					</div>
-				</footer>
 			</form>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data" class="omniloop-admin-import" data-tab-panel="tools" hidden>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data" class="omniloop-admin-import omniloop-admin-card" data-tab-panel="tools" hidden>
 				<?php wp_nonce_field( SettingsIo::IMPORT_ACTION ); ?>
 				<input type="hidden" name="action" value="<?php echo esc_attr( SettingsIo::IMPORT_ACTION ); ?>">
-				<p>
-					<label>
-						<span class="screen-reader-text"><?php esc_html_e( 'Settings JSON file', 'omniloop' ); ?></span>
-						<input type="file" name="omniloop_import_file" accept="application/json,.json" required>
-					</label>
-				</p>
-				<button type="submit" class="omniloop-admin-btn omniloop-admin-btn--primary"><?php esc_html_e( 'Import settings', 'omniloop' ); ?></button>
+				<div class="omniloop-admin-card__head">
+					<div>
+						<h2><?php esc_html_e( 'Import settings', 'omniloop' ); ?></h2>
+						<p><?php esc_html_e( 'Replace presets, merchandising, SEO, and facet rules from a JSON export. Index data is not included — rebuild after import.', 'omniloop' ); ?></p>
+					</div>
+				</div>
+				<div class="omniloop-admin-card__body">
+					<div class="omniloop-admin-file-row">
+						<label>
+							<span class="screen-reader-text"><?php esc_html_e( 'Settings JSON file', 'omniloop' ); ?></span>
+							<input class="omniloop-admin-file" type="file" name="omniloop_import_file" accept="application/json,.json" required>
+						</label>
+						<button type="submit" class="omniloop-admin-btn omniloop-admin-btn--primary"><?php esc_html_e( 'Import settings', 'omniloop' ); ?></button>
+					</div>
+				</div>
 			</form>
+
+			<div class="omniloop-admin-tip">
+				<span class="omniloop-admin-tip__icon" aria-hidden="true">
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+						<path d="M8 1.6a6.4 6.4 0 100 12.8A6.4 6.4 0 008 1.6z" stroke="currentColor" stroke-width="1.5"/>
+						<path d="M8 7v3.2M8 4.8h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+					</svg>
+				</span>
+				<div>
+					<strong><?php esc_html_e( 'After saving', 'omniloop' ); ?></strong>
+					<p><?php esc_html_e( 'Rebuild the index whenever you change post types or ACF facets, then insert OmniLoop Filter in the Divi 5 Visual Builder.', 'omniloop' ); ?></p>
+				</div>
+			</div>
+
+			<footer class="omniloop-admin-foot">
+				<div class="omniloop-admin-foot__actions">
+					<button type="submit" class="omniloop-admin-btn omniloop-admin-btn--primary" form="omniloop-settings-form">
+						<?php esc_html_e( 'Save changes', 'omniloop' ); ?>
+					</button>
+					<button type="button" class="omniloop-admin-btn omniloop-admin-btn--ghost" id="omniloop-reindex-secondary">
+						<?php esc_html_e( 'Rebuild index', 'omniloop' ); ?>
+					</button>
+				</div>
+				<div>
+					<div class="omniloop-admin-progress" id="omniloop-reindex-progress" aria-hidden="true">
+						<div class="omniloop-admin-progress__bar" id="omniloop-reindex-bar"></div>
+					</div>
+					<p class="omniloop-admin-status" id="omniloop-reindex-status" aria-live="polite"></p>
+				</div>
+			</footer>
+			<?php SettingsFields::templates( $facet_choices, $types, $default_type ); ?>
 		</div>
 		<?php
 	}

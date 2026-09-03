@@ -21,7 +21,9 @@ final class Indexer {
 		add_action( 'wp_trash_post', [ self::class, 'delete_post' ] );
 		add_action( 'untrashed_post', [ self::class, 'maybe_index_post_id' ] );
 		add_action( 'set_object_terms', [ self::class, 'on_terms' ], 10, 4 );
+		add_action( 'added_post_meta', [ self::class, 'on_meta_updated' ], 10, 4 );
 		add_action( 'updated_post_meta', [ self::class, 'on_meta_updated' ], 10, 4 );
+		add_action( 'deleted_post_meta', [ self::class, 'on_meta_updated' ], 10, 4 );
 		add_action( 'comment_post', [ self::class, 'on_comment_post' ], 20, 3 );
 		add_action( 'wp_set_comment_status', [ self::class, 'on_comment_status' ], 20, 2 );
 		add_action( 'deleted_comment', [ self::class, 'on_comment_deleted' ], 20, 2 );
@@ -29,6 +31,8 @@ final class Indexer {
 		if ( class_exists( 'WooCommerce' ) ) {
 			add_action( 'woocommerce_update_product', [ self::class, 'maybe_index_post_id' ] );
 			add_action( 'woocommerce_product_set_stock_status', [ self::class, 'on_wc_stock' ], 10, 2 );
+			add_action( 'woocommerce_save_product_variation', [ self::class, 'on_variation_saved' ], 20, 1 );
+			add_action( 'woocommerce_before_delete_product_variation', [ self::class, 'on_variation_saved' ], 5, 1 );
 		}
 
 		AcfFacets::init();
@@ -44,7 +48,7 @@ final class Indexer {
 	}
 
 	/**
-	 * @return array{indexed_rows:int,indexed_posts:int,reindex_pending:bool,reindex_offset:int,last_sync:int,last_sync_human:string,auto_sync:bool}
+	 * @return array{indexed_rows:int,indexed_posts:int,stale_rows:int,reindex_pending:bool,reindex_offset:int,last_sync:int,last_sync_human:string,auto_sync:bool}
 	 */
 	public static function status(): array {
 		global $wpdb;
@@ -54,12 +58,15 @@ final class Indexer {
 		$rows  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$posts = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$stale = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} i LEFT JOIN {$wpdb->posts} p ON p.ID = i.post_id WHERE p.ID IS NULL OR p.post_status <> 'publish' OR p.post_password <> ''" );
 		$cursor = (int) get_option( 'omniloop_reindex_cursor', 0 );
 		$last   = (int) get_option( 'omniloop_last_index_sync', 0 );
 
 		return [
 			'indexed_rows'    => $rows,
 			'indexed_posts'   => $posts,
+			'stale_rows'      => $stale,
 			'reindex_pending' => $cursor > 0,
 			'reindex_offset'  => $cursor,
 			'last_sync'       => $last,
@@ -93,9 +100,29 @@ final class Indexer {
 	}
 
 	/**
-	 * @param int    $product_id Product ID.
-	 * @param string $status     Stock status.
+	 * Reindex the parent variable product when a variation is saved or deleted.
+	 *
+	 * @param mixed $variation_id Variation post ID.
 	 */
+	public static function on_variation_saved( $variation_id ): void {
+		$variation_id = (int) $variation_id;
+		if ( $variation_id < 1 ) {
+			return;
+		}
+
+		$parent = (int) wp_get_post_parent_id( $variation_id );
+		if ( $parent < 1 && function_exists( 'wc_get_product' ) ) {
+			$variation = wc_get_product( $variation_id );
+			if ( $variation && method_exists( $variation, 'get_parent_id' ) ) {
+				$parent = (int) $variation->get_parent_id();
+			}
+		}
+
+		if ( $parent > 0 ) {
+			self::maybe_index_post_id( $parent );
+		}
+	}
+
 	public static function on_wc_stock( $product_id, $status ): void {
 		unset( $status );
 		self::maybe_index_post_id( (int) $product_id );
@@ -137,6 +164,7 @@ final class Indexer {
 				'_sale_price'    => true,
 				'_stock_status'  => true,
 				'_stock'         => true,
+				'_sku'           => true,
 				'_featured'      => true,
 				'_visibility'    => true,
 			];
@@ -208,10 +236,10 @@ final class Indexer {
 		}
 	}
 
-	public static function index_post_id( int $post_id ): void {
+	public static function index_post_id( int $post_id, bool $bump_cache = true ): void {
 		$post = get_post( $post_id );
 		if ( $post instanceof \WP_Post ) {
-			self::index_post( $post_id, $post );
+			self::index_post( $post_id, $post, $bump_cache );
 		}
 	}
 
@@ -219,7 +247,7 @@ final class Indexer {
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post    Post object.
 	 */
-	public static function index_post( $post_id, $post = null ): void {
+	public static function index_post( $post_id, $post = null, bool $bump_cache = true ): void {
 		$post_id = (int) $post_id;
 		if ( $post_id <= 0 ) {
 			return;
@@ -242,10 +270,12 @@ final class Indexer {
 			return;
 		}
 
-		self::delete_post( $post_id );
+		self::delete_post( $post_id, false );
 
 		if ( 'publish' !== $post->post_status || '' !== $post->post_password ) {
-			CacheManager::bump();
+			if ( $bump_cache ) {
+				CacheManager::bump();
+			}
 			return;
 		}
 
@@ -260,6 +290,7 @@ final class Indexer {
 				$row,
 				[
 					'%d',
+					'%d',
 					'%s',
 					'%s',
 					'%s',
@@ -269,10 +300,12 @@ final class Indexer {
 		}
 
 		self::touch_sync_time();
-		CacheManager::bump();
+		if ( $bump_cache ) {
+			CacheManager::bump();
+		}
 	}
 
-	public static function delete_post( $post_id ): void {
+	public static function delete_post( $post_id, bool $bump_cache = true ): void {
 		global $wpdb;
 
 		$post_id = (int) $post_id;
@@ -283,6 +316,9 @@ final class Indexer {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->delete( Installer::table_name(), [ 'post_id' => $post_id ], [ '%d' ] );
 		self::touch_sync_time();
+		if ( $bump_cache ) {
+			CacheManager::bump();
+		}
 	}
 
 	/**
@@ -308,7 +344,7 @@ final class Indexer {
 
 		$ids = self::next_indexable_ids( $types, $after_id, self::BATCH );
 		foreach ( $ids as $post_id ) {
-			self::index_post_id( $post_id );
+			self::index_post_id( $post_id, false );
 		}
 
 		$batch     = count( $ids );
@@ -318,6 +354,7 @@ final class Indexer {
 		$done      = $batch < self::BATCH;
 
 		if ( $done ) {
+			self::prune_stale_rows( $types );
 			delete_option( 'omniloop_reindex_cursor' );
 			delete_option( 'omniloop_reindex_processed' );
 			wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
@@ -397,22 +434,42 @@ final class Indexer {
 		return (int) $wpdb->get_var( $prepared );
 	}
 
+	/** @param string[] $types */
+	private static function prune_stale_rows( array $types ): void {
+		global $wpdb;
+		$types = array_values( array_filter( array_map( 'sanitize_key', $types ) ) );
+		if ( ! $types ) {
+			return;
+		}
+		$table = Installer::table_name();
+		$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+		$sql   = "DELETE i FROM {$table} i LEFT JOIN {$wpdb->posts} p ON p.ID = i.post_id
+			WHERE p.ID IS NULL OR p.post_status <> 'publish' OR p.post_password <> '' OR i.post_type NOT IN ({$in})";
+		$prepared = $wpdb->prepare( $sql, $types ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( is_string( $prepared ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( $prepared );
+		}
+	}
+
 	public static function is_indexable_type( string $post_type ): bool {
 		return in_array( $post_type, Installer::allowed_post_types(), true );
 	}
 
 	/**
-	 * @return list<array{post_id:int,post_type:string,facet_key:string,facet_value:string,numeric_value:float|null}>
+	 * @return list<array{post_id:int,source_id:int,post_type:string,facet_key:string,facet_value:string,numeric_value:float|null}>
 	 */
 	private static function collect_rows( \WP_Post $post ): array {
-		$rows     = [];
+		$rows     = [ self::row( $post, '__indexed', '1', 1.0 ) ];
+		$product  = 'product' === $post->post_type && function_exists( 'wc_get_product' ) ? wc_get_product( $post->ID ) : null;
+		$is_variable = is_object( $product ) && method_exists( $product, 'is_type' ) && $product->is_type( 'variable' );
 		$taxonomies = get_object_taxonomies( $post->post_type, 'names' );
 		$taxonomies = apply_filters( 'omniloop_indexable_taxonomies', $taxonomies, $post );
 
 		if ( is_array( $taxonomies ) ) {
 			foreach ( $taxonomies as $taxonomy ) {
 				$taxonomy = sanitize_key( (string) $taxonomy );
-				if ( '' === $taxonomy || ! taxonomy_exists( $taxonomy ) || WooFacets::is_skip_taxonomy( $taxonomy ) ) {
+				if ( '' === $taxonomy || ! taxonomy_exists( $taxonomy ) || WooFacets::is_skip_taxonomy( $taxonomy ) || ( $is_variable && WooFacets::is_attribute_taxonomy( $taxonomy ) ) ) {
 					continue;
 				}
 
@@ -430,7 +487,7 @@ final class Indexer {
 			}
 		}
 
-		$meta_keys = [ '_price', '_regular_price', '_sale_price', '_stock_status', '_stock' ];
+		$meta_keys = [ '_price', '_regular_price', '_sale_price', '_stock_status', '_stock', '_sku' ];
 		$extra     = get_option( 'omniloop_sort_meta_keys', [] );
 		if ( is_array( $extra ) ) {
 			foreach ( $extra as $extra_key ) {
@@ -456,9 +513,7 @@ final class Indexer {
 
 				$numeric = is_numeric( $raw ) ? (float) $raw : null;
 				$value   = sanitize_text_field( (string) $raw );
-				if ( strlen( $value ) > 191 ) {
-					$value = substr( $value, 0, 191 );
-				}
+				$value = self::truncate_text( $value, 191 );
 
 				$rows[] = self::row( $post, $meta_key, $value, $numeric );
 
@@ -468,23 +523,41 @@ final class Indexer {
 			}
 		}
 
+		$seen = [];
+		foreach ( $rows as $row ) {
+			$seen[ $row['source_id'] . '|' . $row['facet_key'] . '|' . $row['facet_value'] ] = true;
+		}
+
 		foreach ( WooFacets::extra_index_values( $post ) as $extra ) {
-			$rows[] = self::row( $post, $extra[0], $extra[1], $extra[2] );
+			$source_id = isset( $extra[3] ) ? (int) $extra[3] : 0;
+			$mark = $source_id . '|' . $extra[0] . '|' . $extra[1];
+			if ( isset( $seen[ $mark ] ) ) {
+				continue;
+			}
+			$seen[ $mark ] = true;
+			$rows[]        = self::row( $post, $extra[0], $extra[1], $extra[2], isset( $extra[3] ) ? (int) $extra[3] : 0 );
 		}
 
 		foreach ( AcfFacets::extra_index_values( $post ) as $extra ) {
-			$rows[] = self::row( $post, $extra[0], $extra[1], $extra[2] );
+			$source_id = isset( $extra[3] ) ? (int) $extra[3] : 0;
+			$mark = $source_id . '|' . $extra[0] . '|' . $extra[1];
+			if ( isset( $seen[ $mark ] ) ) {
+				continue;
+			}
+			$seen[ $mark ] = true;
+			$rows[]        = self::row( $post, $extra[0], $extra[1], $extra[2], isset( $extra[3] ) ? (int) $extra[3] : 0 );
 		}
 
 		return $rows;
 	}
 
 	/**
-	 * @return array{post_id:int,post_type:string,facet_key:string,facet_value:string,numeric_value:float|null}
+	 * @return array{post_id:int,source_id:int,post_type:string,facet_key:string,facet_value:string,numeric_value:float|null}
 	 */
-	private static function row( \WP_Post $post, string $key, string $value, ?float $numeric ): array {
+	private static function row( \WP_Post $post, string $key, string $value, ?float $numeric, int $source_id = 0 ): array {
 		return [
 			'post_id'       => (int) $post->ID,
+			'source_id'     => max( 0, $source_id ),
 			'post_type'     => substr( sanitize_key( $post->post_type ), 0, 20 ),
 			'facet_key'     => substr( $key, 0, 50 ),
 			'facet_value'   => $value,
@@ -497,5 +570,13 @@ final class Indexer {
 		$key = preg_replace( '/[^a-z0-9_\-]/', '', $key ) ?? '';
 
 		return substr( $key, 0, 50 );
+	}
+
+	public static function truncate_text( string $value, int $length ): string {
+		if ( function_exists( 'mb_substr' ) ) {
+			return mb_substr( $value, 0, $length, 'UTF-8' );
+		}
+
+		return substr( $value, 0, $length );
 	}
 }

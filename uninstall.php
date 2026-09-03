@@ -38,9 +38,13 @@ foreach ( $options as $option ) {
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->query(
 	$wpdb->prepare(
-		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 		$wpdb->esc_like( '_transient_olq_' ) . '%',
-		$wpdb->esc_like( '_transient_timeout_olq_' ) . '%'
+		$wpdb->esc_like( '_transient_timeout_olq_' ) . '%',
+		$wpdb->esc_like( '_transient_ol_ev_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_ol_ev_' ) . '%',
+		$wpdb->esc_like( '_transient_ol_qr_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_ol_qr_' ) . '%'
 	)
 );
 
