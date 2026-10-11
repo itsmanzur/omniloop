@@ -14,6 +14,7 @@ use OmniLoop\Engine\Core\FacetUi;
 use OmniLoop\Engine\Core\FilterPresets;
 use OmniLoop\Engine\Core\HelpVideo;
 use OmniLoop\Engine\Core\I18n;
+use OmniLoop\Engine\Core\Indexer;
 use OmniLoop\Engine\Core\Installer;
 use OmniLoop\Engine\Core\Merchandising;
 use OmniLoop\Engine\Core\QueryBuilder;
@@ -37,6 +38,7 @@ final class SettingsPage {
 		add_action( 'admin_notices', [ self::class, 'import_notice' ] );
 		add_action( 'admin_post_' . SettingsIo::EXPORT_ACTION, [ self::class, 'handle_export' ] );
 		add_action( 'admin_post_' . SettingsIo::IMPORT_ACTION, [ self::class, 'handle_import' ] );
+		add_action( 'update_option_omniloop_settings', [ self::class, 'maybe_reindex_after_save' ], 10, 2 );
 	}
 
 	public static function menu(): void {
@@ -147,6 +149,28 @@ final class SettingsPage {
 		CacheManager::bump();
 
 		return $clean;
+	}
+
+	/**
+	 * Indexed post types or ACF fields changed (settings form or import):
+	 * existing rows no longer match, so rebuild the index in the background.
+	 *
+	 * @param mixed $old_value
+	 * @param mixed $value
+	 */
+	public static function maybe_reindex_after_save( $old_value, $value ): void {
+		$old = is_array( $old_value ) ? $old_value : [];
+		$new = is_array( $value ) ? $value : [];
+		foreach ( [ 'post_types', 'acf_fields' ] as $key ) {
+			$before = isset( $old[ $key ] ) && is_array( $old[ $key ] ) ? $old[ $key ] : [];
+			$after  = isset( $new[ $key ] ) && is_array( $new[ $key ] ) ? $new[ $key ] : [];
+			sort( $before );
+			sort( $after );
+			if ( $before !== $after ) {
+				Indexer::schedule_full_reindex();
+				return;
+			}
+		}
 	}
 
 	public static function divi_required_notice(): void {

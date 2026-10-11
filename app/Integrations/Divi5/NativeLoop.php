@@ -165,13 +165,28 @@ final class NativeLoop {
 		if ( ! FilterEndpoint::is_allowed_post_type( $post_type ) || ! SeoUrls::frontend_enabled() ) {
 			return $query;
 		}
-		$state = SeoUrls::state_for( $post_type );
-		if ( ! SeoUrls::state_is_filtered( $state ) && empty( $query['omniloop_attach'] ) ) {
+		$forced = ! empty( $query['omniloop_attach'] );
+		$state  = SeoUrls::state_for( $post_type );
+		if ( ! SeoUrls::state_is_filtered( $state ) && ! $forced ) {
+			return $query;
+		}
+		// Hand-picked / related loops already choose their posts; leave them alone.
+		$attach = $forced || empty( $query['post__in'] );
+		/**
+		 * Whether a Query Loop block / Divi loop should follow the page's OmniLoop filters.
+		 *
+		 * @param bool                $attach
+		 * @param array<string,mixed> $query
+		 * @param string              $post_type
+		 */
+		if ( ! apply_filters( 'omniloop_attach_loop_query', $attach, $query, $post_type ) ) {
 			return $query;
 		}
 		$ids = self::matching_ids( $post_type, is_array( $state['facets'] ) ? $state['facets'] : [], (string) $state['search'] );
 		$query['post__in'] = $ids ? $ids : [ 0 ];
-		$query['orderby']  = 'post__in';
+		if ( empty( $query['orderby'] ) ) {
+			$query['orderby'] = 'post__in';
+		}
 
 		return $query;
 	}

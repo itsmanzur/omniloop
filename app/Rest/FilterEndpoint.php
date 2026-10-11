@@ -338,7 +338,7 @@ final class FilterEndpoint {
 		$i     = 0;
 
 		foreach ( $facets as $key => $values ) {
-			if ( $i++ > 24 ) {
+			if ( $i++ >= QueryBuilder::MAX_FACET_KEYS ) {
 				break;
 			}
 
@@ -472,6 +472,8 @@ final class FilterEndpoint {
 	 * @return array<string,mixed>
 	 */
 	private static function build_payload( array $parsed, array $result ): array {
+		LoopRenderer::prime_caches( $result['post_ids'] );
+
 		$posts = [];
 		foreach ( $result['post_ids'] as $post_id ) {
 			$built = LoopRenderer::post_payload( (int) $post_id, false );

@@ -669,7 +669,24 @@ final class SeoUrls {
 	 * @return array{base:string,seo:string,post_id:int}|null
 	 */
 	private static function split_request_uri(): ?array {
+		// Called from several hooks per request; url_to_postid() is expensive.
+		static $memo = [];
+
 		$path = self::request_path();
+		if ( ! array_key_exists( $path, $memo ) ) {
+			if ( count( $memo ) > 20 ) {
+				$memo = [];
+			}
+			$memo[ $path ] = self::split_path( $path );
+		}
+
+		return $memo[ $path ];
+	}
+
+	/**
+	 * @return array{base:string,seo:string,post_id:int}|null
+	 */
+	private static function split_path( string $path ): ?array {
 		if ( ! preg_match( '#^(.*?)/' . self::MARKER . '/(.+)$#', $path, $match ) ) {
 			return null;
 		}

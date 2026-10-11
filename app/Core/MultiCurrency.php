@@ -51,6 +51,20 @@ final class MultiCurrency {
 		return $amount;
 	}
 
+	/**
+	 * Active shopper currency code (e.g. USD), or the symbol when WooCommerce is absent.
+	 */
+	public static function code(): string {
+		if ( function_exists( 'get_woocommerce_currency' ) ) {
+			$code = (string) get_woocommerce_currency();
+			if ( '' !== $code ) {
+				return $code;
+			}
+		}
+
+		return self::symbol();
+	}
+
 	public static function symbol(): string {
 		if ( function_exists( 'wmc_get_list_currencies' ) && function_exists( 'get_woocommerce_currency' ) ) {
 			$code = (string) get_woocommerce_currency();

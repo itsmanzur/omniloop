@@ -6,6 +6,44 @@
 	"use strict";
 
 	var cache = {};
+	var cacheKeys = [];
+	var CACHE_LIMIT = 60;
+
+	function cachePut(key, data) {
+		if (!Object.prototype.hasOwnProperty.call(cache, key)) {
+			cacheKeys.push(key);
+			while (cacheKeys.length > CACHE_LIMIT) {
+				delete cache[cacheKeys.shift()];
+			}
+		}
+		cache[key] = data;
+	}
+
+	/**
+	 * POST JSON to the REST API. The nonce is only sent when present: page caches
+	 * can serve an expired nonce, and WordPress rejects any invalid X-WP-Nonce with
+	 * 403 even for anonymous visitors, so retry once without it in that case.
+	 */
+	function restPost(url, nonce, body, extra) {
+		extra = extra || {};
+		function send(withNonce) {
+			var headers = { "Content-Type": "application/json" };
+			if (withNonce) headers["X-WP-Nonce"] = nonce;
+			var init = {
+				method: "POST",
+				credentials: "same-origin",
+				headers: headers,
+				body: body
+			};
+			if (extra.signal) init.signal = extra.signal;
+			if (extra.keepalive) init.keepalive = true;
+			return fetch(url, init);
+		}
+		if (!nonce) return send(false);
+		return send(true).then(function (res) {
+			return res.status === 403 ? send(false) : res;
+		});
+	}
 
 	function qs(root, sel) {
 		return root.querySelector(sel);
@@ -1357,16 +1395,7 @@
 			result_count: extra.result_count || 0
 		};
 		try {
-			fetch(cfg.eventUrl, {
-				method: "POST",
-				credentials: "same-origin",
-				headers: {
-					"Content-Type": "application/json",
-					"X-WP-Nonce": cfg.nonce || ""
-				},
-				body: JSON.stringify(body),
-				keepalive: true
-			}).catch(function () {});
+			restPost(cfg.eventUrl, cfg.nonce || "", JSON.stringify(body), { keepalive: true }).catch(function () {});
 		} catch (err) {}
 	}
 
@@ -2112,23 +2141,14 @@
 		var ac = typeof AbortController === "function" ? new AbortController() : null;
 		root._olAbort = ac;
 
-		fetch(config.restUrl, {
-			method: "POST",
-			credentials: "same-origin",
-			headers: {
-				"Content-Type": "application/json",
-				"X-WP-Nonce": config.nonce || ""
-			},
-			body: JSON.stringify(body),
-			signal: ac ? ac.signal : undefined
-		})
+		restPost(config.restUrl, config.nonce || "", JSON.stringify(body), { signal: ac ? ac.signal : null })
 			.then(function (res) {
 				if (!res.ok) throw new Error("query failed");
 				return res.json();
 			})
 			.then(function (data) {
 				if (!data || data.status !== "success") return;
-				cache[key] = data;
+				cachePut(key, data);
 				apply(root, data, append);
 			})
 			.catch(function (err) {

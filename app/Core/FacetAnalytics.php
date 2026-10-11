@@ -101,7 +101,8 @@ final class FacetAnalytics {
 		$ok = $wpdb->insert(
 			self::table_name(),
 			[
-				'created_at'   => current_time( 'mysql' ),
+				// UTC, to match the gmdate() cutoffs used by prune() and the reports.
+				'created_at'   => current_time( 'mysql', true ),
 				'post_type'    => $event['post_type'],
 				'event_type'   => $event['event_type'],
 				'facet_key'    => $event['facet_key'],

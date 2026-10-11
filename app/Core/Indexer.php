@@ -15,6 +15,15 @@ final class Indexer {
 
 	private const BATCH = 40;
 
+	/**
+	 * Post IDs waiting to be reindexed at shutdown. One product save fires
+	 * save_post, set_object_terms per taxonomy and several meta hooks; queueing
+	 * collapses them into a single reindex and a single cache bump.
+	 *
+	 * @var array<int,true>
+	 */
+	private static $queue = [];
+
 	public static function init(): void {
 		add_action( 'save_post', [ self::class, 'maybe_index_post' ], 20, 2 );
 		add_action( 'before_delete_post', [ self::class, 'delete_post' ] );
@@ -31,6 +40,9 @@ final class Indexer {
 		if ( class_exists( 'WooCommerce' ) ) {
 			add_action( 'woocommerce_update_product', [ self::class, 'maybe_index_post_id' ] );
 			add_action( 'woocommerce_product_set_stock_status', [ self::class, 'on_wc_stock' ], 10, 2 );
+			// Order stock changes bypass variation saves; refresh the parent's variation rows.
+			add_action( 'woocommerce_variation_set_stock_status', [ self::class, 'on_variation_saved' ], 10, 1 );
+			add_action( 'woocommerce_updated_product_sales', [ self::class, 'maybe_index_post_id' ], 10, 1 );
 			add_action( 'woocommerce_save_product_variation', [ self::class, 'on_variation_saved' ], 20, 1 );
 			add_action( 'woocommerce_before_delete_product_variation', [ self::class, 'on_variation_saved' ], 5, 1 );
 		}
@@ -79,12 +91,15 @@ final class Indexer {
 		update_option( 'omniloop_last_index_sync', time(), false );
 	}
 
-	public static function maybe_index_post_id( int $post_id ): void {
+	/**
+	 * @param int|string $post_id Post ID (some WooCommerce hooks pass strings).
+	 */
+	public static function maybe_index_post_id( $post_id ): void {
 		if ( ! self::auto_sync_enabled() ) {
 			return;
 		}
 
-		self::index_post_id( $post_id );
+		self::enqueue( (int) $post_id );
 	}
 
 	/**
@@ -92,11 +107,48 @@ final class Indexer {
 	 * @param \WP_Post $post    Post object.
 	 */
 	public static function maybe_index_post( $post_id, $post = null ): void {
+		unset( $post );
 		if ( ! self::auto_sync_enabled() ) {
 			return;
 		}
 
-		self::index_post( $post_id, $post );
+		self::enqueue( (int) $post_id );
+	}
+
+	public static function enqueue( int $post_id ): void {
+		if ( $post_id <= 0 ) {
+			return;
+		}
+		if ( ! self::$queue ) {
+			add_action( 'shutdown', [ self::class, 'flush_queue' ], 1 );
+		}
+		self::$queue[ $post_id ] = true;
+	}
+
+	/**
+	 * Reindex everything queued during this request, then bump the cache once.
+	 */
+	public static function flush_queue(): void {
+		$ids         = array_keys( self::$queue );
+		self::$queue = [];
+		if ( ! $ids ) {
+			return;
+		}
+
+		foreach ( $ids as $post_id ) {
+			self::index_post_id( (int) $post_id, false );
+		}
+		CacheManager::bump();
+	}
+
+	/**
+	 * Restart the batch reindex from the first post in the background.
+	 */
+	public static function schedule_full_reindex(): void {
+		delete_option( 'omniloop_reindex_cursor' );
+		delete_option( 'omniloop_reindex_processed' );
+		wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
+		wp_schedule_single_event( time() + 15, 'omniloop_reindex_batch' );
 	}
 
 	/**
@@ -147,11 +199,19 @@ final class Indexer {
 		}
 
 		$post = get_post( (int) $object_id );
-		if ( ! $post instanceof \WP_Post || ! self::is_indexable_type( $post->post_type ) ) {
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+		// Variation meta (_price, _stock_status…) lives on the parent's index rows.
+		if ( 'product_variation' === $post->post_type && $post->post_parent > 0 ) {
+			self::enqueue( (int) $post->post_parent );
+			return;
+		}
+		if ( ! self::is_indexable_type( $post->post_type ) ) {
 			return;
 		}
 
-		self::index_post_id( (int) $object_id );
+		self::enqueue( (int) $object_id );
 	}
 
 	private static function is_relevant_meta_key( string $meta_key ): bool {
@@ -279,29 +339,45 @@ final class Indexer {
 			return;
 		}
 
-		global $wpdb;
-		$table = Installer::table_name();
-		$rows  = self::collect_rows( $post );
-
-		foreach ( $rows as $row ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$wpdb->insert(
-				$table,
-				$row,
-				[
-					'%d',
-					'%d',
-					'%s',
-					'%s',
-					'%s',
-					is_null( $row['numeric_value'] ) ? '%s' : '%f',
-				]
-			);
-		}
+		self::insert_rows( self::collect_rows( $post ) );
 
 		self::touch_sync_time();
 		if ( $bump_cache ) {
 			CacheManager::bump();
+		}
+	}
+
+	/**
+	 * Multi-row INSERT: a variable product can produce hundreds of rows.
+	 *
+	 * @param list<array{post_id:int,source_id:int,post_type:string,facet_key:string,facet_value:string,numeric_value:float|null}> $rows
+	 */
+	private static function insert_rows( array $rows ): void {
+		global $wpdb;
+
+		$table = Installer::table_name();
+		foreach ( array_chunk( $rows, 200 ) as $chunk ) {
+			$values = [];
+			$params = [];
+			foreach ( $chunk as $row ) {
+				$numeric  = null === $row['numeric_value'] ? 'NULL' : '%f';
+				$values[] = "(%d, %d, %s, %s, %s, {$numeric})";
+				$params[] = $row['post_id'];
+				$params[] = $row['source_id'];
+				$params[] = $row['post_type'];
+				$params[] = $row['facet_key'];
+				$params[] = $row['facet_value'];
+				if ( null !== $row['numeric_value'] ) {
+					$params[] = $row['numeric_value'];
+				}
+			}
+
+			$sql      = "INSERT INTO {$table} (post_id, source_id, post_type, facet_key, facet_value, numeric_value) VALUES " . implode( ', ', $values );
+			$prepared = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			if ( is_string( $prepared ) ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+				$wpdb->query( $prepared );
+			}
 		}
 	}
 

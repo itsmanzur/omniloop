@@ -33,7 +33,16 @@ final class CacheManager {
 
 	public static function query_key( array $args ): string {
 		$args['_ol_lang'] = I18n::current_language();
-		$args['_ol_cur']  = MultiCurrency::symbol();
+		// Symbols collide ($ for USD/CAD/AUD), so key on the currency code.
+		$args['_ol_cur']  = MultiCurrency::code();
+
+		/**
+		 * Extra context that changes a query payload (tax location, role pricing…).
+		 *
+		 * @param array<string,mixed> $parts
+		 * @param array<string,mixed> $args
+		 */
+		$args['_ol_ctx'] = apply_filters( 'omniloop_cache_key_parts', [], $args );
 
 		return md5( (string) wp_json_encode( $args ) );
 	}

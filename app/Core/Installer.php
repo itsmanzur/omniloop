@@ -59,10 +59,7 @@ final class Installer {
 
 			// Schema changes can alter indexed row semantics. Rebuild in the
 			// background so existing installations receive the new data shape.
-			delete_option( 'omniloop_reindex_cursor' );
-			delete_option( 'omniloop_reindex_processed' );
-			wp_clear_scheduled_hook( 'omniloop_reindex_batch' );
-			wp_schedule_single_event( time() + 15, 'omniloop_reindex_batch' );
+			Indexer::schedule_full_reindex();
 		}
 	}
 
@@ -145,14 +142,30 @@ final class Installer {
 			post_type VARCHAR(20) NOT NULL,
 			facet_key VARCHAR(50) NOT NULL,
 			facet_value VARCHAR(191) NOT NULL,
-			numeric_value DECIMAL(12,4) DEFAULT NULL,
+			numeric_value DECIMAL(19,4) DEFAULT NULL,
 			PRIMARY KEY  (id),
 			KEY idx_post (post_id),
 			KEY idx_source (post_id, source_id, facet_key),
 			KEY idx_lookup (facet_key, numeric_value),
-			KEY idx_type_key_val (post_type, facet_key, facet_value)
+			KEY idx_type_key_val_post (post_type, facet_key, facet_value, post_id)
 		) {$charset};";
 
 		dbDelta( $sql );
+		self::drop_legacy_indexes( $table );
+	}
+
+	/**
+	 * dbDelta adds new indexes but never removes old ones. idx_type_key_val is
+	 * superseded by the covering idx_type_key_val_post (schema 1.3.0).
+	 */
+	private static function drop_legacy_indexes( string $table ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$exists = $wpdb->get_var( $wpdb->prepare( "SHOW INDEX FROM {$table} WHERE Key_name = %s", 'idx_type_key_val' ) );
+		if ( $exists ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "ALTER TABLE {$table} DROP INDEX idx_type_key_val" );
+		}
 	}
 }
