@@ -2,37 +2,41 @@
 <section class="ol-landing" data-ol-landing="faq" id="ol-faq">
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">FAQ</p>
-		<h2 class="ol-h ol-h--sm">Short answers for the person who will install it.</h2>
+		<h2 class="ol-h ol-h--sm">Questions people ask before they install.</h2>
 		<div class="ol-faq is-open">
-			<button type="button" data-ol-faq>How is this different from Divi’s Post Filter?</button>
-			<p>Divi’s free filter lists posts. OmniLoop is the shop layer on top: a custom index, Loop Item Builder, merchandising, pretty /ol/ URLs with SEO templates, Filter Sync, and optional Woo/ACF facets — still one Visual Builder module.</p>
+			<button type="button" data-ol-faq aria-expanded="true">I’m not a developer. Can I still use this?</button>
+			<p>Yes. If you can add a Divi module, you can run OmniLoop. Activate it, rebuild the index, drop OmniLoop Filter, pick a layout. The live catalog above is the same interaction your shoppers get.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Do I need WooCommerce?</button>
+			<button type="button" data-ol-faq aria-expanded="false">How is this different from Divi’s Post Filter?</button>
+			<p>Divi’s free filter lists posts. OmniLoop is the shop layer: a fast index, cards you design, merchandising, pretty /ol/ URLs, Filter Sync, and optional Woo/ACF — still one Visual Builder module.</p>
+		</div>
+		<div class="ol-faq">
+			<button type="button" data-ol-faq aria-expanded="false">Do I need WooCommerce?</button>
 			<p>No. Posts and any public post type work. Woo unlocks product facets, swatches, cart, stock urgency, and sale badges. ACF is a separate opt-in for custom fields.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Is this a Gutenberg block?</button>
-			<p>No. It is a Divi 5 Visual Builder extension: one module, OmniLoop Filter, plus nested OmniLoop Card Item children for the loop layout.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Is this a Gutenberg block?</button>
+			<p>No. It is a Divi 5 Visual Builder extension: one module, OmniLoop Filter, plus nested OmniLoop Card Item children if you want a custom card order.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Will pretty URLs 404?</button>
-			<p>After install, open Settings &gt; Permalinks and click Save once so /ol/ rules flush. Templates for title, description, and H1 live under OmniLoop &gt; Settings. Noindex is a checkbox per mix, not a global surprise.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Will pretty URLs show “not found”?</button>
+			<p>After install, open Settings → Permalinks and click Save once so /ol/ rules flush. Title and heading templates live under OmniLoop → Settings. Noindex is a checkbox, not a global surprise.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Where do I rebuild the index?</button>
-			<p>OmniLoop &gt; Settings. Rebuild after you change post types, attributes, or ACF fields. Saving a product still syncs that row on its own.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Where do I rebuild the index?</button>
+			<p>OmniLoop → Settings. Rebuild after you change post types, attributes, or ACF fields. Saving a product still syncs that row on its own.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Can two modules share the same filters?</button>
-			<p>Yes. Give them the same Filter Sync group. A sidebar module and a grid module stay on the same chips. Saved presets are a Settings list; share them with ?ol_preset=your-slug.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Can two modules share the same filters?</button>
+			<p>Yes. Give them the same Filter Sync group. A sidebar and a grid stay on the same chips. Saved presets live in Settings; share them with ?ol_preset=your-slug.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>What about Divi's own Loop Builder?</button>
-			<p>Native Loop attach hands OmniLoop's matching IDs to Divi's loop. It binds the main query only unless you opt a secondary query in, so other loops on the page do not inherit the shop mix.</p>
+			<button type="button" data-ol-faq aria-expanded="false">I already designed cards in Loop Builder.</button>
+			<p>Native Loop attach hands OmniLoop’s matching IDs to Divi’s loop. It binds the main query only unless you opt a second query in, so other loops on the page do not inherit the shop mix.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>How do updates work?</button>
+			<button type="button" data-ol-faq aria-expanded="false">How do updates work?</button>
 			<p>GPL-2.0-or-later. Updates come through the Divi Marketplace. There is no license-key sidebar and no custom updater inside the plugin.</p>
 		</div>
 	</div>

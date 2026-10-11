@@ -101,10 +101,10 @@ Recommended size: Marketplace listing ratio (typically wide hero + square thumbs
 From the plugin root on Windows / PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\build-marketplace-zip.ps1 -Version 1.0.1
+powershell -ExecutionPolicy Bypass -File .\scripts\build-marketplace-zip.ps1 -Version 1.0.0
 ```
 
-Output ZIP: `dist/omniloop-marketplace-1.0.1.zip`
+Output ZIP: `dist/omniloop-marketplace-1.0.0.zip`
 
 ### Pre-flight
 

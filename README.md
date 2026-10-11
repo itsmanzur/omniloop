@@ -4,6 +4,8 @@ Faceted product and post loop for the **Divi 5 Visual Builder**. Custom index ta
 
 This is a **Divi extension** (one Visual Builder module: **OmniLoop Filter**). It is not a Gutenberg block.
 
+**Current release:** 1.0.0
+
 ## Requirements
 
 | Requirement | Notes |

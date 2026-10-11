@@ -10,9 +10,9 @@ if (-not (Test-Path (Join-Path $root "sections"))) {
 $files = @(
 	"01-nav.html",
 	"02-hero.html",
+	"04-live.html",
 	"03-proof.html",
 	"03-why.html",
-	"04-live.html",
 	"05-layouts.html",
 	"06-cards.html",
 	"07-builder.html",
@@ -29,12 +29,13 @@ $head = @"
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>OmniLoop for Divi - landing demo</title>
-	<meta name="description" content="OmniLoop for Divi: the Divi 5 shop layer. One module, custom index, merchandising, pretty SEO URLs, WooCommerce optional.">
+	<title>OmniLoop for Divi - live shop filters in the Visual Builder</title>
+	<meta name="description" content="OmniLoop for Divi: drop one Divi 5 module and shoppers filter without a reload. Custom index, cards you design, merchandising, pretty URLs. WooCommerce optional.">
 	<link rel="stylesheet" href="assets/css/landing.css">
 	<script defer src="assets/js/landing.js"></script>
 </head>
 <body>
+	<a class="ol-skip" href="#ol-live">Skip to live catalog</a>
 "@
 
 $parts = foreach ($name in $files) {

@@ -841,7 +841,7 @@ const EmptyState = ({ style, title, message, resetLabel, showReset, onReset }) =
 	);
 };
 
-const LiveGrid = ({ postType, posts, previewCount, queried, emptyProps, showAddToCart, showQuickView, onQuickView }) => {
+const LiveGrid = ({ postType, posts, previewCount, queried, emptyProps, showAddToCart, showQuickView, quickViewLabel, onQuickView }) => {
 	const labels = postTypeLabels();
 	const items = Array.isArray(posts) ? posts : [];
 
@@ -897,7 +897,7 @@ const LiveGrid = ({ postType, posts, previewCount, queried, emptyProps, showAddT
 											if (typeof onQuickView === 'function') onQuickView(item);
 										}}
 									>
-										Quick view
+										{quickViewLabel || 'Quick view'}
 									</button>
 								) : null}
 								{showAddToCart && atc && atc.url ? (
@@ -1095,6 +1095,7 @@ const LoopEdit = ({ attrs, id, name, elements }) => {
 	const showFilters = attrValue(attrs, 'showFilters', 'on');
 	const showAddToCart = attrValue(attrs, 'showAddToCart', 'on') !== 'off' && postType === 'product';
 	const showQuickView = attrValue(attrs, 'showQuickView', 'on') !== 'off';
+	const quickViewLabel = (attrValue(attrs, 'quickViewLabel', 'Quick view') || 'Quick view').trim() || 'Quick view';
 	const carouselAutoplay = attrValue(attrs, 'carouselAutoplay', 'off') === 'on';
 	const carouselSpeed = attrValue(attrs, 'carouselSpeed', '4000');
 	const carouselPauseHover = attrValue(attrs, 'carouselPauseHover', 'on') !== 'off';
@@ -1343,6 +1344,7 @@ const LoopEdit = ({ attrs, id, name, elements }) => {
 										emptyProps={emptyProps}
 										showAddToCart={showAddToCart}
 										showQuickView={showQuickView}
+										quickViewLabel={quickViewLabel}
 										onQuickView={setQvItem}
 									/>
 								</VbCarousel>
@@ -1356,6 +1358,7 @@ const LoopEdit = ({ attrs, id, name, elements }) => {
 										emptyProps={emptyProps}
 										showAddToCart={showAddToCart}
 										showQuickView={showQuickView}
+										quickViewLabel={quickViewLabel}
 										onQuickView={setQvItem}
 									/>
 								</div>
@@ -1466,6 +1469,9 @@ const loopModule = {
 				},
 				showQuickView: {
 					desktop: { value: 'on' },
+				},
+				quickViewLabel: {
+					desktop: { value: 'Quick view' },
 				},
 				showPagination: {
 					desktop: { value: 'on' },

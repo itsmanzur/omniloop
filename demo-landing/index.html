@@ -3,25 +3,28 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>OmniLoop for Divi - landing demo</title>
-	<meta name="description" content="OmniLoop for Divi: the Divi 5 shop layer. One module, custom index, merchandising, pretty SEO URLs, WooCommerce optional.">
+	<title>OmniLoop for Divi - live shop filters in the Visual Builder</title>
+	<meta name="description" content="OmniLoop for Divi: drop one Divi 5 module and shoppers filter without a reload. Custom index, cards you design, merchandising, pretty URLs. WooCommerce optional.">
 	<link rel="stylesheet" href="assets/css/landing.css">
 	<script defer src="assets/js/landing.js"></script>
 </head>
-<body><!-- OmniLoop landing | 01 Nav | move or insert freely -->
+<body>
+	<a class="ol-skip" href="#ol-live">Skip to live catalog</a><!-- OmniLoop landing | 01 Nav -->
 <section class="ol-landing" data-ol-landing="nav">
 	<div class="ol-landing__inner ol-nav">
 		<a class="ol-nav__brand" href="#ol-hero"><span class="ol-nav__mark" aria-hidden="true"></span> OmniLoop</a>
-		<nav class="ol-nav__links" aria-label="Demo sections">
+		<button type="button" class="ol-nav__toggle" data-ol-nav-toggle aria-expanded="false" aria-controls="ol-nav-links">
+			<span class="screen-reader-text">Menu</span>
+			<span aria-hidden="true"></span>
+		</button>
+		<nav class="ol-nav__links" id="ol-nav-links" aria-label="On this page">
+			<a href="#ol-live">Try it</a>
+			<a href="#ol-start">Setup</a>
 			<a href="#ol-why">Why OmniLoop</a>
-			<a href="#ol-live">Live demo</a>
 			<a href="#ol-layouts">Layouts</a>
-			<a href="#ol-builder">Card builder</a>
-			<a href="#ol-merch">Merch</a>
-			<a href="#ol-seo">SEO URLs</a>
 			<a href="#ol-faq">FAQ</a>
 		</nav>
-		<a class="ol-btn" href="#ol-cta">Get the module</a>
+		<a class="ol-btn ol-nav__cta" href="#ol-cta">Get OmniLoop</a>
 	</div>
 </section>
 
@@ -29,121 +32,50 @@
 <section class="ol-landing" data-ol-landing="hero" id="ol-hero">
 	<div class="ol-landing__inner ol-hero">
 		<div>
-			<p class="ol-kicker">Divi 5 shop layer</p>
-			<h1 class="ol-h">Filter the shop. Watch it move.</h1>
-			<p class="ol-lead">One Visual Builder module — own index, cards you design, merchandising, pretty URLs. Tap a color. Cards that do not match dim out. Click a matching card for a full quick view.</p>
+			<p class="ol-kicker">For Divi 5 shops</p>
+			<h1 class="ol-h">Your customers filter. The shop updates. No page reload.</h1>
+			<p class="ol-lead">Drop one Visual Builder module. They tap a color or a category, and matching products stay. You design the cards. WooCommerce is optional.</p>
 			<ul class="ol-hero__facts">
-				<li><strong>Not Divi’s free filter</strong> Custom index, merch, SEO URLs, Loop Item Builder</li>
-				<li><strong>Not Woo-only</strong> Posts and CPTs loop; Woo unlocks swatches and cart</li>
-				<li><strong>One module</strong> OmniLoop Filter. Nested Card Items reorder the card</li>
+				<li><strong>About five minutes</strong> Activate, rebuild the index, insert OmniLoop Filter.</li>
+				<li><strong>No code</strong> Layouts, cards, and merchandising are Visual Builder settings.</li>
+				<li><strong>Woo when you need it</strong> Posts and catalogs work first. Products, swatches, and cart unlock later.</li>
 			</ul>
-		<div class="ol-row">
-				<a class="ol-btn" href="#ol-live">Open the full catalog</a>
-				<a class="ol-btn ol-btn--ghost" href="#ol-why">Why it is different</a>
+			<div class="ol-row">
+				<a class="ol-btn" href="#ol-live">Try the live catalog</a>
+				<a class="ol-btn ol-btn--ghost" href="#ol-start">See the 3 steps</a>
 			</div>
 		</div>
 		<div class="ol-hero__visual">
 			<div class="ol-hero__grid">
 				<div class="ol-hero__facet">
-					<b>Color</b>
+					<b>Tap a color</b>
 					<div class="ol-swatch-row">
-						<button type="button" class="ol-swatch is-on ol-ph--navy" data-ol-hero-color="navy" aria-label="Navy"></button>
-						<button type="button" class="ol-swatch ol-ph--clay" data-ol-hero-color="clay" aria-label="Clay"></button>
-						<button type="button" class="ol-swatch ol-ph--sand" data-ol-hero-color="sand" aria-label="Sand"></button>
-						<button type="button" class="ol-swatch ol-ph--forest" data-ol-hero-color="forest" aria-label="Forest"></button>
+						<button type="button" class="ol-swatch is-on ol-ph--navy" data-ol-hero-color="navy" aria-pressed="true" aria-label="Navy"></button>
+						<button type="button" class="ol-swatch ol-ph--clay" data-ol-hero-color="clay" aria-pressed="false" aria-label="Clay"></button>
+						<button type="button" class="ol-swatch ol-ph--sand" data-ol-hero-color="sand" aria-pressed="false" aria-label="Sand"></button>
+						<button type="button" class="ol-swatch ol-ph--forest" data-ol-hero-color="forest" aria-pressed="false" aria-label="Forest"></button>
 					</div>
-					<b class="ol-hero__facet-gap">Try it</b>
-					<p class="ol-hero__hint">Click a swatch. Then click a live card for SKU, size, and stock.</p>
+					<p class="ol-hero__hint">Matching cards stay bright. Click one to open a quick view — the same gesture shoppers use on your site.</p>
+					<div class="ol-float" data-ol-hero-float><b>1 in Navy</b><span>Harbor Tote</span></div>
 				</div>
 				<div class="ol-hero__cards">
 					<button type="button" class="ol-mini" data-ol-hero-item="navy" data-ol-open="1">
 						<div class="ol-mini__ph ol-ph--navy ol-art ol-art--tote"><span class="ol-art__obj"></span></div>
-						<div class="ol-mini__meta"><strong>Harbor Tote</strong><span>$148 · 4.8 · Portugal</span></div>
+						<div class="ol-mini__meta"><strong>Harbor Tote</strong><span>$148 · 4.8</span></div>
 					</button>
 					<button type="button" class="ol-mini" data-ol-hero-item="clay" data-ol-open="2">
 						<div class="ol-mini__ph ol-ph--clay ol-art ol-art--pack"><span class="ol-art__obj"></span></div>
-						<div class="ol-mini__meta"><strong>Clay Daypack</strong><span>$128 · was $158</span></div>
+						<div class="ol-mini__meta"><strong>Clay Daypack</strong><span>$128 · on sale</span></div>
 					</button>
 					<button type="button" class="ol-mini" data-ol-hero-item="sand" data-ol-open="3">
 						<div class="ol-mini__ph ol-ph--sand ol-art ol-art--tote"><span class="ol-art__obj"></span></div>
-						<div class="ol-mini__meta"><strong>Sand Weekender</strong><span>$186 · carry-on</span></div>
+						<div class="ol-mini__meta"><strong>Sand Weekender</strong><span>$186</span></div>
 					</button>
 					<button type="button" class="ol-mini" data-ol-hero-item="forest" data-ol-open="4">
 						<div class="ol-mini__ph ol-ph--forest ol-art ol-art--tote"><span class="ol-art__obj"></span></div>
 						<div class="ol-mini__meta"><strong>Forest Shopper</strong><span>$96 · 2 left</span></div>
 					</button>
 				</div>
-			</div>
-			<div class="ol-float" data-ol-hero-float><b>4 in navy</b><span>Harbor Tote</span></div>
-		</div>
-	</div>
-</section>
-
-<!-- OmniLoop landing | 03 Proof -->
-<section class="ol-landing ol-landing--cream" data-ol-landing="proof">
-	<div class="ol-landing__inner">
-		<p class="ol-kicker">In the box</p>
-		<h2 class="ol-h ol-h--sm">Built for a shop owner, not a developer ticket.</h2>
-		<p class="ol-lead">One Visual Builder module. Filters, cards, merchandising, and SEO URLs share the same index. WooCommerce and ACF are extras, not requirements.</p>
-		<div class="ol-stats">
-			<div class="ol-stat"><strong>6</strong><span>Filter layouts: sidebar, accordion, toolbar, mega bar, pills, chip-only</span></div>
-			<div class="ol-stat"><strong>6</strong><span>Card styles: classic, overlay, list, compact, carousel, masonry</span></div>
-			<div class="ol-stat"><strong>1</strong><span>Module. Nested Card Item children reorder image, title, excerpt, price, rating, button</span></div>
-			<div class="ol-stat"><strong>0</strong><span>Woo required. Posts, CPTs, then products when Woo is on</span></div>
-		</div>
-	</div>
-</section>
-
-<!-- OmniLoop landing | 03-why | uniqueness -->
-<section class="ol-landing" data-ol-landing="why" id="ol-why">
-	<div class="ol-landing__inner">
-		<p class="ol-kicker">Why OmniLoop</p>
-		<h2 class="ol-h ol-h--sm">The shop layer Divi’s free filter does not try to be.</h2>
-		<p class="ol-lead">Divi 5 can list posts. OmniLoop turns that list into a catalog: its own index, cards you design, merchandising, and URLs Google can read — still one Visual Builder module.</p>
-		<div class="ol-why">
-			<article class="ol-why__card">
-				<span class="ol-why__n">01</span>
-				<h3>One module, the whole shop</h3>
-				<p>Filters, grid, chips, sort, and pagination live in OmniLoop Filter. Nested Card Item children reorder image, title, price, and buttons in the layers panel. No Filter + Loop split.</p>
-			</article>
-			<article class="ol-why__card">
-				<span class="ol-why__n">02</span>
-				<h3>Own index, not meta joins</h3>
-				<p>Facet queries hit OmniLoop’s table. Saving a product, term, or ACF field updates that row. Rebuild once when you change post types — shops stay snappy as catalogs grow.</p>
-			</article>
-			<article class="ol-why__card">
-				<span class="ol-why__n">03</span>
-				<h3>WooCommerce optional</h3>
-				<p>Posts and any public post type loop on Divi + WordPress alone. Turn Woo on later for swatches, price slider, stock, sale, rating, cart, and quick view. ACF is a separate opt-in.</p>
-			</article>
-			<article class="ol-why__card">
-				<span class="ol-why__n">04</span>
-				<h3>Pretty /ol/ SEO URLs</h3>
-				<p>Color + shoes can look like <em>/ol/color/navy/category/shoes/</em>. Title, description, and H1 templates, noindex for page 2+, optional sitemap. Shareable presets with <em>?ol_preset=</em>.</p>
-			</article>
-			<article class="ol-why__card">
-				<span class="ol-why__n">05</span>
-				<h3>Merchandising in the same index</h3>
-				<p>Pin products, push out-of-stock last, promo badges, “Only X left.” Filter Sync keeps two modules on one page. This is shop control, not just a checkbox list.</p>
-			</article>
-			<article class="ol-why__card">
-				<span class="ol-why__n">06</span>
-				<h3>Divi’s Loop, OmniLoop’s speed</h3>
-				<p>Already designed cards in Loop Builder? Native Loop attach hands matching IDs to Divi’s loop — main query only unless you opt in — so other loops on the page stay clean.</p>
-			</article>
-		</div>
-		<div class="ol-versus" aria-label="How OmniLoop sits next to other tools">
-			<div class="ol-versus__item">
-				<strong>Divi Post Filter</strong>
-				<span>A free list that filters. No custom index, merchandising, card builder, or pretty SEO URLs.</span>
-			</div>
-			<div class="ol-versus__item">
-				<strong>Woo-only filter plugins</strong>
-				<span>Strong on products. Weak if you also loop posts, projects, or need a Divi 5 Visual Builder module.</span>
-			</div>
-			<div class="ol-versus__item is-us">
-				<strong>OmniLoop for Divi</strong>
-				<span>Divi 5 shop layer: one module, own index, cards you design, merch + SEO, Woo when you want it.</span>
 			</div>
 		</div>
 	</div>
@@ -153,15 +85,29 @@
 <section class="ol-landing" data-ol-landing="live" id="ol-live">
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Live catalog</p>
-		<h2 class="ol-h ol-h--sm">Shop it. Filter it. Open a card.</h2>
-		<p class="ol-lead">Sixteen Harbor Goods SKUs. Facet counts update as you click. Active chips write a pretty /ol/ path. List view shows excerpt, SKU, material, and origin. In production this hits OmniLoop's index over AJAX.</p>
+		<h2 class="ol-h ol-h--sm">This is the shop your visitors get.</h2>
+		<p class="ol-lead">Sixteen sample products. Click a color or category — the grid updates, counts change, and the pretty URL writes itself. Click a card for a quick view. On a real site this runs against OmniLoop’s index.</p>
+		<p class="ol-coach" data-ol-coach>
+			Start here:
+			<button type="button" class="ol-coach__btn" data-ol-try="navy">Navy</button>
+			then
+			<button type="button" class="ol-coach__btn" data-ol-try="bags">Bags</button>
+			— then open a card.
+		</p>
 		<p class="ol-url ol-url--live" data-ol-path>/shop/</p>
 		<div class="ol-demo">
-			<aside class="ol-filters" aria-label="Demo filters">
-				<h3>Filters</h3>
+			<button type="button" class="ol-filters-toggle" data-ol-filters-open aria-expanded="false" aria-controls="ol-demo-filters">
+				Filters <span class="ol-filters-toggle__n" data-ol-filter-count hidden></span>
+			</button>
+			<div class="ol-filters-scrim" data-ol-filters-scrim hidden></div>
+			<aside class="ol-filters" id="ol-demo-filters" data-ol-filters aria-label="Demo filters">
+				<div class="ol-filters__bar">
+					<h3>Filters</h3>
+					<button type="button" class="ol-filters__done" data-ol-filters-close>Show results</button>
+				</div>
 				<label class="ol-facet">
 					<h4>Search</h4>
-					<input class="ol-search" type="search" placeholder="Tote, HG-LAMP, Portugal..." data-ol-q>
+					<input class="ol-search" type="search" placeholder="Tote, lamp, Portugal…" data-ol-q autocomplete="off">
 				</label>
 				<div class="ol-facet">
 					<h4>Color</h4>
@@ -223,13 +169,13 @@
 							<button type="button" class="is-on" data-ol-view="grid">Grid</button>
 							<button type="button" data-ol-view="list">List</button>
 						</div>
-						<select class="ol-sort" data-ol-sort>
-							<option value="featured">Featured (pins first)</option>
+						<select class="ol-sort" data-ol-sort aria-label="Sort products">
+							<option value="featured">Featured</option>
 							<option value="price-asc">Price: low to high</option>
 							<option value="price-desc">Price: high to low</option>
 							<option value="rating">Top rated</option>
 							<option value="newest">Newest</option>
-							<option value="name">Name A-Z</option>
+							<option value="name">Name A–Z</option>
 						</select>
 					</div>
 				</div>
@@ -239,12 +185,12 @@
 			</div>
 		</div>
 		<div class="ol-qv-scrim" data-ol-scrim></div>
-		<div class="ol-qv" data-ol-qv>
+		<div class="ol-qv" data-ol-qv role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="ol-qv-title">
 			<button type="button" class="ol-qv__back" data-ol-qv-close>Close</button>
 			<div class="ol-qv__media" data-ol-qv-media></div>
 			<div class="ol-qv__body">
 				<p class="ol-kicker" data-ol-qv-cat></p>
-				<h3 data-ol-qv-title></h3>
+				<h3 id="ol-qv-title" data-ol-qv-title></h3>
 				<p class="ol-qv__rating" data-ol-qv-rating></p>
 				<p class="ol-qv__price" data-ol-qv-price></p>
 				<p class="ol-lead" data-ol-qv-copy></p>
@@ -256,9 +202,9 @@
 					<div>
 						<span class="ol-qv__lab">Qty</span>
 						<div class="ol-qty">
-							<button type="button" data-ol-qv-qty="-1">-</button>
+							<button type="button" data-ol-qv-qty="-1" aria-label="Decrease quantity">−</button>
 							<span data-ol-qv-qty-n>1</span>
-							<button type="button" data-ol-qv-qty="1">+</button>
+							<button type="button" data-ol-qv-qty="1" aria-label="Increase quantity">+</button>
 						</div>
 					</div>
 				</div>
@@ -271,7 +217,95 @@
 			</div>
 		</div>
 	</div>
-	<div class="ol-toast" data-ol-toast></div>
+	<div class="ol-toast" data-ol-toast role="status"></div>
+</section>
+
+<!-- OmniLoop landing | 03 How it works -->
+<section class="ol-landing ol-landing--cream" data-ol-landing="start" id="ol-start">
+	<div class="ol-landing__inner">
+		<p class="ol-kicker">Setup</p>
+		<h2 class="ol-h ol-h--sm">Three steps. Then you are filtering.</h2>
+		<p class="ol-lead">You do not write queries. You do not paste JSON. If you can add a Divi module, you can run OmniLoop.</p>
+		<ol class="ol-steps">
+			<li class="ol-step">
+				<span class="ol-step__n">1</span>
+				<div>
+					<h3>Activate OmniLoop</h3>
+					<p>Install the Divi 5 extension. Open OmniLoop → Settings and tick the post types you sell or list (Products, Posts, or both).</p>
+				</div>
+			</li>
+			<li class="ol-step">
+				<span class="ol-step__n">2</span>
+				<div>
+					<h3>Rebuild the index</h3>
+					<p>One click. OmniLoop copies titles, categories, and attributes into its own fast table. Saving a product later updates that row by itself.</p>
+				</div>
+			</li>
+			<li class="ol-step">
+				<span class="ol-step__n">3</span>
+				<div>
+					<h3>Drop OmniLoop Filter</h3>
+					<p>In the Visual Builder, insert the module. Pick a filter layout and a card style. Save, view the page, tap a filter. That is the shop.</p>
+				</div>
+			</li>
+		</ol>
+		<p class="ol-reassure">Need WooCommerce? Turn it on whenever you are ready. Need a custom field? Tick it in Settings and rebuild once.</p>
+	</div>
+</section>
+
+<!-- OmniLoop landing | 03-why -->
+<section class="ol-landing" data-ol-landing="why" id="ol-why">
+	<div class="ol-landing__inner">
+		<p class="ol-kicker">Why OmniLoop</p>
+		<h2 class="ol-h ol-h--sm">Divi can list posts. This turns the list into a shop.</h2>
+		<p class="ol-lead">The free Post Filter is a list with checkboxes. OmniLoop is the catalog on top: fast filters, cards you design, merchandising, and URLs Google can read — still one Visual Builder module.</p>
+		<div class="ol-why">
+			<article class="ol-why__card">
+				<span class="ol-why__n">01</span>
+				<h3>One module does the whole page</h3>
+				<p>Filters, grid, sort, and page numbers live together. Nested Card Items let you reorder image, title, price, and buttons in the layers panel.</p>
+			</article>
+			<article class="ol-why__card">
+				<span class="ol-why__n">02</span>
+				<h3>Stays fast as the catalog grows</h3>
+				<p>Queries hit OmniLoop’s own index, not a stack of WordPress meta joins. Save a product — that row updates. Rebuild once when you change what you index.</p>
+			</article>
+			<article class="ol-why__card">
+				<span class="ol-why__n">03</span>
+				<h3>WooCommerce is optional</h3>
+				<p>Loop posts or any public type on Divi + WordPress alone. Add Woo later for swatches, price slider, stock, sale, rating, cart, and quick view.</p>
+			</article>
+			<article class="ol-why__card">
+				<span class="ol-why__n">04</span>
+				<h3>Filter pages Google can read</h3>
+				<p>Navy + bags can look like <em>/ol/color/navy/category/bags/</em>. You control title, heading, and whether page 2 is hidden from search.</p>
+			</article>
+			<article class="ol-why__card">
+				<span class="ol-why__n">05</span>
+				<h3>Pin, promote, hide empty shelves</h3>
+				<p>Search to pin a hero product. Push sold-out items last. Promo badges and “Only 2 left” come from Settings — no extra plugin.</p>
+			</article>
+			<article class="ol-why__card">
+				<span class="ol-why__n">06</span>
+				<h3>Keep Divi’s Loop if you already designed it</h3>
+				<p>Native Loop attach hands matching products to Divi’s own loop. Other loops on the page stay untouched unless you opt them in.</p>
+			</article>
+		</div>
+		<div class="ol-versus" aria-label="How OmniLoop sits next to other tools">
+			<div class="ol-versus__item">
+				<strong>Divi Post Filter</strong>
+				<span>A free list that filters. No custom index, merchandising, card builder, or pretty SEO URLs.</span>
+			</div>
+			<div class="ol-versus__item">
+				<strong>Woo-only filter plugins</strong>
+				<span>Strong on products. Awkward if you also loop posts, or want a native Divi 5 module.</span>
+			</div>
+			<div class="ol-versus__item is-us">
+				<strong>OmniLoop for Divi</strong>
+				<span>One Divi 5 module. Own index. Cards you design. Merch and SEO. Woo when you want it.</span>
+			</div>
+		</div>
+	</div>
 </section>
 
 <!-- OmniLoop landing | 05 Filter layouts -->
@@ -279,7 +313,7 @@
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Filter styles</p>
 		<h2 class="ol-h ol-h--sm">Same catalog. Pick a mood.</h2>
-		<p class="ol-lead">These are the six OmniLoop layouts. Click a style, then Bags or Clay. Counts on each chip are live. Chip Only hides the facets until you open Filters.</p>
+		<p class="ol-lead">Six layouts, same catalog. Click a style, then Bags or Clay. Chip Only hides filters until someone asks — good for landing pages.</p>
 		<div class="ol-switch">
 			<button type="button" class="is-on" data-ol-switch="sidebar">Sidebar</button>
 			<button type="button" data-ol-switch="accordion">Accordion</button>
@@ -311,7 +345,7 @@
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Card styles</p>
 		<h2 class="ol-h ol-h--sm">Same three products. Six skins.</h2>
-		<p class="ol-lead">Harbor Tote, Ink Field Jacket, Ink Table Lamp. Presets get a shop live in minutes. Native Divi decoration still owns type, borders, and sale badges.</p>
+		<p class="ol-lead">Harbor Tote, Ink Field Jacket, Ink Table Lamp. Pick a skin. In the module, Divi’s Design tab still owns type, borders, and sale badges.</p>
 		<div class="ol-switch">
 			<button type="button" class="is-on" data-ol-switch="classic">Classic</button>
 			<button type="button" data-ol-switch="overlay">Overlay</button>
@@ -330,7 +364,7 @@
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Loop Item Builder</p>
 		<h2 class="ol-h ol-h--sm">Drag a layer. The card follows.</h2>
-		<p class="ol-lead">Grab Image, Title, Excerpt, Price, Rating, or Add to cart and drop it. In Divi this is nested OmniLoop Card Item children in the layers panel. Reorder here the same way.</p>
+		<p class="ol-lead">Grab a row and drop it. Image, title, excerpt, price, rating, add to cart — the preview follows. In Divi this is nested OmniLoop Card Item children in the layers panel.</p>
 		<div class="ol-builder">
 			<div class="ol-builder__parts" data-ol-parts>
 				<div class="ol-part" data-part="image" draggable="true"><span class="ol-grip" aria-hidden="true"></span> Image</div>
@@ -357,7 +391,7 @@
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Merchandising</p>
 		<h2 class="ol-h ol-h--sm">Pin the hero product. Keep empty shelves out of the way.</h2>
-		<p class="ol-lead">Toggle the rules OmniLoop stores in Settings. Pinned IDs jump first, sold-out SKUs drop last, sale badges and "Only 2 left" are optional. The six cards on the right are the same SKUs each time; only the order and labels change.</p>
+		<p class="ol-lead">Toggle the same rules you set in OmniLoop → Settings. Pin a hero SKU, hide empty shelves, show sale badges or “Only 2 left.” The six cards stay the same — only order and labels change.</p>
 		<div class="ol-switch">
 			<button type="button" class="is-on" data-ol-merch="pin">Pinned first</button>
 			<button type="button" class="is-on" data-ol-merch="oos">Sold out last</button>
@@ -380,7 +414,7 @@
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Pretty URLs</p>
 		<h2 class="ol-h ol-h--sm">Filters that Google can read.</h2>
-		<p class="ol-lead">Click a color and a category. The path is what OmniLoop writes under /ol/. Title, description, and H1 templates use the same tokens. Noindex is a Settings toggle, not a surprise. Canonical follows the pretty path.</p>
+		<p class="ol-lead">Click a color and a category. That path is what OmniLoop writes. You control the title and heading in Settings. Hide page 2 from Google with a checkbox — it is never a surprise.</p>
 		<div class="ol-row ol-seo-picks">
 			<button type="button" class="ol-btn ol-btn--ghost" data-ol-seo="color" data-ol-value="navy">Navy</button>
 			<button type="button" class="ol-btn ol-btn--ghost" data-ol-seo="color" data-ol-value="clay">Clay</button>
@@ -409,7 +443,7 @@
 			<div class="ol-feature"><h3>Woo when you want it</h3><p>Attributes as color, image, or size swatches. Dual price slider, stock, sale, rating, add to cart, quick view. Hide Woo facets when the module is looping posts.</p></div>
 			<div class="ol-feature"><h3>ACF opt-in</h3><p>Pick select, checkbox, radio, button group, or true/false fields in Settings. They index like native facets and can sit in the same sidebar.</p></div>
 			<div class="ol-feature"><h3>Native Loop attach</h3><p>Hand matching IDs to Divi's own loop. Main query only, unless you opt a secondary query in. Stops archive leaks onto unrelated loops.</p></div>
-			<div class="ol-feature"><h3>Languages and currency</h3><p>WPML / Polylang labels, WOOMULTI-style price facets, settings export/import so a staging shop copies cleanly.</p></div>
+			<div class="ol-feature"><h3>Languages and currency</h3><p>If WPML or Polylang is active, filter labels follow the shopper’s language. The price bar follows multi-currency hooks when those plugins are present. Export settings to copy a shop to staging.</p></div>
 			<div class="ol-feature"><h3>Analytics</h3><p>Anonymous clicks and empty-result mixes, 30 days, on the dashboard. See which facet combos die so you can add a preset or rewrite the empty state.</p></div>
 		</div>
 	</div>
@@ -419,37 +453,41 @@
 <section class="ol-landing" data-ol-landing="faq" id="ol-faq">
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">FAQ</p>
-		<h2 class="ol-h ol-h--sm">Short answers for the person who will install it.</h2>
+		<h2 class="ol-h ol-h--sm">Questions people ask before they install.</h2>
 		<div class="ol-faq is-open">
-			<button type="button" data-ol-faq>How is this different from Divi’s Post Filter?</button>
-			<p>Divi’s free filter lists posts. OmniLoop is the shop layer on top: a custom index, Loop Item Builder, merchandising, pretty /ol/ URLs with SEO templates, Filter Sync, and optional Woo/ACF facets — still one Visual Builder module.</p>
+			<button type="button" data-ol-faq aria-expanded="true">I’m not a developer. Can I still use this?</button>
+			<p>Yes. If you can add a Divi module, you can run OmniLoop. Activate it, rebuild the index, drop OmniLoop Filter, pick a layout. The live catalog above is the same interaction your shoppers get.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Do I need WooCommerce?</button>
+			<button type="button" data-ol-faq aria-expanded="false">How is this different from Divi’s Post Filter?</button>
+			<p>Divi’s free filter lists posts. OmniLoop is the shop layer: a fast index, cards you design, merchandising, pretty /ol/ URLs, Filter Sync, and optional Woo/ACF — still one Visual Builder module.</p>
+		</div>
+		<div class="ol-faq">
+			<button type="button" data-ol-faq aria-expanded="false">Do I need WooCommerce?</button>
 			<p>No. Posts and any public post type work. Woo unlocks product facets, swatches, cart, stock urgency, and sale badges. ACF is a separate opt-in for custom fields.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Is this a Gutenberg block?</button>
-			<p>No. It is a Divi 5 Visual Builder extension: one module, OmniLoop Filter, plus nested OmniLoop Card Item children for the loop layout.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Is this a Gutenberg block?</button>
+			<p>No. It is a Divi 5 Visual Builder extension: one module, OmniLoop Filter, plus nested OmniLoop Card Item children if you want a custom card order.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Will pretty URLs 404?</button>
-			<p>After install, open Settings &gt; Permalinks and click Save once so /ol/ rules flush. Templates for title, description, and H1 live under OmniLoop &gt; Settings. Noindex is a checkbox per mix, not a global surprise.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Will pretty URLs show “not found”?</button>
+			<p>After install, open Settings → Permalinks and click Save once so /ol/ rules flush. Title and heading templates live under OmniLoop → Settings. Noindex is a checkbox, not a global surprise.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Where do I rebuild the index?</button>
-			<p>OmniLoop &gt; Settings. Rebuild after you change post types, attributes, or ACF fields. Saving a product still syncs that row on its own.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Where do I rebuild the index?</button>
+			<p>OmniLoop → Settings. Rebuild after you change post types, attributes, or ACF fields. Saving a product still syncs that row on its own.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>Can two modules share the same filters?</button>
-			<p>Yes. Give them the same Filter Sync group. A sidebar module and a grid module stay on the same chips. Saved presets are a Settings list; share them with ?ol_preset=your-slug.</p>
+			<button type="button" data-ol-faq aria-expanded="false">Can two modules share the same filters?</button>
+			<p>Yes. Give them the same Filter Sync group. A sidebar and a grid stay on the same chips. Saved presets live in Settings; share them with ?ol_preset=your-slug.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>What about Divi's own Loop Builder?</button>
-			<p>Native Loop attach hands OmniLoop's matching IDs to Divi's loop. It binds the main query only unless you opt a secondary query in, so other loops on the page do not inherit the shop mix.</p>
+			<button type="button" data-ol-faq aria-expanded="false">I already designed cards in Loop Builder.</button>
+			<p>Native Loop attach hands OmniLoop’s matching IDs to Divi’s loop. It binds the main query only unless you opt a second query in, so other loops on the page do not inherit the shop mix.</p>
 		</div>
 		<div class="ol-faq">
-			<button type="button" data-ol-faq>How do updates work?</button>
+			<button type="button" data-ol-faq aria-expanded="false">How do updates work?</button>
 			<p>GPL-2.0-or-later. Updates come through the Divi Marketplace. There is no license-key sidebar and no custom updater inside the plugin.</p>
 		</div>
 	</div>
@@ -459,20 +497,20 @@
 <section class="ol-landing ol-landing--ink" data-ol-landing="cta" id="ol-cta">
 	<div class="ol-landing__inner ol-cta">
 		<p class="ol-kicker">Divi Marketplace</p>
-		<h2 class="ol-h">Drop one module. Open the shop.</h2>
-		<p class="ol-lead">Not a Gutenberg block. Not a Woo-only plugin. WordPress 6.4+, PHP 7.4+, Divi 5. WooCommerce and ACF optional. GPL-2.0-or-later. Updates through the Marketplace.</p>
+		<h2 class="ol-h">Ready when you are.</h2>
+		<p class="ol-lead">One module. A shop that filters without reloading. WordPress 6.4+, PHP 7.4+, Divi 5. WooCommerce and ACF optional. GPL-2.0-or-later. Updates through the Marketplace.</p>
 		<div class="ol-row ol-cta__chips">
-			<span class="ol-chip">Filter Sync</span>
-			<span class="ol-chip">Saved presets</span>
+			<span class="ol-chip">Live filters</span>
+			<span class="ol-chip">Cards you design</span>
 			<span class="ol-chip">Merchandising</span>
-			<span class="ol-chip">Pretty /ol/ URLs</span>
-			<span class="ol-chip">Native Loop attach</span>
+			<span class="ol-chip">Pretty URLs</span>
+			<span class="ol-chip">Woo optional</span>
 		</div>
 		<div class="ol-row">
-			<a class="ol-btn" href="#ol-live">Back to the live filter</a>
-			<a class="ol-btn ol-btn--ghost" href="#ol-hero">From the top</a>
+			<a class="ol-btn" href="#ol-live">Try the catalog again</a>
+			<a class="ol-btn ol-btn--ghost" href="#ol-start">Review the 3 steps</a>
 		</div>
-		<p class="ol-foot">OmniLoop for Divi, demo landing, not the plugin ZIP</p>
+		<p class="ol-foot">OmniLoop for Divi · demo landing · not the plugin ZIP</p>
 	</div>
 </section>
 

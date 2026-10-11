@@ -50,6 +50,11 @@
 							"value": "on"
 						}
 					},
+					"quickViewLabel": {
+						"desktop": {
+							"value": "Quick view"
+						}
+					},
 					"showPagination": {
 						"desktop": {
 							"value": "on"
@@ -390,6 +395,34 @@
 										"off": { "label": "No" }
 									}
 								}
+							}
+						}
+					},
+					"quickViewLabel": {
+						"groupType": "group-item",
+						"item": {
+							"groupSlug": "loopQuery",
+							"priority": 37.5,
+							"render": true,
+							"attrName": "module.advanced.quickViewLabel",
+							"label": "Quick View Text",
+							"description": "Label on the Quick view button. Leave blank to use Quick view.",
+							"category": "configuration",
+							"features": {
+								"dynamicContent": false,
+								"hover": false,
+								"sticky": false,
+								"responsive": false,
+								"preset": "content"
+							},
+							"defaultAttr": {
+								"desktop": {
+									"value": "Quick view"
+								}
+							},
+							"component": {
+								"type": "field",
+								"name": "divi/text"
 							}
 						}
 					},

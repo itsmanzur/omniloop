@@ -140,6 +140,7 @@ class LoopModule implements DependencyInterface {
 		$show_filters = $attrs['module']['advanced']['showFilters']['desktop']['value'] ?? 'on';
 		$show_atc     = $attrs['module']['advanced']['showAddToCart']['desktop']['value'] ?? 'on';
 		$show_qv      = $attrs['module']['advanced']['showQuickView']['desktop']['value'] ?? 'on';
+		$qv_label     = $attrs['module']['advanced']['quickViewLabel']['desktop']['value'] ?? '';
 		$show_pager   = $attrs['module']['advanced']['showPagination']['desktop']['value'] ?? 'on';
 		$pager_style  = $attrs['module']['advanced']['paginationStyle']['desktop']['value'] ?? 'pages';
 		$filter_sync  = $attrs['module']['advanced']['filterSync']['desktop']['value'] ?? 'on';
@@ -201,6 +202,7 @@ class LoopModule implements DependencyInterface {
 					'showFilters'   => $show_filters,
 					'showAddToCart' => $show_atc,
 					'showQuickView'  => $show_qv,
+					'quickViewLabel' => is_string( $qv_label ) ? $qv_label : '',
 					'showPagination' => $show_pager,
 					'paginationStyle' => LoopRenderer::sanitize_pagination_style( $pager_style ),
 					'filterSync'      => $filter_sync,

@@ -2,15 +2,29 @@
 <section class="ol-landing" data-ol-landing="live" id="ol-live">
 	<div class="ol-landing__inner">
 		<p class="ol-kicker">Live catalog</p>
-		<h2 class="ol-h ol-h--sm">Shop it. Filter it. Open a card.</h2>
-		<p class="ol-lead">Sixteen Harbor Goods SKUs. Facet counts update as you click. Active chips write a pretty /ol/ path. List view shows excerpt, SKU, material, and origin. In production this hits OmniLoop's index over AJAX.</p>
+		<h2 class="ol-h ol-h--sm">This is the shop your visitors get.</h2>
+		<p class="ol-lead">Sixteen sample products. Click a color or category — the grid updates, counts change, and the pretty URL writes itself. Click a card for a quick view. On a real site this runs against OmniLoop’s index.</p>
+		<p class="ol-coach" data-ol-coach>
+			Start here:
+			<button type="button" class="ol-coach__btn" data-ol-try="navy">Navy</button>
+			then
+			<button type="button" class="ol-coach__btn" data-ol-try="bags">Bags</button>
+			— then open a card.
+		</p>
 		<p class="ol-url ol-url--live" data-ol-path>/shop/</p>
 		<div class="ol-demo">
-			<aside class="ol-filters" aria-label="Demo filters">
-				<h3>Filters</h3>
+			<button type="button" class="ol-filters-toggle" data-ol-filters-open aria-expanded="false" aria-controls="ol-demo-filters">
+				Filters <span class="ol-filters-toggle__n" data-ol-filter-count hidden></span>
+			</button>
+			<div class="ol-filters-scrim" data-ol-filters-scrim hidden></div>
+			<aside class="ol-filters" id="ol-demo-filters" data-ol-filters aria-label="Demo filters">
+				<div class="ol-filters__bar">
+					<h3>Filters</h3>
+					<button type="button" class="ol-filters__done" data-ol-filters-close>Show results</button>
+				</div>
 				<label class="ol-facet">
 					<h4>Search</h4>
-					<input class="ol-search" type="search" placeholder="Tote, HG-LAMP, Portugal..." data-ol-q>
+					<input class="ol-search" type="search" placeholder="Tote, lamp, Portugal…" data-ol-q autocomplete="off">
 				</label>
 				<div class="ol-facet">
 					<h4>Color</h4>
@@ -72,13 +86,13 @@
 							<button type="button" class="is-on" data-ol-view="grid">Grid</button>
 							<button type="button" data-ol-view="list">List</button>
 						</div>
-						<select class="ol-sort" data-ol-sort>
-							<option value="featured">Featured (pins first)</option>
+						<select class="ol-sort" data-ol-sort aria-label="Sort products">
+							<option value="featured">Featured</option>
 							<option value="price-asc">Price: low to high</option>
 							<option value="price-desc">Price: high to low</option>
 							<option value="rating">Top rated</option>
 							<option value="newest">Newest</option>
-							<option value="name">Name A-Z</option>
+							<option value="name">Name A–Z</option>
 						</select>
 					</div>
 				</div>
@@ -88,12 +102,12 @@
 			</div>
 		</div>
 		<div class="ol-qv-scrim" data-ol-scrim></div>
-		<div class="ol-qv" data-ol-qv>
+		<div class="ol-qv" data-ol-qv role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="ol-qv-title">
 			<button type="button" class="ol-qv__back" data-ol-qv-close>Close</button>
 			<div class="ol-qv__media" data-ol-qv-media></div>
 			<div class="ol-qv__body">
 				<p class="ol-kicker" data-ol-qv-cat></p>
-				<h3 data-ol-qv-title></h3>
+				<h3 id="ol-qv-title" data-ol-qv-title></h3>
 				<p class="ol-qv__rating" data-ol-qv-rating></p>
 				<p class="ol-qv__price" data-ol-qv-price></p>
 				<p class="ol-lead" data-ol-qv-copy></p>
@@ -105,9 +119,9 @@
 					<div>
 						<span class="ol-qv__lab">Qty</span>
 						<div class="ol-qty">
-							<button type="button" data-ol-qv-qty="-1">-</button>
+							<button type="button" data-ol-qv-qty="-1" aria-label="Decrease quantity">−</button>
 							<span data-ol-qv-qty-n>1</span>
-							<button type="button" data-ol-qv-qty="1">+</button>
+							<button type="button" data-ol-qv-qty="1" aria-label="Increase quantity">+</button>
 						</div>
 					</div>
 				</div>
@@ -120,5 +134,5 @@
 			</div>
 		</div>
 	</div>
-	<div class="ol-toast" data-ol-toast></div>
+	<div class="ol-toast" data-ol-toast role="status"></div>
 </section>

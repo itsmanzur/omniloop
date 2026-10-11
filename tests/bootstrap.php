@@ -27,7 +27,7 @@ if ( ! defined( 'OMNILOOP_VERSION' ) ) {
 }
 
 if ( ! defined( 'OMNILOOP_DB_VERSION' ) ) {
-	define( 'OMNILOOP_DB_VERSION', '1.1.0' );
+	define( 'OMNILOOP_DB_VERSION', '1.3.0' );
 }
 
 if ( ! defined( 'OMNILOOP_PATH' ) ) {

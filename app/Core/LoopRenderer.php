@@ -26,6 +26,9 @@ final class LoopRenderer {
 	/** @var bool */
 	private static $show_quick_view = false;
 
+	/** @var string */
+	private static $quick_view_label = '';
+
 	/** @var bool */
 	private static $show_stock_urgency = true;
 
@@ -99,6 +102,28 @@ final class LoopRenderer {
 	public static function sanitize_empty_style( $value ): string {
 		$style = sanitize_key( (string) $value );
 		return in_array( $style, [ 'minimal', 'box', 'search', 'bag' ], true ) ? $style : 'box';
+	}
+
+	/**
+	 * Visible Quick view button label. Blank falls back to the translated default.
+	 *
+	 * @param mixed $value
+	 */
+	public static function sanitize_quick_view_label( $value ): string {
+		$label = sanitize_text_field( (string) $value );
+		if ( function_exists( 'mb_substr' ) ) {
+			$label = mb_substr( $label, 0, 80 );
+		} else {
+			$label = substr( $label, 0, 80 );
+		}
+
+		return trim( $label );
+	}
+
+	public static function quick_view_label( $value = null ): string {
+		$label = self::sanitize_quick_view_label( null === $value ? self::$quick_view_label : $value );
+
+		return '' !== $label ? $label : __( 'Quick view', 'omniloop' );
 	}
 
 	/**
@@ -301,6 +326,7 @@ final class LoopRenderer {
 			&& 'product' === $post_type
 			&& function_exists( 'wc_get_product' );
 		$show_qv      = self::is_flag_on( $attributes['showQuickView'] ?? 'on' );
+		self::$quick_view_label = self::sanitize_quick_view_label( $attributes['quickViewLabel'] ?? '' );
 		$show_pager   = self::is_flag_on( $attributes['showPagination'] ?? 'on' );
 		$pager_style  = $show_pager
 			? self::sanitize_pagination_style( $attributes['paginationStyle'] ?? 'pages' )
@@ -374,7 +400,8 @@ final class LoopRenderer {
 		$config = wp_json_encode(
 			[
 				'restUrl'       => rest_url( 'omniloop/v1/query' ),
-				'nonce'         => wp_create_nonce( 'wp_rest' ),
+				// Public queries need no nonce; a page-cached one expires and would 403.
+				'nonce'         => is_user_logged_in() ? wp_create_nonce( 'wp_rest' ) : '',
 				'postType'      => $post_type,
 				'perPage'       => $per_page,
 				'filterStyle'   => $filter_style,
@@ -391,7 +418,7 @@ final class LoopRenderer {
 					'result'       => __( 'result', 'omniloop' ),
 					'results'      => __( 'results', 'omniloop' ),
 					'sale'         => __( 'Sale', 'omniloop' ),
-					'quickView'    => __( 'Quick view', 'omniloop' ),
+					'quickView'    => self::quick_view_label(),
 					'addToCart'    => __( 'Add to cart', 'omniloop' ),
 					'viewDetails'  => __( 'View details', 'omniloop' ),
 					'close'        => __( 'Close', 'omniloop' ),
@@ -552,6 +579,8 @@ final class LoopRenderer {
 			return self::empty_html( $copy, $can_reset );
 		}
 
+		self::prime_caches( $post_ids );
+
 		$html = '';
 		foreach ( $post_ids as $post_id ) {
 			$payload = self::post_payload( (int) $post_id );
@@ -561,6 +590,32 @@ final class LoopRenderer {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Load posts, meta, terms and thumbnails for a page of results in a few
+	 * queries instead of several per card.
+	 *
+	 * @param int[] $post_ids
+	 */
+	public static function prime_caches( array $post_ids ): void {
+		$post_ids = array_values( array_filter( array_map( 'intval', $post_ids ) ) );
+		if ( ! $post_ids || ! function_exists( '_prime_post_caches' ) ) {
+			return;
+		}
+
+		_prime_post_caches( $post_ids, true, true );
+
+		$thumb_ids = [];
+		foreach ( $post_ids as $post_id ) {
+			$thumb_id = (int) get_post_thumbnail_id( $post_id );
+			if ( $thumb_id > 0 ) {
+				$thumb_ids[] = $thumb_id;
+			}
+		}
+		if ( $thumb_ids ) {
+			_prime_post_caches( $thumb_ids, false, true );
+		}
 	}
 
 	/**
@@ -602,8 +657,9 @@ final class LoopRenderer {
 			}
 		}
 
-		$raw     = '' !== $post->post_excerpt ? $post->post_excerpt : $post->post_content;
-		$excerpt = wp_trim_words( wp_strip_all_tags( $raw ), 18 );
+		$raw = '' !== $post->post_excerpt ? $post->post_excerpt : $post->post_content;
+		// Divi 4 content is shortcode markup; don't leak [et_pb_*] into card excerpts.
+		$excerpt = wp_trim_words( wp_strip_all_tags( strip_shortcodes( $raw ) ), 18 );
 
 		$merch   = Merchandising::decorate( $post_id, (string) $post->post_type, $product );
 		$payload = [
@@ -871,10 +927,12 @@ final class LoopRenderer {
 			return '';
 		}
 
+		$label = self::quick_view_label();
+
 		return sprintf(
 			'<button type="button" class="omniloop-card__qv" data-omniloop-qv aria-haspopup="dialog" aria-label="%s">%s</button>',
-			esc_attr__( 'Quick view', 'omniloop' ),
-			esc_html__( 'Quick view', 'omniloop' )
+			esc_attr( $label ),
+			esc_html( $label )
 		);
 	}
 
@@ -1359,6 +1417,9 @@ final class LoopRenderer {
 		}
 		$saved[] = $key;
 		update_option( 'omniloop_sort_meta_keys', array_slice( array_values( array_unique( $saved ) ), 0, 24 ), false );
+
+		// Existing posts have no rows for the new key yet; rebuild in the background.
+		Indexer::schedule_full_reindex();
 	}
 
 	private static function stars_html( int $stars ): string {

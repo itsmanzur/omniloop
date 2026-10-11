@@ -301,6 +301,7 @@
 		var scrim = qs(root, "[data-ol-scrim]");
 		if (qv) {
 			qv.classList.toggle("is-on", on);
+			qv.setAttribute("aria-hidden", on ? "false" : "true");
 		}
 		if (scrim) {
 			scrim.classList.toggle("is-on", on);
@@ -366,6 +367,47 @@
 		};
 	}
 
+	function initNav(root) {
+		if (root.getAttribute("data-ol-ready") === "1") {
+			return;
+		}
+		root.setAttribute("data-ol-ready", "1");
+		var nav = qs(root, ".ol-nav");
+		var toggle = qs(root, "[data-ol-nav-toggle]");
+
+		function close() {
+			if (nav) {
+				nav.classList.remove("is-open");
+			}
+			if (toggle) {
+				toggle.setAttribute("aria-expanded", "false");
+			}
+		}
+
+		if (toggle) {
+			toggle.addEventListener("click", function (e) {
+				e.stopPropagation();
+				var open = nav && nav.classList.contains("is-open");
+				if (open) {
+					close();
+				} else if (nav) {
+					nav.classList.add("is-open");
+					toggle.setAttribute("aria-expanded", "true");
+				}
+			});
+		}
+		root.addEventListener("click", function (e) {
+			if (e.target.closest(".ol-nav__links a") || e.target.closest(".ol-nav__cta")) {
+				close();
+			}
+		});
+		document.addEventListener("keydown", function (e) {
+			if (e.key === "Escape") {
+				close();
+			}
+		});
+	}
+
 	function initHero(root) {
 		if (root.getAttribute("data-ol-ready") === "1") {
 			return;
@@ -375,7 +417,9 @@
 
 		function paint() {
 			qsa(root, "[data-ol-hero-color]").forEach(function (b) {
-				b.classList.toggle("is-on", b.getAttribute("data-ol-hero-color") === color);
+				var on = b.getAttribute("data-ol-hero-color") === color;
+				b.classList.toggle("is-on", on);
+				b.setAttribute("aria-pressed", on ? "true" : "false");
 			});
 			var n = 0;
 			var names = [];
@@ -392,7 +436,7 @@
 			});
 			var float = qs(root, "[data-ol-hero-float]");
 			if (float) {
-				float.innerHTML = "<b>" + n + " in " + color + "</b><span>" + names.join(" · ") + "</span>";
+				float.innerHTML = "<b>" + n + " in " + (LABELS[color] || color) + "</b><span>" + names.join(" · ") + "</span>";
 			}
 		}
 
@@ -422,6 +466,38 @@
 		root.setAttribute("data-ol-ready", "1");
 
 		var state = defaultState();
+		var tried = { navy: false, bags: false };
+
+		function setFiltersOpen(on) {
+			var demo = qs(root, ".ol-demo");
+			var toggle = qs(root, "[data-ol-filters-open]");
+			var scrim = qs(root, "[data-ol-filters-scrim]");
+			if (demo) {
+				demo.classList.toggle("is-filters-open", on);
+			}
+			if (toggle) {
+				toggle.setAttribute("aria-expanded", on ? "true" : "false");
+			}
+			if (scrim) {
+				if (on) {
+					scrim.removeAttribute("hidden");
+				} else {
+					scrim.setAttribute("hidden", "");
+				}
+			}
+			document.body.classList.toggle("ol-filters-lock", on);
+		}
+
+		function activeFilterCount() {
+			return selected(state.colors).length + selected(state.cats).length + selected(state.sizes).length + selected(state.mats).length + (state.max < 220 ? 1 : 0) + (state.q ? 1 : 0) + (state.inStock ? 1 : 0) + (state.onSale ? 1 : 0) + (state.minRating ? 1 : 0);
+		}
+
+		function hideCoachIfDone() {
+			var coach = qs(root, "[data-ol-coach]");
+			if (coach && tried.navy && tried.bags) {
+				coach.classList.add("is-done");
+			}
+		}
 
 		function syncToggles() {
 			qsa(root, "[data-ol-color]").forEach(function (b) {
@@ -492,6 +568,16 @@
 					? "Showing " + (start + 1) + "-" + (start + slice.length) + " of " + list.length + (list.length === 1 ? " product" : " products")
 					: "0 products";
 			}
+			var filterN = qs(root, "[data-ol-filter-count]");
+			if (filterN) {
+				var nActive = activeFilterCount();
+				filterN.textContent = String(nActive);
+				if (nActive) {
+					filterN.removeAttribute("hidden");
+				} else {
+					filterN.setAttribute("hidden", "");
+				}
+			}
 			if (path) {
 				path.innerHTML = pathFor(state);
 			}
@@ -548,7 +634,7 @@
 			}
 			grid.setAttribute("data-view", state.view);
 			if (!list.length) {
-				grid.innerHTML = '<div class="ol-empty"><strong>Nothing matches this mix.</strong><p>Clear a chip, raise the price cap, or turn off In stock. This is the custom empty state OmniLoop lets you write in the module.</p></div>';
+				grid.innerHTML = '<div class="ol-empty"><strong>Nothing matches this mix.</strong><p>Clear a chip, raise the price cap, or turn off In stock. This is the custom empty state OmniLoop lets you write in the module.</p><button type="button" class="ol-btn" data-ol-clear="all">Clear all filters</button></div>';
 				return;
 			}
 			grid.innerHTML = slice.map(function (p, i) {
@@ -562,6 +648,29 @@
 		}
 
 		root.addEventListener("click", function (e) {
+			var tryBtn = e.target.closest("[data-ol-try]");
+			if (tryBtn) {
+				var kind = tryBtn.getAttribute("data-ol-try");
+				if (kind === "navy") {
+					state.colors.navy = true;
+					tried.navy = true;
+				}
+				if (kind === "bags") {
+					state.cats.bags = true;
+					tried.bags = true;
+				}
+				hideCoachIfDone();
+				bump();
+				return;
+			}
+			if (e.target.closest("[data-ol-filters-open]")) {
+				setFiltersOpen(true);
+				return;
+			}
+			if (e.target.closest("[data-ol-filters-close]") || e.target.closest("[data-ol-filters-scrim]")) {
+				setFiltersOpen(false);
+				return;
+			}
 			var colorBtn = e.target.closest("[data-ol-color]");
 			if (colorBtn) {
 				var c = colorBtn.getAttribute("data-ol-color");
@@ -727,9 +836,15 @@
 		});
 
 		document.addEventListener("keydown", function (e) {
-			if (e.key === "Escape") {
-				closeQuick(root);
+			if (e.key !== "Escape") {
+				return;
 			}
+			var demo = qs(root, ".ol-demo");
+			if (demo && demo.classList.contains("is-filters-open")) {
+				setFiltersOpen(false);
+				return;
+			}
+			closeQuick(root);
 		});
 
 		render();
@@ -1061,6 +1176,14 @@
 			return;
 		}
 		root.setAttribute("data-ol-ready", "1");
+		function syncFaqAria() {
+			qsa(root, ".ol-faq").forEach(function (el) {
+				var b = qs(el, "[data-ol-faq]");
+				if (b) {
+					b.setAttribute("aria-expanded", el.classList.contains("is-open") ? "true" : "false");
+				}
+			});
+		}
 		root.addEventListener("click", function (e) {
 			var btn = e.target.closest("[data-ol-faq]");
 			if (!btn) {
@@ -1074,10 +1197,13 @@
 			if (!open) {
 				item.classList.add("is-open");
 			}
+			syncFaqAria();
 		});
+		syncFaqAria();
 	}
 
 	function boot() {
+		qsa(document, '[data-ol-landing="nav"]').forEach(initNav);
 		qsa(document, '[data-ol-landing="hero"]').forEach(initHero);
 		qsa(document, '[data-ol-landing="live"]').forEach(initDemo);
 		qsa(document, '[data-ol-landing="layouts"]').forEach(initLayouts);

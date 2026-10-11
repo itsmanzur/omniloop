@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: OmniLoop for Divi 1.0.1\n"
+"Project-Id-Version: OmniLoop for Divi 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-03 15:30+06:00\n"
+"POT-Creation-Date: 2026-09-06 10:19+06:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: omniloop\n"
 
-#: app/Core/LoopRenderer.php:1099
+#: app/Core/LoopRenderer.php:1106
 msgid "-%d%%"
 msgstr ""
 
@@ -23,7 +23,7 @@ msgstr ""
 msgid "“Shose” can still find “Shoes”. Turn it off if you only want exact words."
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1371
+#: app/Core/LoopRenderer.php:1378
 msgid "%1$s (%2$d)"
 msgstr ""
 
@@ -139,7 +139,7 @@ msgstr ""
 msgid "Add to Cart"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:395 app/Core/LoopRenderer.php:793 app/Core/LoopRenderer.php:796
+#: app/Core/LoopRenderer.php:395 app/Core/LoopRenderer.php:787 app/Core/LoopRenderer.php:790
 msgid "Add to cart"
 msgstr ""
 
@@ -147,7 +147,7 @@ msgstr ""
 msgid "Add to cart or peek with Quick View, if you turned those on."
 msgstr ""
 
-#: app/Core/LoopRenderer.php:843
+#: app/Core/LoopRenderer.php:850
 msgid "Add to cart: %s"
 msgstr ""
 
@@ -211,7 +211,7 @@ msgstr ""
 msgid "Auto-sync on"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1328
+#: app/Core/LoopRenderer.php:1335
 msgid "Average rating"
 msgstr ""
 
@@ -327,7 +327,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1188
+#: app/Core/LoopRenderer.php:1195
 msgid "Close filters"
 msgstr ""
 
@@ -371,7 +371,7 @@ msgstr ""
 msgid "Could not load results. Check your connection and try again."
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1332 app/Core/QueryBuilder.php:35
+#: app/Core/LoopRenderer.php:1339 app/Core/QueryBuilder.php:35
 msgid "Custom meta"
 msgstr ""
 
@@ -499,7 +499,7 @@ msgstr ""
 msgid "Filtered pages can look like /ol/color/navy/category/shoes/. Title, description, and H1 templates, noindex for page 2+, optional sitemap, and shareable ?ol_preset= links."
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1182 app/Core/LoopRenderer.php:1183 app/Core/LoopRenderer.php:1187
+#: app/Core/LoopRenderer.php:1189 app/Core/LoopRenderer.php:1190 app/Core/LoopRenderer.php:1194
 msgid "Filters"
 msgstr ""
 
@@ -539,7 +539,7 @@ msgstr ""
 msgid "Follow these steps once after you install OmniLoop. After that, you mostly work inside the Divi Visual Builder."
 msgstr ""
 
-#: app/Admin/SettingsFields.php:273 app/Admin/SettingsPage.php:229 app/Core/LoopRenderer.php:1213
+#: app/Admin/SettingsFields.php:273 app/Admin/SettingsPage.php:229 app/Core/LoopRenderer.php:1220
 msgid "From"
 msgstr ""
 
@@ -563,7 +563,7 @@ msgstr ""
 msgid "Google and filter pages"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1135
+#: app/Core/LoopRenderer.php:1142
 msgid "Grid view"
 msgstr ""
 
@@ -775,7 +775,7 @@ msgstr ""
 msgid "Last sync"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1130
+#: app/Core/LoopRenderer.php:1137
 msgid "Layout"
 msgstr ""
 
@@ -803,7 +803,7 @@ msgstr ""
 msgid "List"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1143
+#: app/Core/LoopRenderer.php:1150
 msgid "List view"
 msgstr ""
 
@@ -831,7 +831,7 @@ msgstr ""
 msgid "Max sitemap URLs"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1217 app/Core/LoopRenderer.php:1224
+#: app/Core/LoopRenderer.php:1224 app/Core/LoopRenderer.php:1231
 msgid "Maximum price"
 msgstr ""
 
@@ -851,7 +851,7 @@ msgstr ""
 msgid "Meta description template"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1214 app/Core/LoopRenderer.php:1223
+#: app/Core/LoopRenderer.php:1221 app/Core/LoopRenderer.php:1230
 msgid "Minimum price"
 msgstr ""
 
@@ -879,7 +879,7 @@ msgstr ""
 msgid "New options missing in Divi"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1322 app/Core/QueryBuilder.php:29
+#: app/Core/LoopRenderer.php:1329 app/Core/QueryBuilder.php:29
 msgid "Newest"
 msgstr ""
 
@@ -1171,7 +1171,7 @@ msgstr ""
 msgid "Plugin activated"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1327 app/Core/QueryBuilder.php:33
+#: app/Core/LoopRenderer.php:1334 app/Core/QueryBuilder.php:33
 msgid "Popularity"
 msgstr ""
 
@@ -1207,7 +1207,7 @@ msgstr ""
 msgid "Previous products"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:411 app/Core/LoopRenderer.php:1209 app/Core/LoopRenderer.php:1210 app/Rest/FilterEndpoint.php:450
+#: app/Core/LoopRenderer.php:411 app/Core/LoopRenderer.php:1216 app/Core/LoopRenderer.php:1217 app/Rest/FilterEndpoint.php:450
 msgid "Price"
 msgstr ""
 
@@ -1215,11 +1215,11 @@ msgstr ""
 msgid "Price range"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1326 app/Core/QueryBuilder.php:32
+#: app/Core/LoopRenderer.php:1333 app/Core/QueryBuilder.php:32
 msgid "Price: high to low"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1325 app/Core/QueryBuilder.php:31
+#: app/Core/LoopRenderer.php:1332 app/Core/QueryBuilder.php:31
 msgid "Price: low to high"
 msgstr ""
 
@@ -1239,7 +1239,7 @@ msgstr ""
 msgid "Promo badges"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:394 app/Core/LoopRenderer.php:869 app/Core/LoopRenderer.php:870
+#: app/Core/LoopRenderer.php:394 app/Core/LoopRenderer.php:876 app/Core/LoopRenderer.php:877
 msgid "Quick view"
 msgstr ""
 
@@ -1251,7 +1251,7 @@ msgstr ""
 msgid "Rated"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1060
+#: app/Core/LoopRenderer.php:1067
 msgid "Rated %s out of 5"
 msgstr ""
 
@@ -1327,7 +1327,7 @@ msgstr ""
 msgid "Replace presets, merchandising, SEO, and facet rules from a JSON export. Index data is not included — rebuild after import."
 msgstr ""
 
-#: app/Core/LoopRenderer.php:121 app/Core/LoopRenderer.php:1335
+#: app/Core/LoopRenderer.php:121 app/Core/LoopRenderer.php:1342
 msgid "Reset filters"
 msgstr ""
 
@@ -1355,7 +1355,7 @@ msgstr ""
 msgid "Rule ID (optional)"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:393 app/Core/LoopRenderer.php:1102
+#: app/Core/LoopRenderer.php:393 app/Core/LoopRenderer.php:1109
 msgid "Sale"
 msgstr ""
 
@@ -1371,7 +1371,7 @@ msgstr ""
 msgid "Saved filter presets"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:410 app/Core/LoopRenderer.php:1190
+#: app/Core/LoopRenderer.php:410 app/Core/LoopRenderer.php:1197
 msgid "Search"
 msgstr ""
 
@@ -1379,7 +1379,7 @@ msgstr ""
 msgid "Search by title to pin…"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1280
+#: app/Core/LoopRenderer.php:1287
 msgid "Search facet"
 msgstr ""
 
@@ -1395,7 +1395,7 @@ msgstr ""
 msgid "Search with typos"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1191 app/Core/LoopRenderer.php:1281
+#: app/Core/LoopRenderer.php:1198 app/Core/LoopRenderer.php:1288
 msgid "Search…"
 msgstr ""
 
@@ -1451,15 +1451,15 @@ msgstr ""
 msgid "Show Filters"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1307
+#: app/Core/LoopRenderer.php:1314
 msgid "Show less"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1307
+#: app/Core/LoopRenderer.php:1314
 msgid "Show more"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1311
+#: app/Core/LoopRenderer.php:1318
 msgid "Show more (%d)"
 msgstr ""
 
@@ -1511,7 +1511,7 @@ msgstr ""
 msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
-#: app/Admin/SettingsFields.php:51 app/Core/LoopRenderer.php:1320
+#: app/Admin/SettingsFields.php:51 app/Core/LoopRenderer.php:1327
 msgid "Sort"
 msgstr ""
 
@@ -1623,7 +1623,7 @@ msgstr ""
 msgid "Tip"
 msgstr ""
 
-#: app/Core/LoopRenderer.php:1323
+#: app/Core/LoopRenderer.php:1330
 msgid "Title"
 msgstr ""
 
@@ -1639,7 +1639,7 @@ msgstr ""
 msgid "Title, description, heading"
 msgstr ""
 
-#: app/Admin/SettingsFields.php:274 app/Admin/SettingsPage.php:230 app/Core/LoopRenderer.php:1216
+#: app/Admin/SettingsFields.php:274 app/Admin/SettingsPage.php:230 app/Core/LoopRenderer.php:1223
 msgid "To"
 msgstr ""
 

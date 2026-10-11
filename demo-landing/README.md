@@ -30,11 +30,11 @@ powershell -ExecutionPolicy Bypass -File .\demo-landing\assemble.ps1
 
 | ফাইল | সেকশন | সরানো / মাঝে ঢোকানো |
 | --- | --- | --- |
-| `01-nav.html` | Sticky nav | চাইলে বাদ |
+| `01-nav.html` | Sticky nav (hamburger on small screens) | চাইলে বাদ |
 | `02-hero.html` | Hero | |
-| `03-proof.html` | Stats | মাঝে ঢোকানো সহজ |
-| `03-why.html` | Why OmniLoop (uniqueness) | হিরোর পরে রাখা ভালো |
-| `04-live.html` | Live filter (ইন্টারঅ্যাকটিভ) | |
+| `04-live.html` | Live catalog (ইন্টারঅ্যাকটিভ) | হিরোর ঠিক পরে রাখা ভালো |
+| `03-proof.html` | Setup — 3 steps | |
+| `03-why.html` | Why OmniLoop | |
 | `05-layouts.html` | Filter layout switcher | |
 | `06-cards.html` | Card style switcher | |
 | `07-builder.html` | Card item reorder | |
